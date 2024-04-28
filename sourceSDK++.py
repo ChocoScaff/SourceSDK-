@@ -3,6 +3,20 @@ import srctools
 import os
 import subprocess
 from tkinter import filedialog
+import sys
+
+class Terminal(tk.Text):
+    def __init__(self, master, **kwargs):
+        super().__init__(master, **kwargs)
+        self.tag_configure("stdout", foreground="black")
+        self.tag_configure("stderr", foreground="red")
+
+    def write(self, message):
+        self.insert(tk.END, message)
+        self.see(tk.END)
+
+    def flush(self):
+        pass
 
 def parse_gameinfo_txt(file_path):
     #gameinfo_path = os.path.join(folder_path, "gameinfo.txt")
@@ -112,12 +126,23 @@ print("game name : " + game_name)
 root = tk.Tk()
 root.title("Source SDK")
 
-lbl_result = tk.Label(root, text="", wraplength=300)
+try:
+    root.iconbitmap(selected_folder + '/resource/game.ico')
+except tk.TclError:
+    print("Error: Failed to set icon.")
+    
+# Create a Text widget to display terminal output
+terminal = Terminal(root, wrap=tk.WORD, height=20, width=50)
+terminal.pack()
+
+# Redirect sys.stdout and sys.stderr to the Terminal widget
+sys.stdout = terminal
+sys.stderr = terminal
+
+lbl_result = tk.Label(root, text="Tools", wraplength=400)
 lbl_result.pack()
 
-# Create "Open Folder" button
-#btn_open_folder = tk.Button(root, text="Open Folder", command=find_gameinfo_folder(current_directory))
-#btn_open_folder.pack(pady=10)
+
 
 # Create "Build Map" button
 btn_build_map = tk.Button(root, text="Build Maps", command=build_map)
