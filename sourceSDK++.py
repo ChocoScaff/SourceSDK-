@@ -29,12 +29,10 @@ def find_executable_game(folder_path):
             if file.endswith('.exe'):
                 executables.append(os.path.join(root, file))
     #print(executables)
-    print(executables[0])
     return executables[0]
 
 def find_game_name(folder_path):
-    game_name = folder_path.split("\\")[-1]
-    print(game_name)
+    game_name = os.path.basename(folder_path)
     return game_name
 
 def find_gameinfo_folder(start_dir):
@@ -42,7 +40,6 @@ def find_gameinfo_folder(start_dir):
     selected_folder = filedialog.askdirectory()
     gameinfo_path = os.path.join(selected_folder, "gameinfo.txt")
     if os.path.isfile(gameinfo_path):
-        print(gameinfo_path)
         path = os.path.join(os.getcwd(), "scripts/vproject.bat")
         subprocess.call([path, selected_folder], shell=True)
     else:
@@ -52,19 +49,19 @@ def find_gameinfo_folder(start_dir):
 
 def build_map():  
     path = os.path.join(os.getcwd(), "scripts/compile_map.bat")
-    subprocess.call([path, selected_folder], shell=True)
+    subprocess.call([path, selected_folder,game_name], shell=True)
         
 def build_texture():
     path = os.path.join(os.getcwd(), "scripts/compile_texture.bat")
-    subprocess.call([path,selected_folder], shell=True)
+    subprocess.call([path,selected_folder,game_name], shell=True)
 
 def build_model():
     path = os.path.join(os.getcwd(), "scripts/compile_model.bat")
-    subprocess.call([path,selected_folder], shell=True)
+    subprocess.call([path,selected_folder,game_name], shell=True)
 
 def build_caption():
     path = os.path.join(os.getcwd(), "scripts/compile_caption.bat")
-    subprocess.call([path,selected_folder], shell=True)
+    subprocess.call([path,selected_folder,game_name], shell=True)
 
 def open_hammer():
     path = os.path.join(os.getcwd(), "scripts/hammer.bat")
@@ -100,13 +97,16 @@ def Launch():
 
 # Start searching from the root directory (e.g., "C:\")
 current_directory = os.getcwd()
-print(current_directory)
+print("current directory : " + current_directory)
 
 selected_folder = find_gameinfo_folder(current_directory)
+print("selected directory : " + selected_folder)
 
 executable_game = find_executable_game(selected_folder)
+print("executable game : " + executable_game)
 
 game_name = find_game_name(selected_folder)
+print("game name : " + game_name)
 
 # Create the main window
 root = tk.Tk()
