@@ -1,9 +1,24 @@
+import re
+import string
 import tkinter as tk
+from turtle import st
+from numpy import source
 import srctools
 import os
 import subprocess
 from tkinter import filedialog
 import sys
+
+from sympy import false
+
+class SourceSDK():
+    selected_folder : string
+    executable_game : string
+    game_name : string
+    first_init : bool
+    def __init__(self):
+        self.first_init = False
+
 
 class Terminal(tk.Text):
     def __init__(self, master, **kwargs):
@@ -49,90 +64,155 @@ def find_game_name(folder_path):
     game_name = os.path.basename(folder_path)
     return game_name
 
-def find_gameinfo_folder(start_dir):
+def find_gameinfo_folder():
     # Recursively search through directories
     selected_folder = filedialog.askdirectory()
+    
     gameinfo_path = os.path.join(selected_folder, "gameinfo.txt")
+
     if os.path.isfile(gameinfo_path):
         path = os.path.join(os.getcwd(), "scripts/vproject.bat")
         subprocess.call([path, selected_folder], shell=True)
+        return selected_folder
     else:
         print("gameinfo.txt not found in selected folder.")
-        exit()
-    return selected_folder
+        return -1
 
 def build_map():  
     path = os.path.join(os.getcwd(), "scripts/compile_map.bat")
-    subprocess.call([path, selected_folder,game_name], shell=True)
+    subprocess.call([path, sdk.selected_folder,sdk.game_name], shell=True)
         
 def build_texture():
     path = os.path.join(os.getcwd(), "scripts/compile_texture.bat")
-    subprocess.call([path,selected_folder,game_name], shell=True)
+    subprocess.call([path,sdk.selected_folder,sdk.game_name], shell=True)
 
 def build_model():
     path = os.path.join(os.getcwd(), "scripts/compile_model.bat")
-    subprocess.call([path,selected_folder,game_name], shell=True)
+    subprocess.call([path,sdk.selected_folder,sdk.game_name], shell=True)
 
 def build_caption():
     path = os.path.join(os.getcwd(), "scripts/compile_caption.bat")
-    subprocess.call([path,selected_folder,game_name], shell=True)
+    subprocess.call([path,sdk.selected_folder,sdk.game_name], shell=True)
 
 def open_hammer():
     path = os.path.join(os.getcwd(), "scripts/hammer.bat")
-    subprocess.call([path,selected_folder], shell=True)
+    subprocess.call([path,sdk.selected_folder], shell=True)
 
 def open_hammer_plus_plus():
     path = os.path.join(os.getcwd(), "scripts/hammer++.bat")
-    subprocess.call([path,selected_folder], shell=True)
+    subprocess.call([path,sdk.selected_folder], shell=True)
 
 def open_hlmv():
     path = os.path.join(os.getcwd(), "scripts/hlmv.bat")
-    subprocess.call([path,selected_folder], shell=True)
+    subprocess.call([path,sdk.selected_folder], shell=True)
 
 def open_qc_eyes():
     path = os.path.join(os.getcwd(), "scripts/qc_eyes.bat")
-    subprocess.call([path,selected_folder], shell=True)
+    subprocess.call([path,sdk.selected_folder], shell=True)
 
 def open_hlfaceposer():
     path = os.path.join(os.getcwd(), "scripts/hlfaceposer.bat")
-    subprocess.call([path,selected_folder], shell=True)
+    subprocess.call([path,sdk.selected_folder], shell=True)
 
 def particle():
     path = os.path.join(os.getcwd(), "scripts/particle.bat")
-    subprocess.call([path,game_name,executable_game], shell=True)
+    subprocess.call([path,sdk.game_name,sdk.executable_game], shell=True)
 
 def Launch_dev():
     path = os.path.join(os.getcwd(), "scripts/launch_dev.bat")
-    subprocess.call([path,game_name,executable_game], shell=True)
+    subprocess.call([path,sdk.game_name,sdk.executable_game], shell=True)
 
 def Launch():
     path = os.path.join(os.getcwd(), "scripts/launch.bat")
-    subprocess.call([path,game_name,executable_game], shell=True)
+    subprocess.call([path,sdk.game_name,sdk.executable_game], shell=True)
 
-# Start searching from the root directory (e.g., "C:\")
-current_directory = os.getcwd()
-print("current directory : " + current_directory)
 
-selected_folder = find_gameinfo_folder(current_directory)
-print("selected directory : " + selected_folder)
+def Init():
+    print("Wait...")
+    sdk.selected_folder = find_gameinfo_folder()
+    if sdk.selected_folder == -1:
+        return
+    print("selected directory : " + sdk.selected_folder)
 
-executable_game = find_executable_game(selected_folder)
-print("executable game : " + executable_game)
+    sdk.executable_game = find_executable_game(sdk.selected_folder)
+    print("executable game : " + sdk.executable_game)
 
-game_name = find_game_name(selected_folder)
-print("game name : " + game_name)
+    sdk.game_name = find_game_name(sdk.selected_folder)
+    print("game name : " + sdk.game_name)
+
+    try:
+        root.iconbitmap(sdk.selected_folder + '/resource/game.ico')
+    except tk.TclError:
+        print("Error: Failed to set icon.")
+    
+    print("Projet open")
+
+    button_init()
+
+def button_init():
+
+    if sdk.first_init == True:
+        return
+    
+    # Create "Build Map" button
+    btn_build_map = tk.Button(root, text="Build Maps", command=build_map)
+    btn_build_map.pack()
+
+    # Create "Build Texture" button
+    btn_build_texture = tk.Button(root, text="Build Textures", command=build_texture)
+    btn_build_texture.pack()
+
+    btn_build_model = tk.Button(root, text="Build Models", command=build_model)
+    btn_build_model.pack()
+
+    btn_build_caption = tk.Button(root, text="Build Captions", command=build_caption)
+    btn_build_caption.pack()
+
+    btn_hammer = tk.Button(root, text="hammer", command=open_hammer)
+    btn_hammer.pack()
+
+    btn_open_hammer_plus_plus = tk.Button(root, text="hammer++", command=open_hammer_plus_plus)
+    btn_open_hammer_plus_plus.pack()
+
+    btn_hlmv = tk.Button(root, text="hlmv", command=open_hlmv)
+    btn_hlmv.pack()
+
+    btn_hlmv = tk.Button(root, text="qc_eyes", command=open_qc_eyes)
+    btn_hlmv.pack()
+
+    btn_hlfaceposer = tk.Button(root, text="hlfaceposer", command=open_hlfaceposer)
+    btn_hlfaceposer.pack()
+
+    btn_particle = tk.Button(root, text="Particle", command=particle)
+    btn_particle.pack()
+
+    btn_Launch_dev = tk.Button(root, text="Launch Dev", command=Launch_dev)
+    btn_Launch_dev.pack()
+
+    btn_Launch = tk.Button(root, text="Launch", command=Launch)
+    btn_Launch.pack()
+
+    sdk.first_init = True
+
+
+sdk = SourceSDK() 
 
 # Create the main window
 root = tk.Tk()
 root.title("Source SDK")
 
-try:
-    root.iconbitmap(selected_folder + '/resource/game.ico')
-except tk.TclError:
-    print("Error: Failed to set icon.")
-    
+menu_bar = tk.Menu(root)
+root.config(menu=menu_bar)
+
+# Create a "File" menu
+file_menu = tk.Menu(menu_bar, tearoff=0)
+menu_bar.add_cascade(label="File", menu=file_menu)
+
+# Add "Open" option to the "File" menu
+file_menu.add_command(label="Open", command=Init)
+
 # Create a Text widget to display terminal output
-terminal = Terminal(root, wrap=tk.WORD, height=20, width=50)
+terminal = Terminal(root, wrap=tk.WORD, height=10, width=30)
 terminal.pack()
 
 # Redirect sys.stdout and sys.stderr to the Terminal widget
@@ -143,44 +223,6 @@ lbl_result = tk.Label(root, text="Tools", wraplength=400)
 lbl_result.pack()
 
 
-
-# Create "Build Map" button
-btn_build_map = tk.Button(root, text="Build Maps", command=build_map)
-btn_build_map.pack()
-
-# Create "Build Texture" button
-btn_build_texture = tk.Button(root, text="Build Textures", command=build_texture)
-btn_build_texture.pack()
-
-btn_build_model = tk.Button(root, text="Build Models", command=build_model)
-btn_build_model.pack()
-
-btn_build_caption = tk.Button(root, text="Build Captions", command=build_caption)
-btn_build_caption.pack()
-
-btn_hammer = tk.Button(root, text="hammer", command=open_hammer)
-btn_hammer.pack()
-
-btn_open_hammer_plus_plus = tk.Button(root, text="hammer++", command=open_hammer_plus_plus)
-btn_open_hammer_plus_plus.pack()
-
-btn_hlmv = tk.Button(root, text="hlmv", command=open_hlmv)
-btn_hlmv.pack()
-
-btn_hlmv = tk.Button(root, text="qc_eyes", command=open_qc_eyes)
-btn_hlmv.pack()
-
-btn_hlfaceposer = tk.Button(root, text="hlfaceposer", command=open_hlfaceposer)
-btn_hlfaceposer.pack()
-
-btn_particle = tk.Button(root, text="Particle", command=particle)
-btn_particle.pack()
-
-btn_Launch_dev = tk.Button(root, text="Launch Dev", command=Launch_dev)
-btn_Launch_dev.pack()
-
-btn_Launch = tk.Button(root, text="Launch", command=Launch)
-btn_Launch.pack()
 
 # Start the GUI event loop
 root.mainloop()
