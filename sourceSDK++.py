@@ -13,6 +13,7 @@ from sympy import false
 
 class SourceSDK():
     selected_folder : string
+    bin_folder : string
     executable_game : string
     game_name : string
     first_init : bool
@@ -49,6 +50,11 @@ def parse_gameinfo_txt(file_path):
                     next_line = next(file)
                     paths = next_line.strip().split('"')[1::2]
                     print("Paths:", paths)
+
+def bin_folder(folder_path):
+    parent_folder = os.path.dirname(folder_path)
+    bin_folder = parent_folder + "/bin"
+    return bin_folder
 
 def find_executable_game(folder_path):
     parent_folder = os.path.dirname(folder_path)
@@ -95,24 +101,19 @@ def build_caption():
     subprocess.call([path,sdk.selected_folder,sdk.game_name], shell=True)
 
 def open_hammer():
-    path = os.path.join(os.getcwd(), "scripts/hammer.bat")
-    subprocess.call([path,sdk.selected_folder], shell=True)
+    subprocess.Popen([sdk.bin_folder + "/hammer.exe"])
 
 def open_hammer_plus_plus():
-    path = os.path.join(os.getcwd(), "scripts/hammer++.bat")
-    subprocess.call([path,sdk.selected_folder], shell=True)
+    subprocess.Popen([sdk.bin_folder + "/hammerplusplus.exe"])
 
 def open_hlmv():
-    path = os.path.join(os.getcwd(), "scripts/hlmv.bat")
-    subprocess.call([path,sdk.selected_folder], shell=True)
+    subprocess.Popen([sdk.bin_folder + "/hlmv.exe"])
 
 def open_qc_eyes():
-    path = os.path.join(os.getcwd(), "scripts/qc_eyes.bat")
-    subprocess.call([path,sdk.selected_folder], shell=True)
+    subprocess.Popen([sdk.bin_folder + "/qc_eyes.exe"])
 
 def open_hlfaceposer():
-    path = os.path.join(os.getcwd(), "scripts/hlfaceposer.bat")
-    subprocess.call([path,sdk.selected_folder], shell=True)
+    subprocess.Popen([sdk.bin_folder + "/hlfaceposer.exe"])
 
 def particle():
     path = os.path.join(os.getcwd(), "scripts/particle.bat")
@@ -139,6 +140,9 @@ def Init():
 
     sdk.game_name = find_game_name(sdk.selected_folder)
     print("game name : " + sdk.game_name)
+
+    sdk.bin_folder = bin_folder(sdk.selected_folder)
+    print("bin directory : " + sdk.bin_folder)
 
     try:
         root.iconbitmap(sdk.selected_folder + '/resource/game.ico')
