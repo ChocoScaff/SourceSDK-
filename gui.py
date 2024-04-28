@@ -21,13 +21,21 @@ def parse_gameinfo_txt(file_path):
                     paths = next_line.strip().split('"')[1::2]
                     print("Paths:", paths)
 
-def find_executables(folder_path):
+def find_executable_game(folder_path):
+    parent_folder = os.path.dirname(folder_path)
     executables = []
-    for root, dirs, files in os.walk(folder_path):
+    for root, dirs, files in os.walk(parent_folder):
         for file in files:
             if file.endswith('.exe'):
                 executables.append(os.path.join(root, file))
-    return executables
+    #print(executables)
+    print(executables[0])
+    return executables[0]
+
+def find_game_name(folder_path):
+    game_name = folder_path.split("\\")[-1]
+    print(game_name)
+    return game_name
 
 def find_gameinfo_folder(start_dir):
     # Recursively search through directories
@@ -78,15 +86,27 @@ def open_hlfaceposer():
     path = os.path.join(os.getcwd(), "scripts/hlfaceposer.bat")
     subprocess.call([path,selected_folder], shell=True)
 
+def particle():
+    path = os.path.join(os.getcwd(), "scripts/particle.bat")
+    subprocess.call([path,game_name,executable_game], shell=True)
+
+def Launch_dev():
+    path = os.path.join(os.getcwd(), "scripts/launch_dev.bat")
+    subprocess.call([path,game_name,executable_game], shell=True)
+
 def Launch():
     path = os.path.join(os.getcwd(), "scripts/launch.bat")
-    subprocess.call([path,selected_folder], shell=True)
+    subprocess.call([path,game_name,executable_game], shell=True)
 
 # Start searching from the root directory (e.g., "C:\")
 current_directory = os.getcwd()
 print(current_directory)
 
 selected_folder = find_gameinfo_folder(current_directory)
+
+executable_game = find_executable_game(selected_folder)
+
+game_name = find_game_name(selected_folder)
 
 # Create the main window
 root = tk.Tk()
@@ -110,7 +130,7 @@ btn_build_texture.pack()
 btn_build_model = tk.Button(root, text="Build Models", command=build_model)
 btn_build_model.pack()
 
-btn_build_caption = tk.Button(root, text="Build Capions", command=build_caption)
+btn_build_caption = tk.Button(root, text="Build Captions", command=build_caption)
 btn_build_caption.pack()
 
 btn_hammer = tk.Button(root, text="hammer", command=open_hammer)
@@ -127,6 +147,12 @@ btn_hlmv.pack()
 
 btn_hlfaceposer = tk.Button(root, text="hlfaceposer", command=open_hlfaceposer)
 btn_hlfaceposer.pack()
+
+btn_particle = tk.Button(root, text="Particle", command=particle)
+btn_particle.pack()
+
+btn_Launch_dev = tk.Button(root, text="Launch Dev", command=Launch_dev)
+btn_Launch_dev.pack()
 
 btn_Launch = tk.Button(root, text="Launch", command=Launch)
 btn_Launch.pack()

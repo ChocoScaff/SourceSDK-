@@ -1,3 +1,2 @@
-cd /d %1
-cd ../
-"hl2.exe" -game custom
+
+%2 -game %1
