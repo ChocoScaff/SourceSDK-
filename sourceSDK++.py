@@ -149,7 +149,7 @@ def build_all_texture():
 def build_texture():
     filenameTGA = filedialog.askopenfile(title="Select .tga file", filetypes=[("TGA files", "*.tga")])
     vtex = (sdk.bin_folder + "/vtex.exe")
-    command = ('"' + vtex + '"' + " -game " + '"' + sdk.selected_folder + '"' + " " + '"' + filenameTGA.name + '"')
+    command = ('"' + vtex + '"' + " -game " + '"' + sdk.selected_folder + '"' + " -nopause "  + '"' + filenameTGA.name + '"' )
     print(command)
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
     print(result)
@@ -290,6 +290,74 @@ def button_init():
 
     sdk.first_init = True
 
+def new_project():
+    
+    directory = filedialog.askdirectory(title="Select a Directory")
+    game_name = find_game_name(directory)
+
+    print(directory)
+    print(game_name)
+    if directory:
+        files_in_dir = os.listdir(directory)
+    
+        # Check if the directory is empty
+        if not files_in_dir:
+
+            os.mkdir(directory + "/materialsrc")
+            os.mkdir(directory + "/materials")
+            os.mkdir(directory + "/models")
+            os.mkdir(directory + "/modelsrc")
+            os.mkdir(directory + "/bin")
+            os.mkdir(directory + "/cfg")
+            os.mkdir(directory + "/scripts")
+            os.mkdir(directory + "/maps")
+            os.mkdir(directory + "/mapsrc")
+            os.mkdir(directory + "/resource")
+            os.mkdir(directory + "/particles")
+            os.mkdir(directory + "/sound")
+            os.mkdir(directory + "/media")
+            os.mkdir(directory + "/expressions")
+            os.mkdir(directory + "/scenes")
+
+            gameinfo_content = """
+            "GameInfo"
+            {
+            game 		"replace"
+            title 		"replace"
+            type		singleplayer_only
+            icon		"resource/game"
+
+            FileSystem
+            {
+                SteamAppId		243730		// Source SDK Base 2013
+                
+                SearchPaths
+                {
+                    mod+mod_write+default_write_path		|gameinfo_path|.
+                    game+game_write		replace
+                    gamebin				replace/bin
+                    Game				|gameinfo_path|.
+                    Game				|all_source_engine_paths|replace
+                }
+            }
+            }
+            """
+
+            # Write the content to the file
+            gameinfo_content.replace("replace", game_name)
+            gameInfo = directory + "/gameinfo.txt"
+            try:
+                with open(gameInfo, 'w') as file:
+                    file.write(gameinfo_content.replace('replace', game_name))
+                print(f"String saved to '{directory}' successfully.")
+            except Exception as e:
+                print(f"Error: {e}")
+
+        else:
+            print("The directory must be empty")
+            
+        
+        
 
 sdk = SourceSDK() 
 
@@ -306,6 +374,7 @@ menu_bar.add_cascade(label="File", menu=file_menu)
 
 
 # Add "Open" option to the "File" menu
+file_menu.add_command(label="New", command=new_project)
 file_menu.add_command(label="Open", command=Init)
 
 
