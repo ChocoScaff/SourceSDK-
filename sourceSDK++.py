@@ -8,7 +8,7 @@ import os
 import subprocess
 from tkinter import filedialog
 import sys
-import shutil
+from vtf2img import Parser
 
 class SourceSDK():
     selected_folder : string
@@ -280,6 +280,7 @@ def button_init():
 
     texture_menu.add_command(label="Build Texture", command=build_texture)
     texture_menu.add_command(label="Build All Textures", command=build_all_texture)
+    texture_menu.add_command(label="See Texture", command=open_vtf)
 
     model_menu.add_command(label="Build Model", command=build_model)
     model_menu.add_command(label="Build All Models", command=build_all_model)
@@ -356,8 +357,21 @@ def new_project():
         else:
             print("The directory must be empty")
             
+def view_vtf_image(file_path):
+
+    parser = Parser(file_path)
+    header = parser.header
+
+    print(f"VTF version: {header.version}, Image size: {header.width}x{header.height}")
+    # VTF version: 7.5, Image size: 2048x2048
+
+    image = parser.get_image()
+
+    image.show()   
         
-        
+def open_vtf():
+    filenamevtf = filedialog.askopenfile(title="Select .vtf file", filetypes=[("VTF files", "*.vtf")])
+    view_vtf_image(filenamevtf.name)
 
 sdk = SourceSDK() 
 
