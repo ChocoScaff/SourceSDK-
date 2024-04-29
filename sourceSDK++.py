@@ -76,8 +76,9 @@ def find_gameinfo_folder():
     gameinfo_path = os.path.join(selected_folder, "gameinfo.txt")
 
     if os.path.isfile(gameinfo_path):
-        path = os.path.join(os.getcwd(), "scripts/vproject.bat")
-        subprocess.call([path, selected_folder], shell=True)
+        command = "setx VProject " + '"' + selected_folder + '"'
+        result = subprocess.run(command, shell=True)
+        print(result)
         return selected_folder
     else:
         print("gameinfo.txt not found in selected folder.")
@@ -188,16 +189,22 @@ def open_hlfaceposer():
     subprocess.Popen([sdk.bin_folder + "/hlfaceposer.exe"])
 
 def particle():
-    path = os.path.join(os.getcwd(), "scripts/particle.bat")
-    subprocess.call([path,sdk.game_name,sdk.executable_game], shell=True)
+    command = ('"' + sdk.executable_game + '"' + " -game " + sdk.game_name + " -tools -nop4 -w 1920 -h 1080 -dev ")
+    print(command)
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    print(result)
 
 def Launch_dev():
-    path = os.path.join(os.getcwd(), "scripts/launch_dev.bat")
-    subprocess.call([path,sdk.game_name,sdk.executable_game], shell=True)
+    command = ('"' + sdk.executable_game + '"' + " -game " + sdk.game_name + " -console -dev")
+    print(command)
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    print(result)
 
 def Launch():
-    path = os.path.join(os.getcwd(), "scripts/launch.bat")
-    subprocess.call([path,sdk.game_name,sdk.executable_game], shell=True)
+    command = ('"' + sdk.executable_game + '"' + " -game " + sdk.game_name)
+    print(command)
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    print(result)
 
 
 def Init():
@@ -292,7 +299,7 @@ file_menu.add_command(label="Build Model", command=build_model)
 file_menu.add_command(label="Build Caption", command=build_caption)
 
 # Create a Text widget to display terminal output
-terminal = Terminal(root, wrap=tk.WORD, height=30, width=90)
+terminal = Terminal(root, wrap=tk.WORD, height=20, width=80)
 terminal.pack()
 
 # Redirect sys.stdout and sys.stderr to the Terminal widget
