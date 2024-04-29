@@ -8,8 +8,7 @@ import os
 import subprocess
 from tkinter import filedialog
 import sys
-
-from sympy import false
+import shutil
 
 class SourceSDK():
     selected_folder : string
@@ -84,19 +83,92 @@ def find_gameinfo_folder():
         print("gameinfo.txt not found in selected folder.")
         return -1
 
-def build_map():  
+def build_all_map():  
     path = os.path.join(os.getcwd(), "scripts/compile_map.bat")
     subprocess.call([path, sdk.selected_folder,sdk.game_name], shell=True)
+
+def build_map():  
+
+    mapsrc_directory = os.path.join(sdk.selected_folder, "mapsrc")
+    map_directory = os.path.join(sdk.selected_folder, "maps")
+
+    filenameVMF = filedialog.askopenfile(title="Select .vmf file", filetypes=[("VMF files", "*.vmf")])
+
+    print("file =", filenameVMF.name)
+    # Execute vbsp.exe
+
+    fileBSP = filenameVMF.name
+    #file_directory = os.path.dirname(fileBSP)
+    fileBSP = os.path.splitext(os.path.basename(fileBSP))[0]
+
+    # Create the new .bsp file path
+    fileBSP = fileBSP + ".bsp"
+    print("bsp =", fileBSP)
+
+
+    print(sdk.bin_folder)
+
+    vbsp = (sdk.bin_folder + "/vbsp.exe")
+    command = ('"' + vbsp + '"' + " -game " + '"' + sdk.selected_folder + '"' + " " + '"' + filenameVMF.name + '"')
+    print(command)
+    #Execute the command in cmd
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    print(result)
+
+    vvis = (sdk.bin_folder + "/vvis.exe")
+    command = ('"' + vvis + '"' + " -game " + '"' + sdk.selected_folder + '"' + " " + '"' + mapsrc_directory + "/" + fileBSP + '"')
+    print(command)
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    print(result)
+
+    vrad = (sdk.bin_folder + "/vrad.exe")
+    command = ('"' + vrad + '"' + " -game " + '"' + sdk.selected_folder + '"' + " " + '"' + mapsrc_directory + "/" + fileBSP + '"')
+    print(command)
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    print(result)
+
+    try:
+        os.makedirs(map_directory, exist_ok=True)
+    except OSError as e:
+        print(f"Error creating folder: {e}")
+
+    # Move bsp file to maps directory
+    directoryBSP = mapsrc_directory + "/" + fileBSP
+    shutil.move(directoryBSP, map_directory)
         
-def build_texture():
+def build_all_texture():
     path = os.path.join(os.getcwd(), "scripts/compile_texture.bat")
     subprocess.call([path,sdk.selected_folder,sdk.game_name], shell=True)
 
+def build_texture():
+    filenameTGA = filedialog.askopenfile(title="Select .tga file", filetypes=[("TGA files", "*.tga")])
+    vtex = (sdk.bin_folder + "/vtex.exe")
+    command = ('"' + vtex + '"' + " -game " + '"' + sdk.selected_folder + '"' + " " + '"' + filenameTGA.name + '"')
+    print(command)
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    print(result)
+
 def build_model():
+    filenameQC = filedialog.askopenfile(title="Select .qc file", filetypes=[("QC files", "*.qc")])
+    vtex = (sdk.bin_folder + "/studiomdl.exe")
+    command = ('"' + vtex + '"' + " -game " + '"' + sdk.selected_folder + '"' + " " + '"' + filenameQC.name + '"')
+    print(command)
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    print(result)
+
+def build_all_model():
     path = os.path.join(os.getcwd(), "scripts/compile_model.bat")
     subprocess.call([path,sdk.selected_folder,sdk.game_name], shell=True)
 
 def build_caption():
+    filenameTXT = filedialog.askopenfile(title="Select .txt file", filetypes=[("TXT files", "closecaption*.txt")])
+    vtex = (sdk.bin_folder + "/captioncompiler.exe")
+    command = ('"' + vtex + '"' + " -game " + '"' + sdk.selected_folder + '"' + " " + '"' + filenameTXT.name + '"')
+    print(command)
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    print(result)
+
+def build_all_caption():
     path = os.path.join(os.getcwd(), "scripts/compile_caption.bat")
     subprocess.call([path,sdk.selected_folder,sdk.game_name], shell=True)
 
@@ -159,17 +231,17 @@ def button_init():
         return
     
     # Create "Build Map" button
-    btn_build_map = tk.Button(root, text="Build Maps", command=build_map)
+    btn_build_map = tk.Button(root, text="Build all Maps", command=build_all_map)
     btn_build_map.pack()
 
     # Create "Build Texture" button
-    btn_build_texture = tk.Button(root, text="Build Textures", command=build_texture)
+    btn_build_texture = tk.Button(root, text="Build all Textures", command=build_all_texture)
     btn_build_texture.pack()
 
-    btn_build_model = tk.Button(root, text="Build Models", command=build_model)
+    btn_build_model = tk.Button(root, text="Build all Models", command=build_all_model)
     btn_build_model.pack()
 
-    btn_build_caption = tk.Button(root, text="Build Captions", command=build_caption)
+    btn_build_caption = tk.Button(root, text="Build all Captions", command=build_all_caption)
     btn_build_caption.pack()
 
     btn_hammer = tk.Button(root, text="hammer", command=open_hammer)
@@ -214,9 +286,13 @@ menu_bar.add_cascade(label="File", menu=file_menu)
 
 # Add "Open" option to the "File" menu
 file_menu.add_command(label="Open", command=Init)
+file_menu.add_command(label="Build Map", command=build_map)
+file_menu.add_command(label="Build Texture", command=build_texture)
+file_menu.add_command(label="Build Model", command=build_model)
+file_menu.add_command(label="Build Caption", command=build_caption)
 
 # Create a Text widget to display terminal output
-terminal = Terminal(root, wrap=tk.WORD, height=10, width=30)
+terminal = Terminal(root, wrap=tk.WORD, height=30, width=90)
 terminal.pack()
 
 # Redirect sys.stdout and sys.stderr to the Terminal widget
