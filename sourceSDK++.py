@@ -135,6 +135,11 @@ def build_map():
 
     # Move bsp file to maps directory
     directoryBSP = mapsrc_directory + "/" + fileBSP
+    try:
+        os.remove(map_directory + "/" + fileBSP)
+    except os.error:
+        print("cant remove :" + map_directory + "/" + fileBSP)
+    
     shutil.move(directoryBSP, map_directory)
         
 def build_all_texture():
@@ -237,20 +242,6 @@ def button_init():
     if sdk.first_init == True:
         return
     
-    # Create "Build Map" button
-    btn_build_map = tk.Button(root, text="Build all Maps", command=build_all_map)
-    btn_build_map.pack()
-
-    # Create "Build Texture" button
-    btn_build_texture = tk.Button(root, text="Build all Textures", command=build_all_texture)
-    btn_build_texture.pack()
-
-    btn_build_model = tk.Button(root, text="Build all Models", command=build_all_model)
-    btn_build_model.pack()
-
-    btn_build_caption = tk.Button(root, text="Build all Captions", command=build_all_caption)
-    btn_build_caption.pack()
-
     btn_hammer = tk.Button(root, text="hammer", command=open_hammer)
     btn_hammer.pack()
 
@@ -275,6 +266,28 @@ def button_init():
     btn_Launch = tk.Button(root, text="Launch", command=Launch)
     btn_Launch.pack()
 
+    texture_menu = tk.Menu(menu_bar, tearoff=0)
+    menu_bar.add_cascade(label="Texture", menu=texture_menu)
+    map_menu = tk.Menu(menu_bar, tearoff=0)
+    menu_bar.add_cascade(label="Map", menu=map_menu)
+    model_menu = tk.Menu(menu_bar, tearoff=0)
+    menu_bar.add_cascade(label="Model", menu=model_menu)
+    other_menu = tk.Menu(menu_bar, tearoff=0)
+    menu_bar.add_cascade(label="Other", menu=other_menu)
+
+    map_menu.add_command(label="Build Map", command=build_map)
+    map_menu.add_command(label="Build All Maps", command=build_all_map)
+
+    texture_menu.add_command(label="Build Texture", command=build_texture)
+    texture_menu.add_command(label="Build All Textures", command=build_all_texture)
+
+    model_menu.add_command(label="Build Model", command=build_model)
+    model_menu.add_command(label="Build All Models", command=build_all_model)
+
+    other_menu.add_command(label="Build Caption", command=build_caption)
+    other_menu.add_command(label="Build All Captions", command=build_all_caption)
+
+
     sdk.first_init = True
 
 
@@ -291,12 +304,10 @@ root.config(menu=menu_bar)
 file_menu = tk.Menu(menu_bar, tearoff=0)
 menu_bar.add_cascade(label="File", menu=file_menu)
 
+
 # Add "Open" option to the "File" menu
 file_menu.add_command(label="Open", command=Init)
-file_menu.add_command(label="Build Map", command=build_map)
-file_menu.add_command(label="Build Texture", command=build_texture)
-file_menu.add_command(label="Build Model", command=build_model)
-file_menu.add_command(label="Build Caption", command=build_caption)
+
 
 # Create a Text widget to display terminal output
 terminal = Terminal(root, wrap=tk.WORD, height=20, width=80)
