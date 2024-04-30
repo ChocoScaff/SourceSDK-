@@ -207,9 +207,16 @@ def open_hammer(file=""):
 
 def open_hammer_plus_plus():
     subprocess.Popen([sdk.bin_folder + "/hammerplusplus.exe"])
+    root = tk.Tk()
     icon_path = "icons/hpp.png" // add icons
     icon_image = Image.open(icon_path)
-    icon_image = icon_image.resize((32, 32),
+    icon_image = icon_image.resize((32, 32), Image.ANTIALIAS)
+    icon_photo = ImageTk.PhotoImage(icon_image)
+    root.iconphoto(True, icon_photo)
+    root.title("Hammer++ Application")
+    label = tk.Label(root, text="Bienvenue dans Hammer++!")
+    label.pack(padx=20, pady=20)
+    root.mainloop()
 
 def open_hlmv():
     subprocess.Popen([sdk.bin_folder + "/hlmv.exe"])
