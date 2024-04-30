@@ -53,8 +53,14 @@ def parse_gameinfo_txt(file_path):
 
 def bin_folder(folder_path):
     parent_folder = os.path.dirname(folder_path)
-    bin_folder = parent_folder + "/bin"
-    return bin_folder
+    binFolder = parent_folder + "/bin"
+    if os.path.exists(binFolder):
+        pass
+    else:
+        #with open(folder_path + "bin.txt", 'r') as file:   
+        folder = filedialog.askdirectory(title="Open game directory")
+        binFolder = bin_folder(folder)
+    return binFolder
 
 def find_executable_game(folder_path):
     parent_folder = os.path.dirname(folder_path)
@@ -228,39 +234,43 @@ def open_hlfaceposer():
     subprocess.Popen([sdk.bin_folder + "/hlfaceposer.exe"])
 
 def particle():
-    command = ('"' + sdk.executable_game + '"' + " -game " + sdk.game_name + " -tools -nop4 -w 1920 -h 1080 -dev ")
+    command = ('"' + sdk.executable_game + '"' + " -game " + '"' + sdk.selected_folder + '"' + " -tools -nop4 -w 1920 -h 1080 -dev ")
     print(command)
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
     print(result)
 
 def Launch_dev():
-    command = ('"' + sdk.executable_game + '"' + " -game " + sdk.game_name + " -console -dev")
+    command = ('"' + sdk.executable_game + '"' + " -game " + '"' + sdk.selected_folder + '"' + " -console -dev")
     print(command)
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
     print(result)
 
 def Launch():
-    command = ('"' + sdk.executable_game + '"' + " -game " + sdk.game_name)
+    command = ('"' + sdk.executable_game + '"' + " -game " + '"' + sdk.selected_folder + '"')
     print(command)
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
     print(result)
 
 
-def Init():
+def Init(folder=False):
     print("Wait...")
-    sdk.selected_folder = find_gameinfo_folder()
-    if sdk.selected_folder == -1:
-        return
-    print("selected directory : " + sdk.selected_folder)
+    if folder == False:
+        sdk.selected_folder = find_gameinfo_folder()
+        if sdk.selected_folder == -1:
+            return
+    else:
+        sdk.selected_folder=folder
 
-    sdk.executable_game = find_executable_game(sdk.selected_folder)
-    print("executable game : " + sdk.executable_game)
+    print("selected directory : " + sdk.selected_folder)
 
     sdk.game_name = find_game_name(sdk.selected_folder)
     print("game name : " + sdk.game_name)
 
     sdk.bin_folder = bin_folder(sdk.selected_folder)
     print("bin directory : " + sdk.bin_folder)
+
+    sdk.executable_game = find_executable_game(sdk.bin_folder)
+    print("executable game : " + sdk.executable_game)
 
     try:
         root.iconbitmap(sdk.selected_folder + '/resource/game.ico')
@@ -386,6 +396,8 @@ def new_project():
                 print(f"String saved to '{directory}' successfully.")
             except Exception as e:
                 print(f"Error: {e}")
+            
+            Init(directory)
 
         else:
             print("The directory must be empty")
@@ -406,6 +418,14 @@ def open_vtf():
     filenamevtf = filedialog.askopenfile(title="Select .vtf file", filetypes=[("VTF files", "*.vtf")])
     view_vtf_image(filenamevtf.name)
 
+# Function to handle keyboard shortcuts
+def handle_shortcut(event):
+    key = event.keysym
+    if key == "n":
+        new_project()
+    elif key == "o":
+        Init()
+
 sdk = SourceSDK() 
 
 # Create the main window
@@ -419,10 +439,12 @@ root.config(menu=menu_bar)
 file_menu = tk.Menu(menu_bar, tearoff=0)
 menu_bar.add_cascade(label="File", menu=file_menu)
 
-
 # Add "Open" option to the "File" menu
-file_menu.add_command(label="New", command=new_project)
-file_menu.add_command(label="Open", command=Init)
+file_menu.add_command(label="New", command=new_project, accelerator="Ctrl+N")
+file_menu.add_command(label="Open", command=Init, accelerator="Ctrl+O")
+#previous_projects_menu = tk.Menu(file_menu, tearoff=0)
+#file_menu.add_cascade(label="Previous Projects", menu=previous_projects_menu)
+file_menu.add_command(label="Exit", command=exit)
 
 
 # Create a Text widget to display terminal output
@@ -436,7 +458,9 @@ sys.stderr = terminal
 lbl_result = tk.Label(root, text="Tools", wraplength=400)
 lbl_result.pack()
 
-
+# Bind keyboard shortcuts to the root window
+root.bind("<Control-n>", handle_shortcut)
+root.bind("<Control-o>", handle_shortcut)
 
 # Start the GUI event loop
 root.mainloop()
