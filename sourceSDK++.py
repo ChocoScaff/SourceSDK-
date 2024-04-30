@@ -207,6 +207,9 @@ def open_hammer(file=""):
 
 def open_hammer_plus_plus():
     subprocess.Popen([sdk.bin_folder + "/hammerplusplus.exe"])
+    icon_path = "icons/hpp.png"
+    icon_image = Image.open(icon_path)
+    icon_image = icon_image.resize((200, 200),
 
 def open_hlmv():
     subprocess.Popen([sdk.bin_folder + "/hlmv.exe"])
