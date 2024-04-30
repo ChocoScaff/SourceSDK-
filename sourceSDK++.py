@@ -207,8 +207,8 @@ def open_hammer(file=""):
 
 def open_hammer_plus_plus():
     subprocess.Popen([sdk.bin_folder + "/hammerplusplus.exe"])
-    root = tk.Tk()
-    icon_path = "icons/hpp.png" // add icons
+    root = tk.Tk() // add icons
+    icon_path = "icons/hpp.png"
     icon_image = Image.open(icon_path)
     icon_image = icon_image.resize((32, 32), Image.ANTIALIAS)
     icon_photo = ImageTk.PhotoImage(icon_image)
