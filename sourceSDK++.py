@@ -58,7 +58,7 @@ def bin_folder(folder_path):
         pass
     else:
         #with open(folder_path + "bin.txt", 'r') as file:   
-        folder = filedialog.askdirectory(title="Open bin directory")
+        folder = filedialog.askdirectory(title="Open bin Engine path",initialdir=parent_folder)
         binFolder = bin_folder(folder)
     return binFolder
 
@@ -100,7 +100,7 @@ def build_map():
     mapsrc_directory = os.path.join(sdk.selected_folder, "mapsrc")
     map_directory = os.path.join(sdk.selected_folder, "maps")
 
-    filenameVMF = filedialog.askopenfile(title="Select .vmf file", filetypes=[("VMF files", "*.vmf")])
+    filenameVMF = filedialog.askopenfile(title="Select .vmf file", filetypes=[("VMF files", "*.vmf")], initialdir=mapsrc_directory)
 
     print("file =", filenameVMF.name)
     # Execute vbsp.exe
@@ -161,7 +161,7 @@ def build_all_texture():
                 print(result)
 
 def build_texture():
-    filenameTGA = filedialog.askopenfile(title="Select .tga file", filetypes=[("TGA files", "*.tga")])
+    filenameTGA = filedialog.askopenfile(title="Select .tga file", filetypes=[("TGA files", "*.tga")], initialdir=sdk.selected_folder + "/materialsrc")
     vtex = (sdk.bin_folder + "/vtex.exe")
     command = ('"' + vtex + '"' + " -game " + '"' + sdk.selected_folder + '"' + " -nopause "  + '"' + filenameTGA.name + '"' )
     print(command)
@@ -169,7 +169,7 @@ def build_texture():
     print(result)
 
 def build_model():
-    filenameQC = filedialog.askopenfile(title="Select .qc file", filetypes=[("QC files", "*.qc")])
+    filenameQC = filedialog.askopenfile(title="Select .qc file", filetypes=[("QC files", "*.qc")], initialdir=sdk.selected_folder + "/modelsrc")
     mdl = (sdk.bin_folder + "/studiomdl.exe")
     command = ('"' + mdl + '"' + " -game " + '"' + sdk.selected_folder + '"' + " " + '"' + filenameQC.name + '"')
     print(command)
@@ -189,7 +189,7 @@ def build_all_model():
                 print(result)
 
 def build_caption():
-    filenameTXT = filedialog.askopenfile(title="Select .txt file", filetypes=[("TXT files", "closecaption*.txt")])
+    filenameTXT = filedialog.askopenfile(title="Select .txt file", filetypes=[("TXT files", "closecaption*.txt")], initialdir=sdk.selected_folder + "/resource")
     captioncompiler = (sdk.bin_folder + "/captioncompiler.exe")
     command = ('"' + captioncompiler + '"' + " -game " + '"' + sdk.selected_folder + '"' + " " + '"' + filenameTXT.name + '"')
     print(command)
@@ -405,7 +405,7 @@ def view_vtf_image(file_path):
     image.show()   
         
 def open_vtf():
-    filenamevtf = filedialog.askopenfile(title="Select .vtf file", filetypes=[("VTF files", "*.vtf")])
+    filenamevtf = filedialog.askopenfile(title="Select .vtf file", filetypes=[("VTF files", "*.vtf")], initialdir=sdk.selected_folder + "/materials")
     view_vtf_image(filenamevtf.name)
 
 # Function to handle keyboard shortcuts
