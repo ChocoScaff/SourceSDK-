@@ -9,6 +9,7 @@ import subprocess
 from tkinter import filedialog
 import sys
 from vtf2img import Parser
+import shutil
 
 class SourceSDK():
     selected_folder : string
@@ -106,7 +107,6 @@ def build_map():
     fileBSP = fileBSP + ".bsp"
     print("bsp =", fileBSP)
 
-
     print(sdk.bin_folder)
 
     vbsp = (sdk.bin_folder + "/vbsp.exe")
@@ -143,8 +143,16 @@ def build_map():
     shutil.move(directoryBSP, map_directory)
         
 def build_all_texture():
-    path = os.path.join(os.getcwd(), "scripts/compile_texture.bat")
-    subprocess.call([path,sdk.selected_folder,sdk.game_name], shell=True)
+    print("wait...")
+    vtex = (sdk.bin_folder + "/vtex.exe")
+    for root, dirs, files in os.walk(sdk.selected_folder + "/materialsrc"):
+        for file in files:
+            if file.endswith(".tga"):
+                tga_file_path = os.path.join(root, file)
+                command = ('"' + vtex + '"' + " -game " + '"' + sdk.selected_folder + '"' + " -nopause "  + '"' + tga_file_path + '"' )
+                print(command)
+                result = subprocess.run(command, shell=True, capture_output=True, text=True)
+                print(result)
 
 def build_texture():
     filenameTGA = filedialog.askopenfile(title="Select .tga file", filetypes=[("TGA files", "*.tga")])
@@ -156,30 +164,46 @@ def build_texture():
 
 def build_model():
     filenameQC = filedialog.askopenfile(title="Select .qc file", filetypes=[("QC files", "*.qc")])
-    vtex = (sdk.bin_folder + "/studiomdl.exe")
-    command = ('"' + vtex + '"' + " -game " + '"' + sdk.selected_folder + '"' + " " + '"' + filenameQC.name + '"')
+    mdl = (sdk.bin_folder + "/studiomdl.exe")
+    command = ('"' + mdl + '"' + " -game " + '"' + sdk.selected_folder + '"' + " " + '"' + filenameQC.name + '"')
     print(command)
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
     print(result)
 
 def build_all_model():
-    path = os.path.join(os.getcwd(), "scripts/compile_model.bat")
-    subprocess.call([path,sdk.selected_folder,sdk.game_name], shell=True)
+    print("wait...")
+    mdl = (sdk.bin_folder + "/captioncompiler.exe")
+    for root, dirs, files in os.walk(sdk.selected_folder + "/modelsrc"):
+        for file in files:
+            if file.endswith(".qc"):
+                qc_file_path = os.path.join(root, file)
+                command = ('"' + mdl + '"' + " -game " + '"' + sdk.selected_folder + '"' + " " + '"' + qc_file_path + '"')
+                print(command)
+                result = subprocess.run(command, shell=True, capture_output=True, text=True)
+                print(result)
 
 def build_caption():
     filenameTXT = filedialog.askopenfile(title="Select .txt file", filetypes=[("TXT files", "closecaption*.txt")])
-    vtex = (sdk.bin_folder + "/captioncompiler.exe")
-    command = ('"' + vtex + '"' + " -game " + '"' + sdk.selected_folder + '"' + " " + '"' + filenameTXT.name + '"')
+    captioncompiler = (sdk.bin_folder + "/captioncompiler.exe")
+    command = ('"' + captioncompiler + '"' + " -game " + '"' + sdk.selected_folder + '"' + " " + '"' + filenameTXT.name + '"')
     print(command)
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
     print(result)
 
 def build_all_caption():
-    path = os.path.join(os.getcwd(), "scripts/compile_caption.bat")
-    subprocess.call([path,sdk.selected_folder,sdk.game_name], shell=True)
+    print("wait...")
+    captioncompiler = (sdk.bin_folder + "/captioncompiler.exe")
+    for root, dirs, files in os.walk(sdk.selected_folder + "/resource"):
+        for file in files:
+            if file.startswith("closecaption") and file.endswith(".txt"):
+                caption_file_path = os.path.join(root, file)
+                command = ('"' + captioncompiler + '"' + " -game " + '"' + sdk.selected_folder + '"' + " " + '"' + caption_file_path + '"')
+                print(command)
+                result = subprocess.run(command, shell=True, capture_output=True, text=True)
+                print(result)
 
-def open_hammer():
-    subprocess.Popen([sdk.bin_folder + "/hammer.exe"])
+def open_hammer(file=""):
+    subprocess.Popen([sdk.bin_folder + "/hammer.exe" + " " + file])
 
 def open_hammer_plus_plus():
     subprocess.Popen([sdk.bin_folder + "/hammerplusplus.exe"])
@@ -277,7 +301,6 @@ def button_init():
 
     map_menu.add_command(label="Build Map", command=build_map)
     map_menu.add_command(label="Build All Maps", command=build_all_map)
-
     texture_menu.add_command(label="Build Texture", command=build_texture)
     texture_menu.add_command(label="Build All Textures", command=build_all_texture)
     texture_menu.add_command(label="See Texture", command=open_vtf)
