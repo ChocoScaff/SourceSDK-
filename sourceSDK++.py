@@ -58,7 +58,7 @@ def bin_folder(folder_path):
         pass
     else:
         #with open(folder_path + "bin.txt", 'r') as file:   
-        folder = filedialog.askdirectory(title="Open game directory")
+        folder = filedialog.askdirectory(title="Open bin directory")
         binFolder = bin_folder(folder)
     return binFolder
 
@@ -213,16 +213,6 @@ def open_hammer(file=""):
 
 def open_hammer_plus_plus():
     subprocess.Popen([sdk.bin_folder + "/hammerplusplus.exe"])
-    root = tk.Tk() // add icons
-    icon_path = "icons/hpp.png"
-    icon_image = Image.open(icon_path)
-    icon_image = icon_image.resize((32, 32), Image.ANTIALIAS)
-    icon_photo = ImageTk.PhotoImage(icon_image)
-    root.iconphoto(True, icon_photo)
-    root.title("Hammer++ Application")
-    label = tk.Label(root, text="Bienvenue dans Hammer++!")
-    label.pack(padx=20, pady=20)
-    root.mainloop()
 
 def open_hlmv():
     subprocess.Popen([sdk.bin_folder + "/hlmv.exe"])
