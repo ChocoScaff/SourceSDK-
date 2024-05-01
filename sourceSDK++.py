@@ -431,6 +431,8 @@ def info_map():
     print("Number of cameras in the VMF:", len(cameras))
     print(cameras)
 
+def launch_exit():
+    exit()
 
 sdk = SourceSDK() 
 
@@ -450,7 +452,7 @@ file_menu.add_command(label="New", command=new_project, accelerator="Ctrl+N")
 file_menu.add_command(label="Open", command=Init, accelerator="Ctrl+O")
 #previous_projects_menu = tk.Menu(file_menu, tearoff=0)
 #file_menu.add_cascade(label="Previous Projects", menu=previous_projects_menu)
-file_menu.add_command(label="Exit", command=exit)
+file_menu.add_command(label="Exit", command=launch_exit)
 
 
 # Create a Text widget to display terminal output
