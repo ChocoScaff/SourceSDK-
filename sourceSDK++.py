@@ -12,6 +12,7 @@ import sys
 import srctools.mdl
 from vtf2img import Parser
 import shutil
+from PIL import Image
 
 class SourceSDK():
     selected_folder : string
@@ -278,29 +279,29 @@ def button_init():
     if sdk.first_init == True:
         return
     
-    btn_hammer = tk.Button(root, text="hammer", command=open_hammer)
-    btn_hammer.pack()
+    btn_hammer = tk.Button(root, text="hammer", command=open_hammer,image=iconHammer,compound=tk.LEFT)
+    btn_hammer.pack(side="left")
+    
+    btn_open_hammer_plus_plus = tk.Button(root, text="hammer++", command=open_hammer_plus_plus, image=iconHpp, compound=tk.LEFT)    
+    btn_open_hammer_plus_plus.pack(side="left")
 
-    btn_open_hammer_plus_plus = tk.Button(root, text="hammer++", command=open_hammer_plus_plus)
-    btn_open_hammer_plus_plus.pack()
+    btn_hlmv = tk.Button(root, text="hlmv", command=open_hlmv, image=iconHLMV, compound=tk.LEFT)
+    btn_hlmv.pack(side="left")
 
-    btn_hlmv = tk.Button(root, text="hlmv", command=open_hlmv)
-    btn_hlmv.pack()
+    btn_hlmv = tk.Button(root, text="qc_eyes", command=open_qc_eyes, image=iconQc_eyes, compound=tk.LEFT)
+    btn_hlmv.pack(side="left")
 
-    btn_hlmv = tk.Button(root, text="qc_eyes", command=open_qc_eyes)
-    btn_hlmv.pack()
+    btn_hlfaceposer = tk.Button(root, text="hlfaceposer", command=open_hlfaceposer, image=iconHlposer, compound=tk.LEFT)
+    btn_hlfaceposer.pack(side="left")
 
-    btn_hlfaceposer = tk.Button(root, text="hlfaceposer", command=open_hlfaceposer)
-    btn_hlfaceposer.pack()
+    btn_particle = tk.Button(root, text="Particle", command=particle, image=iconSource, compound=tk.LEFT)
+    btn_particle.pack(side="left")
 
-    btn_particle = tk.Button(root, text="Particle", command=particle)
-    btn_particle.pack()
+    btn_Launch_dev = tk.Button(root, text="Launch Dev", command=Launch_dev, image=iconSource, compound=tk.LEFT)
+    btn_Launch_dev.pack(side="left")
 
-    btn_Launch_dev = tk.Button(root, text="Launch Dev", command=Launch_dev)
-    btn_Launch_dev.pack()
-
-    btn_Launch = tk.Button(root, text="Launch", command=Launch)
-    btn_Launch.pack()
+    btn_Launch = tk.Button(root, text="Launch", command=Launch, image=iconSource, compound=tk.LEFT)
+    btn_Launch.pack(side="left")
 
     texture_menu = tk.Menu(menu_bar, tearoff=0)
     menu_bar.add_cascade(label="Texture", menu=texture_menu)
@@ -466,6 +467,13 @@ lbl_result.pack()
 # Bind keyboard shortcuts to the root window
 root.bind("<Control-n>", handle_shortcut)
 root.bind("<Control-o>", handle_shortcut)
+
+iconHpp = tk.PhotoImage(file=os.getcwd() + "/icons/hpp.png")
+iconHammer = tk.PhotoImage(file=os.getcwd() + "/icons/hammer.png")
+iconSource = tk.PhotoImage(file=os.getcwd() + "/icons/source.png")
+iconHLMV = tk.PhotoImage(file=os.getcwd() + "/icons/hlmv.png")
+iconQc_eyes = tk.PhotoImage(file=os.getcwd() + "/icons/qc_eyes.png")
+iconHlposer = tk.PhotoImage(file=os.getcwd() + "/icons/hlposer.png")
 
 # Start the GUI event loop
 root.mainloop()
