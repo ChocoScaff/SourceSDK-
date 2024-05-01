@@ -1,18 +1,15 @@
-import re
+#import re
 import string
 import tkinter as tk
-from turtle import st
-from numpy import source
-import srctools
-from srctools import mdl
+#from turtle import st
+#from numpy import source
 import os
 import subprocess
 from tkinter import filedialog
 import sys
-import srctools.mdl
 from vtf2img import Parser
 import shutil
-from PIL import Image
+#from PIL import Image
 
 class SourceSDK():
     selected_folder : string
@@ -229,20 +226,17 @@ def open_hlfaceposer():
 def particle():
     command = ('"' + sdk.executable_game + '"' + " -game " + '"' + sdk.selected_folder + '"' + " -tools -nop4 -w 1920 -h 1080 -dev ")
     print(command)
-    result = subprocess.run(command, shell=True, capture_output=True, text=True)
-    print(result)
+    subprocess.Popen(command)
 
 def Launch_dev():
     command = ('"' + sdk.executable_game + '"' + " -game " + '"' + sdk.selected_folder + '"' + " -console -dev")
     print(command)
-    result = subprocess.run(command, shell=True, capture_output=True, text=True)
-    print(result)
+    subprocess.Popen(command)
 
 def Launch():
     command = ('"' + sdk.executable_game + '"' + " -game " + '"' + sdk.selected_folder + '"')
     print(command)
-    result = subprocess.run(command, shell=True, capture_output=True, text=True)
-    print(result)
+    subprocess.Popen(command)
 
 
 def Init(folder=False):
@@ -323,6 +317,9 @@ def button_init():
     model_menu.add_command(label="Build Model", command=build_model)
     model_menu.add_command(label="Build All Models", command=build_all_model)
 
+    other_menu.add_command(label="Create VPK", command=create_VPK)
+    other_menu.add_command(label="Display VPK", command=display_VPK)
+    other_menu.add_command(label="Extract VPK", command=extract_VPK)
     other_menu.add_command(label="Build Caption", command=build_caption)
     other_menu.add_command(label="Build All Captions", command=build_all_caption)
 
@@ -433,6 +430,25 @@ def info_map():
 
 def launch_exit():
     exit()
+
+def create_VPK():
+    directory = filedialog.askdirectory(title="Select a Directory")
+    command = '"' + sdk.bin_folder + "/vpk.exe" + '" ' + '"' + directory + '"'
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    print(result)
+
+def extract_VPK():
+    filenamevpk = filedialog.askopenfile(title="Select .vpk file", filetypes=[("VPK files", "*.vpk")], initialdir=sdk.selected_folder)
+    command = '"' + sdk.bin_folder + "/vpk.exe" + '" ' + '"' + filenamevpk.name + '"'
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    print(result)
+
+def display_VPK():
+    filenamevpk = filedialog.askopenfile(title="Select .vpk file", filetypes=[("VPK files", "*.vpk")], initialdir=sdk.selected_folder)
+    command = '"' + sdk.bin_folder + "/vpk.exe" + '"' + " L " + '"' + filenamevpk.name + '"'
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    print(result)
+
 
 sdk = SourceSDK() 
 
