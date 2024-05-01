@@ -4,10 +4,12 @@ import tkinter as tk
 from turtle import st
 from numpy import source
 import srctools
+from srctools import mdl
 import os
 import subprocess
 from tkinter import filedialog
 import sys
+import srctools.mdl
 from vtf2img import Parser
 import shutil
 
@@ -311,6 +313,8 @@ def button_init():
 
     map_menu.add_command(label="Build Map", command=build_map)
     map_menu.add_command(label="Build All Maps", command=build_all_map)
+    map_menu.add_command(label="Info Map", command=info_map)
+
     texture_menu.add_command(label="Build Texture", command=build_texture)
     texture_menu.add_command(label="Build All Textures", command=build_all_texture)
     texture_menu.add_command(label="See Texture", command=open_vtf)
@@ -415,6 +419,17 @@ def handle_shortcut(event):
         new_project()
     elif key == "o":
         Init()
+
+def info_map():
+    filenamevmf = filedialog.askopenfile(title="Select .vmf file", filetypes=[("VMF files", "*.vmf")], initialdir=sdk.selected_folder + "/mapsrc")
+    vmf = srctools.VMF.parse(filenamevmf.name)
+    entities = vmf.entities
+    print("Number of entities in the VMF:", len(entities))
+    print(entities)
+    cameras = vmf.cameras
+    print("Number of cameras in the VMF:", len(cameras))
+    print(cameras)
+
 
 sdk = SourceSDK() 
 
