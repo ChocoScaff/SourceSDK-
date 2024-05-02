@@ -544,12 +544,16 @@ def open_everything():
     open_sln_file(sdk.selected_folder + "/src/everything.sln")
 
 def generate_games():
-    path = sdk.selected_folder + "/src/creategameprojects.bat"
-    subprocess.call(path, shell=True)
+    command = f'cd /D "{sdk.selected_folder}\\src" && creategameprojects.bat'
+    print(command)
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    print(result)
 
 def generate_everything():
-    path = sdk.selected_folder + "/src/createallprojects.bat"
-    subprocess.call(path, shell=True)
+    command = f'cd /D "{sdk.selected_folder}\\src" && createallprojects.bat'
+    print(command)
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    print(result)
 
 def downbload_source_code():
 
