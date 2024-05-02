@@ -8,7 +8,6 @@ import os
 import subprocess
 from tkinter import filedialog
 import sys
-from sympy import true
 from vtf2img import Parser
 import shutil
 #from PIL import Image
