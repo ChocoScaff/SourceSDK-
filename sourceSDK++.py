@@ -560,7 +560,7 @@ def downbload_source_code():
     shutil.rmtree(sdk.selected_folder + "/src/sp/")
 
 def download_github_code(repo_url, destination_folder):
-    git.Repo.clone_from(repo_url, destination_folder ,progress=print_progress)
+    git.Repo.clone_from(repo_url, destination_folder)
 
 
 sdk = SourceSDK() 
