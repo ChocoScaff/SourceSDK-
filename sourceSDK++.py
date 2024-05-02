@@ -8,12 +8,13 @@ import os
 import subprocess
 from tkinter import filedialog
 import sys
+from sympy import true
 from vtf2img import Parser
 import shutil
 #from PIL import Image
 import git
-import threading
-import queue
+
+
 
 class SourceSDK():
     selected_folder : string
@@ -21,8 +22,24 @@ class SourceSDK():
     executable_game : string
     game_name : string
     first_init : bool
+    btn_hammer : tk.Button
+    btn_hammer_plus_plus : tk.Button
+    btn_hlmv : tk.Button
+    btn_hlfaceposer : tk.Button
+    btn_qc_eyes : tk.Button
+    btn_games : tk.Button
+    btn_everything : tk.Button
+    btn_particle : tk.Button
+    btn_Launch : tk.Button
+    btn_Launch_dev : tk.Button
+    other_menu : tk.Menu
+    texture_menu : tk.Menu
+    map_menu : tk.Menu
+    model_menu : tk.Menu
+    menu_bar : tk.Menu
+
     def __init__(self):
-        self.first_init = False
+        self.first_init = 0
 
 
 class Terminal(tk.Text):
@@ -290,11 +307,16 @@ def Launch():
 
 def Init(folder=False):
     print("Wait...")
+
     if folder == False:
+        if sdk.first_init == 1:
+            reload_button()
         sdk.selected_folder = find_gameinfo_folder()
         if sdk.selected_folder == -1:
             return
     else:
+        if sdk.first_init == 1:
+            reload_button()
         sdk.selected_folder=folder
 
     print("selected directory : " + sdk.selected_folder)
@@ -319,81 +341,102 @@ def Init(folder=False):
 
 def button_init():
 
-    if sdk.first_init == True:
-        return
-    
     if os.path.isfile(sdk.bin_folder + "/hammer.exe"):
-        btn_hammer = tk.Button(root, text="hammer", command=open_hammer,image=iconHammer,compound=tk.LEFT)
-        btn_hammer.pack(side="left")
+        sdk.btn_hammer = tk.Button(root, text="hammer", command=open_hammer,image=iconHammer,compound=tk.LEFT)
+        sdk.btn_hammer.pack(side="left")
     
     if os.path.isfile(sdk.bin_folder + "/hammerplusplus.exe"):
-        btn_open_hammer_plus_plus = tk.Button(root, text="hammer++", command=open_hammer_plus_plus, image=iconHpp, compound=tk.LEFT)    
-        btn_open_hammer_plus_plus.pack(side="left")
+        sdk.btn_hammer_plus_plus = tk.Button(root, text="hammer++", command=open_hammer_plus_plus, image=iconHpp, compound=tk.LEFT)    
+        sdk.btn_hammer_plus_plus.pack(side="left")
 
     if os.path.isfile(sdk.bin_folder + "/hlmv.exe"):
-        btn_hlmv = tk.Button(root, text="hlmv", command=open_hlmv, image=iconHLMV, compound=tk.LEFT)
-        btn_hlmv.pack(side="left")
+        sdk.btn_hlmv = tk.Button(root, text="hlmv", command=open_hlmv, image=iconHLMV, compound=tk.LEFT)
+        sdk.btn_hlmv.pack(side="left")
 
     if os.path.isfile(sdk.bin_folder + "/qc_eyes.exe"):
-        btn_hlmv = tk.Button(root, text="qc_eyes", command=open_qc_eyes, image=iconQc_eyes, compound=tk.LEFT)
-        btn_hlmv.pack(side="left")
+        sdk.btn_qc_eyes= tk.Button(root, text="qc_eyes", command=open_qc_eyes, image=iconQc_eyes, compound=tk.LEFT)
+        sdk.btn_qc_eyes.pack(side="left")
 
     if os.path.isfile(sdk.bin_folder + "/hlfaceposer.exe"):
-        btn_hlfaceposer = tk.Button(root, text="hlfaceposer", command=open_hlfaceposer, image=iconHlposer, compound=tk.LEFT)
-        btn_hlfaceposer.pack(side="left")
+        sdk.btn_hlfaceposer = tk.Button(root, text="hlfaceposer", command=open_hlfaceposer, image=iconHlposer, compound=tk.LEFT)
+        sdk.btn_hlfaceposer.pack(side="left")
 
     if os.path.exists(sdk.selected_folder + "/src/games.sln"):
-        btn_games = tk.Button(root, text="games", command=open_games, image=iconVisualStudio, compound=tk.LEFT)
-        btn_games.pack(side="left")
+        sdk.btn_games = tk.Button(root, text="games", command=open_games, image=iconVisualStudio, compound=tk.LEFT)
+        sdk.btn_games.pack(side="left")
 
     if os.path.exists(sdk.selected_folder + "/src/everything.sln"):
-        btn_everything = tk.Button(root, text="everything", command=open_everything, image=iconVisualStudio, compound=tk.LEFT)
-        btn_everything.pack(side="left")
+        sdk.btn_everything = tk.Button(root, text="everything", command=open_everything, image=iconVisualStudio, compound=tk.LEFT)
+        sdk.btn_everything.pack(side="left")
 
-    btn_particle = tk.Button(root, text="Particle", command=particle, image=iconSource, compound=tk.LEFT)
-    btn_particle.pack(side="left")
+    sdk.btn_particle = tk.Button(root, text="Particle", command=particle, image=iconSource, compound=tk.LEFT)
+    sdk.btn_particle.pack(side="left")
 
-    btn_Launch_dev = tk.Button(root, text="Launch Dev", command=Launch_dev, image=iconSource, compound=tk.LEFT)
-    btn_Launch_dev.pack(side="left")
+    sdk.btn_Launch_dev = tk.Button(root, text="Launch Dev", command=Launch_dev, image=iconSource, compound=tk.LEFT)
+    sdk.btn_Launch_dev.pack(side="left")
 
-    btn_Launch = tk.Button(root, text="Launch", command=Launch, image=iconSource, compound=tk.LEFT)
-    btn_Launch.pack(side="left")
+    sdk.btn_Launch = tk.Button(root, text="Launch", command=Launch, image=iconSource, compound=tk.LEFT)
+    sdk.btn_Launch.pack(side="left")
 
-    texture_menu = tk.Menu(menu_bar, tearoff=0)
-    menu_bar.add_cascade(label="Texture", menu=texture_menu)
-    map_menu = tk.Menu(menu_bar, tearoff=0)
-    menu_bar.add_cascade(label="Map", menu=map_menu)
-    model_menu = tk.Menu(menu_bar, tearoff=0)
-    menu_bar.add_cascade(label="Model", menu=model_menu)
-    other_menu = tk.Menu(menu_bar, tearoff=0)
-    menu_bar.add_cascade(label="Other", menu=other_menu)
+    if sdk.first_init == 1:
+        sdk.texture_menu = tk.Menu(sdk.menu_bar, tearoff=0)
+        sdk.menu_bar.add_cascade(label="Texture", menu=sdk.texture_menu)
+        sdk.map_menu = tk.Menu(sdk.menu_bar, tearoff=0)
+        sdk.menu_bar.add_cascade(label="Map", menu=sdk.map_menu)
+        sdk.model_menu = tk.Menu(sdk.menu_bar, tearoff=0)
+        sdk.menu_bar.add_cascade(label="Model", menu=sdk.model_menu)
+        sdk.other_menu = tk.Menu(sdk.menu_bar, tearoff=0)
+        sdk.menu_bar.add_cascade(label="Other", menu=sdk.other_menu)
 
-    map_menu.add_command(label="Build Map", command=build_map)
-    map_menu.add_command(label="Build All Maps", command=build_all_map)
-    map_menu.add_command(label="Info Map", command=info_map)
+        sdk.map_menu.add_command(label="Build Map", command=build_map)
+        sdk.map_menu.add_command(label="Build All Maps", command=build_all_map)
+        sdk.map_menu.add_command(label="Info Map", command=info_map)
 
-    texture_menu.add_command(label="Build Texture", command=build_texture)
-    texture_menu.add_command(label="Build All Textures", command=build_all_texture)
-    texture_menu.add_command(label="See Texture", command=open_vtf)
+        sdk.texture_menu.add_command(label="Build Texture", command=build_texture)
+        sdk.texture_menu.add_command(label="Build All Textures", command=build_all_texture)
+        sdk.texture_menu.add_command(label="See Texture", command=open_vtf)
 
-    model_menu.add_command(label="Build Model", command=build_model)
-    model_menu.add_command(label="Build All Models", command=build_all_model)
+        sdk.model_menu.add_command(label="Build Model", command=build_model)
+        sdk.model_menu.add_command(label="Build All Models", command=build_all_model)
 
-    other_menu.add_command(label="Create VPK", command=create_VPK)
-    other_menu.add_command(label="Display VPK", command=display_VPK)
-    other_menu.add_command(label="Extract VPK", command=extract_VPK)
-    other_menu.add_command(label="Build Caption", command=build_caption)
-    other_menu.add_command(label="Build All Captions", command=build_all_caption)
+        sdk.other_menu.add_command(label="Create VPK", command=create_VPK)
+        sdk.other_menu.add_command(label="Display VPK", command=display_VPK)
+        sdk.other_menu.add_command(label="Extract VPK", command=extract_VPK)
+        sdk.other_menu.add_command(label="Build Caption", command=build_caption)
+        sdk.other_menu.add_command(label="Build All Captions", command=build_all_caption)
 
-    if os.path.exists(sdk.selected_folder + "/src/creategameprojects.bat"):
-        other_menu.add_command(label="Generate games", command=generate_games)
+        #if os.path.exists(sdk.selected_folder + "/src/creategameprojects.bat"):
+        sdk.other_menu.add_command(label="Generate games", command=generate_games)
 
-    if os.path.exists(sdk.selected_folder + "/src/createallprojects.bat"):
-        other_menu.add_command(label="Generate everything", command=generate_everything)
+        #if os.path.exists(sdk.selected_folder + "/src/createallprojects.bat"):
+        sdk.other_menu.add_command(label="Generate everything", command=generate_everything)
 
-    other_menu.add_command(label="Dowbload source code", command=downbload_source_code)
+        sdk.other_menu.add_command(label="Download source code", command=downbload_source_code)
 
-    sdk.first_init = True
+    sdk.first_init = 1
+
+def reload_button():
+    print("reload")   
+
+    if os.path.isfile(sdk.bin_folder + "/hammer.exe"):
+        sdk.btn_hammer.destroy()
+    if os.path.isfile(sdk.bin_folder + "/hammerplusplus.exe"):
+        sdk.btn_hammer_plus_plus.destroy()
+    if os.path.isfile(sdk.bin_folder + "/qc_eyes.exe"):
+        sdk.btn_qc_eyes.destroy()
+    if os.path.exists(sdk.selected_folder + "/src/everything.sln"):
+        sdk.btn_everything.destroy()
+    if os.path.exists(sdk.selected_folder + "/src/games.sln"):
+        sdk.btn_games.destroy()
+    if os.path.isfile(sdk.bin_folder + "/hlmv.exe"):
+        sdk.btn_hlmv.destroy()
+    if os.path.isfile(sdk.bin_folder + "/hlfaceposer.exe"):
+        sdk.btn_hlfaceposer.destroy()
+
+    sdk.btn_Launch.destroy()
+    sdk.btn_particle.destroy()
+    sdk.btn_Launch_dev.destroy()
+    
 
 def new_project():
     
@@ -589,12 +632,12 @@ sdk = SourceSDK()
 root = tk.Tk()
 root.title("Source SDK")
 
-menu_bar = tk.Menu(root)
-root.config(menu=menu_bar)
+sdk.menu_bar = tk.Menu(root)
+root.config(menu=sdk.menu_bar)
 
 # Create a "File" menu
-file_menu = tk.Menu(menu_bar, tearoff=0)
-menu_bar.add_cascade(label="File", menu=file_menu)
+file_menu = tk.Menu(sdk.menu_bar, tearoff=0)
+sdk.menu_bar.add_cascade(label="File", menu=file_menu)
 
 # Add "Open" option to the "File" menu
 file_menu.add_command(label="New", command=new_project, accelerator="Ctrl+N")
@@ -603,8 +646,8 @@ file_menu.add_command(label="Open", command=Init, accelerator="Ctrl+O")
 #file_menu.add_cascade(label="Previous Projects", menu=previous_projects_menu)
 file_menu.add_command(label="Exit", command=launch_exit)
 
-help_menu = tk.Menu(menu_bar, tearoff=0)
-menu_bar.add_cascade(label="Help", menu=help_menu)
+help_menu = tk.Menu(sdk.menu_bar, tearoff=0)
+sdk.menu_bar.add_cascade(label="Help", menu=help_menu)
 help_menu.add_command(label="About", command=open_about_window, )
 
 # Create a Text widget to display terminal output
