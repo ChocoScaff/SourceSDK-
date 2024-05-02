@@ -3,6 +3,7 @@ import string
 import tkinter as tk
 #from turtle import st
 #from numpy import source
+import srctools
 import os
 import subprocess
 from tkinter import filedialog
@@ -273,20 +274,25 @@ def button_init():
     if sdk.first_init == True:
         return
     
-    btn_hammer = tk.Button(root, text="hammer", command=open_hammer,image=iconHammer,compound=tk.LEFT)
-    btn_hammer.pack(side="left")
+    if os.path.isfile(sdk.bin_folder + "/hammer.exe"):
+        btn_hammer = tk.Button(root, text="hammer", command=open_hammer,image=iconHammer,compound=tk.LEFT)
+        btn_hammer.pack(side="left")
     
-    btn_open_hammer_plus_plus = tk.Button(root, text="hammer++", command=open_hammer_plus_plus, image=iconHpp, compound=tk.LEFT)    
-    btn_open_hammer_plus_plus.pack(side="left")
+    if os.path.isfile(sdk.bin_folder + "/hammerplusplus.exe"):
+        btn_open_hammer_plus_plus = tk.Button(root, text="hammer++", command=open_hammer_plus_plus, image=iconHpp, compound=tk.LEFT)    
+        btn_open_hammer_plus_plus.pack(side="left")
 
-    btn_hlmv = tk.Button(root, text="hlmv", command=open_hlmv, image=iconHLMV, compound=tk.LEFT)
-    btn_hlmv.pack(side="left")
+    if os.path.isfile(sdk.bin_folder + "/hlmv.exe"):
+        btn_hlmv = tk.Button(root, text="hlmv", command=open_hlmv, image=iconHLMV, compound=tk.LEFT)
+        btn_hlmv.pack(side="left")
 
-    btn_hlmv = tk.Button(root, text="qc_eyes", command=open_qc_eyes, image=iconQc_eyes, compound=tk.LEFT)
-    btn_hlmv.pack(side="left")
+    if os.path.isfile(sdk.bin_folder + "/qc_eyes.exe"):
+        btn_hlmv = tk.Button(root, text="qc_eyes", command=open_qc_eyes, image=iconQc_eyes, compound=tk.LEFT)
+        btn_hlmv.pack(side="left")
 
-    btn_hlfaceposer = tk.Button(root, text="hlfaceposer", command=open_hlfaceposer, image=iconHlposer, compound=tk.LEFT)
-    btn_hlfaceposer.pack(side="left")
+    if os.path.isfile(sdk.bin_folder + "/hlfaceposer.exe"):
+        btn_hlfaceposer = tk.Button(root, text="hlfaceposer", command=open_hlfaceposer, image=iconHlposer, compound=tk.LEFT)
+        btn_hlfaceposer.pack(side="left")
 
     btn_particle = tk.Button(root, text="Particle", command=particle, image=iconSource, compound=tk.LEFT)
     btn_particle.pack(side="left")
@@ -322,6 +328,7 @@ def button_init():
     other_menu.add_command(label="Extract VPK", command=extract_VPK)
     other_menu.add_command(label="Build Caption", command=build_caption)
     other_menu.add_command(label="Build All Captions", command=build_all_caption)
+
 
 
     sdk.first_init = True
@@ -449,6 +456,14 @@ def display_VPK():
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
     print(result)
 
+def open_about_window():
+    # Create a new window for about information
+    about_window = tk.Toplevel(root)
+    about_window.title("About")
+
+    # Add text to the window
+    about_text = tk.Label(about_window, text="Software create by ChocoScaff.\nYou can find source code.\nhttps://github.com/ChocoScaff/SourceSDK-")
+    about_text.pack()
 
 sdk = SourceSDK() 
 
@@ -470,6 +485,9 @@ file_menu.add_command(label="Open", command=Init, accelerator="Ctrl+O")
 #file_menu.add_cascade(label="Previous Projects", menu=previous_projects_menu)
 file_menu.add_command(label="Exit", command=launch_exit)
 
+help_menu = tk.Menu(menu_bar, tearoff=0)
+menu_bar.add_cascade(label="Help", menu=help_menu)
+help_menu.add_command(label="About", command=open_about_window, )
 
 # Create a Text widget to display terminal output
 terminal = Terminal(root, wrap=tk.WORD, height=20, width=80)
