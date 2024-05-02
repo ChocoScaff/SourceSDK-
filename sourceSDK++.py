@@ -377,7 +377,7 @@ def button_init():
     sdk.btn_Launch = tk.Button(root, text="Launch", command=Launch, image=iconSource, compound=tk.LEFT)
     sdk.btn_Launch.pack(side="left")
 
-    if sdk.first_init == 1:
+    if sdk.first_init == 0:
         sdk.texture_menu = tk.Menu(sdk.menu_bar, tearoff=0)
         sdk.menu_bar.add_cascade(label="Texture", menu=sdk.texture_menu)
         sdk.map_menu = tk.Menu(sdk.menu_bar, tearoff=0)
