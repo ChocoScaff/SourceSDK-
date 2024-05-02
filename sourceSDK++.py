@@ -13,6 +13,7 @@ import shutil
 #from PIL import Image
 import git
 import threading
+import queue
 
 class SourceSDK():
     selected_folder : string
@@ -556,11 +557,26 @@ def downbload_source_code():
 
 
     shutil.rmtree(sdk.selected_folder + "/src/mp/")
-    shutil.move(sdk.selected_folder + "/src/sp/src/", sdk.selected_folder)
+    move_files(sdk.selected_folder + "/src/sp/src/", sdk.selected_folder + "/src/")
     shutil.rmtree(sdk.selected_folder + "/src/sp/")
+    shutil.rmtree(sdk.selected_folder + "/src/.git/")
 
 def download_github_code(repo_url, destination_folder):
     git.Repo.clone_from(repo_url, destination_folder)
+
+def move_files(source_folder, destination_folder):
+    # Create the destination folder if it doesn't exist
+    if not os.path.exists(destination_folder):
+        os.makedirs(destination_folder)
+
+    # Get a list of all files in the source folder
+    files = os.listdir(source_folder)
+
+    # Move each file to the destination folder
+    for file in files:
+        source_file = os.path.join(source_folder, file)
+        destination_file = os.path.join(destination_folder, file)
+        shutil.move(source_file, destination_file)
 
 
 sdk = SourceSDK() 
