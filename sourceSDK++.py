@@ -11,6 +11,8 @@ import sys
 from vtf2img import Parser
 import shutil
 #from PIL import Image
+import git
+import threading
 
 class SourceSDK():
     selected_folder : string
@@ -93,8 +95,53 @@ def find_gameinfo_folder():
         return -1
 
 def build_all_map():  
-    path = os.path.join(os.getcwd(), "scripts/compile_map.bat")
-    subprocess.call([path, sdk.selected_folder,sdk.game_name], shell=True)
+    print("wait...")
+    mapsrc_directory = os.path.join(sdk.selected_folder, "mapsrc")
+    map_directory = os.path.join(sdk.selected_folder, "maps")
+    vbsp = (sdk.bin_folder + "/vbsp.exe")
+    vvis = (sdk.bin_folder + "/vvis.exe")
+    vrad = (sdk.bin_folder + "/vrad.exe")
+
+    try:
+        os.makedirs(map_directory, exist_ok=True)
+    except OSError as e:
+        print(f"Error creating folder: {e}")
+
+    for root, dirs, files in os.walk(sdk.selected_folder + "/mapsrc"):
+        for file in files:
+            if file.endswith(".vmf"):
+                    vmf_file_path = os.path.join(root, file)
+                    command = ('"' + vbsp + '"' + " -game " + '"' + sdk.selected_folder + '"' + " " + '"' + vmf_file_path + '"')
+                    print(command)
+                    #Execute the command in cmd
+                    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+                    print(result)
+
+                    fileBSP = vmf_file_path
+                    #file_directory = os.path.dirname(fileBSP)
+                    fileBSP = os.path.splitext(os.path.basename(fileBSP))[0]
+
+                    # Create the new .bsp file path
+                    fileBSP = fileBSP + ".bsp"
+
+                    command = ('"' + vvis + '"' + " -game " + '"' + sdk.selected_folder + '"' + " " + '"' + mapsrc_directory + "/" + fileBSP + '"')
+                    print(command)
+                    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+                    print(result)
+
+                    command = ('"' + vrad + '"' + " -game " + '"' + sdk.selected_folder + '"' + " " + '"' + mapsrc_directory + "/" + fileBSP + '"')
+                    print(command)
+                    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+                    print(result)
+
+                    # Move bsp file to maps directory
+                    directoryBSP = mapsrc_directory + "/" + fileBSP
+                    try:
+                        os.remove(map_directory + "/" + fileBSP)
+                    except os.error:
+                        print("cant remove :" + map_directory + "/" + fileBSP)
+                    
+                    shutil.move(directoryBSP, map_directory)
 
 def build_map():  
 
@@ -294,6 +341,14 @@ def button_init():
         btn_hlfaceposer = tk.Button(root, text="hlfaceposer", command=open_hlfaceposer, image=iconHlposer, compound=tk.LEFT)
         btn_hlfaceposer.pack(side="left")
 
+    if os.path.exists(sdk.selected_folder + "/src/games.sln"):
+        btn_games = tk.Button(root, text="games", command=open_games, image=iconVisualStudio, compound=tk.LEFT)
+        btn_games.pack(side="left")
+
+    if os.path.exists(sdk.selected_folder + "/src/everything.sln"):
+        btn_everything = tk.Button(root, text="everything", command=open_everything, image=iconVisualStudio, compound=tk.LEFT)
+        btn_everything.pack(side="left")
+
     btn_particle = tk.Button(root, text="Particle", command=particle, image=iconSource, compound=tk.LEFT)
     btn_particle.pack(side="left")
 
@@ -329,7 +384,13 @@ def button_init():
     other_menu.add_command(label="Build Caption", command=build_caption)
     other_menu.add_command(label="Build All Captions", command=build_all_caption)
 
+    if os.path.exists(sdk.selected_folder + "/src/creategameprojects.bat"):
+        other_menu.add_command(label="Generate games", command=generate_games)
 
+    if os.path.exists(sdk.selected_folder + "/src/createallprojects.bat"):
+        other_menu.add_command(label="Generate everything", command=generate_everything)
+
+    other_menu.add_command(label="Dowbload source code", command=downbload_source_code)
 
     sdk.first_init = True
 
@@ -361,6 +422,7 @@ def new_project():
             os.mkdir(directory + "/media")
             os.mkdir(directory + "/expressions")
             os.mkdir(directory + "/scenes")
+            os.mkdir(directory + "/src")
 
             gameinfo_content = """
             "GameInfo"
@@ -465,6 +527,42 @@ def open_about_window():
     about_text = tk.Label(about_window, text="Software create by ChocoScaff.\nYou can find source code.\nhttps://github.com/ChocoScaff/SourceSDK-")
     about_text.pack()
 
+def open_sln_file(sln_file_path):
+    
+    # Check if the .sln file exists
+    if os.path.exists(sln_file_path):
+        # Open the .sln file with the default application
+        os.startfile(sln_file_path)
+    else:
+        print("Error: .sln file not found!")
+
+def open_games():
+    open_sln_file(sdk.selected_folder + "/src/games.sln")
+
+def open_everything():
+    open_sln_file(sdk.selected_folder + "/src/everything.sln")
+
+def generate_games():
+    path = sdk.selected_folder + "/src/creategameprojects.bat"
+    subprocess.call(path, shell=True)
+
+def generate_everything():
+    path = sdk.selected_folder + "/src/createallprojects.bat"
+    subprocess.call(path, shell=True)
+
+def downbload_source_code():
+
+    download_github_code("https://github.com/ValveSoftware/source-sdk-2013", sdk.selected_folder + "/src/")
+
+
+    shutil.rmtree(sdk.selected_folder + "/src/mp/")
+    shutil.move(sdk.selected_folder + "/src/sp/src/", sdk.selected_folder)
+    shutil.rmtree(sdk.selected_folder + "/src/sp/")
+
+def download_github_code(repo_url, destination_folder):
+    git.Repo.clone_from(repo_url, destination_folder ,progress=print_progress)
+
+
 sdk = SourceSDK() 
 
 # Create the main window
@@ -510,6 +608,7 @@ iconSource = tk.PhotoImage(file=os.getcwd() + "/icons/source.png")
 iconHLMV = tk.PhotoImage(file=os.getcwd() + "/icons/hlmv.png")
 iconQc_eyes = tk.PhotoImage(file=os.getcwd() + "/icons/qc_eyes.png")
 iconHlposer = tk.PhotoImage(file=os.getcwd() + "/icons/hlposer.png")
+iconVisualStudio = tk.PhotoImage(file=os.getcwd() + "/icons/Visual_Studio.png")
 
 # Start the GUI event loop
 root.mainloop()
