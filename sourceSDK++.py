@@ -12,8 +12,7 @@ from vtf2img import Parser
 import shutil
 #from PIL import Image
 import git
-
-
+import ctypes as ct
 
 class SourceSDK():
     selected_folder : string
@@ -378,13 +377,13 @@ def button_init():
     sdk.btn_Launch.pack(side="left")
 
     if sdk.first_init == 0:
-        sdk.texture_menu = tk.Menu(sdk.menu_bar, tearoff=0)
+        sdk.texture_menu = tk.Menu(sdk.menu_bar, tearoff=0,background="#4c5844",fg="white")
         sdk.menu_bar.add_cascade(label="Texture", menu=sdk.texture_menu)
-        sdk.map_menu = tk.Menu(sdk.menu_bar, tearoff=0)
+        sdk.map_menu = tk.Menu(sdk.menu_bar, tearoff=0,background="#4c5844",fg="white")
         sdk.menu_bar.add_cascade(label="Map", menu=sdk.map_menu)
-        sdk.model_menu = tk.Menu(sdk.menu_bar, tearoff=0)
+        sdk.model_menu = tk.Menu(sdk.menu_bar, tearoff=0,background="#4c5844",fg="white")
         sdk.menu_bar.add_cascade(label="Model", menu=sdk.model_menu)
-        sdk.other_menu = tk.Menu(sdk.menu_bar, tearoff=0)
+        sdk.other_menu = tk.Menu(sdk.menu_bar, tearoff=0,background="#4c5844",fg="white")
         sdk.menu_bar.add_cascade(label="Other", menu=sdk.other_menu)
 
         sdk.map_menu.add_command(label="Build Map", command=build_map)
@@ -634,6 +633,10 @@ sdk = SourceSDK()
 root = tk.Tk()
 root.title("Source SDK")
 
+root.tk_setPalette(background="#4c5844", foreground="white")
+
+root.configure(background="#3e4637")
+
 sdk.menu_bar = tk.Menu(root)
 root.config(menu=sdk.menu_bar,background="#3e4637")
 
@@ -648,7 +651,7 @@ file_menu.add_command(label="Open", command=Init, accelerator="Ctrl+O")
 #file_menu.add_cascade(label="Previous Projects", menu=previous_projects_menu)
 file_menu.add_command(label="Exit", command=launch_exit)
 
-help_menu = tk.Menu(sdk.menu_bar, tearoff=0)
+help_menu = tk.Menu(sdk.menu_bar, tearoff=0,background="#4c5844",fg="white")
 sdk.menu_bar.add_cascade(label="Help", menu=help_menu)
 help_menu.add_command(label="About", command=open_about_window)
 
