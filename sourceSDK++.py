@@ -341,40 +341,40 @@ def Init(folder=False):
 def button_init():
 
     if os.path.isfile(sdk.bin_folder + "/hammer.exe"):
-        sdk.btn_hammer = tk.Button(root, text="hammer", command=open_hammer,image=iconHammer,compound=tk.LEFT)
+        sdk.btn_hammer = tk.Button(root, text="hammer", command=open_hammer,image=iconHammer,compound=tk.LEFT, background="#4c5844",fg="white")
         sdk.btn_hammer.pack(side="left")
     
     if os.path.isfile(sdk.bin_folder + "/hammerplusplus.exe"):
-        sdk.btn_hammer_plus_plus = tk.Button(root, text="hammer++", command=open_hammer_plus_plus, image=iconHpp, compound=tk.LEFT)    
+        sdk.btn_hammer_plus_plus = tk.Button(root, text="hammer++", command=open_hammer_plus_plus, image=iconHpp, compound=tk.LEFT, background="#4c5844",fg="white")    
         sdk.btn_hammer_plus_plus.pack(side="left")
 
     if os.path.isfile(sdk.bin_folder + "/hlmv.exe"):
-        sdk.btn_hlmv = tk.Button(root, text="hlmv", command=open_hlmv, image=iconHLMV, compound=tk.LEFT)
+        sdk.btn_hlmv = tk.Button(root, text="hlmv", command=open_hlmv, image=iconHLMV, compound=tk.LEFT, background="#4c5844",fg="white")
         sdk.btn_hlmv.pack(side="left")
 
     if os.path.isfile(sdk.bin_folder + "/qc_eyes.exe"):
-        sdk.btn_qc_eyes= tk.Button(root, text="qc_eyes", command=open_qc_eyes, image=iconQc_eyes, compound=tk.LEFT)
+        sdk.btn_qc_eyes= tk.Button(root, text="qc_eyes", command=open_qc_eyes, image=iconQc_eyes, compound=tk.LEFT, background="#4c5844",fg="white")
         sdk.btn_qc_eyes.pack(side="left")
 
     if os.path.isfile(sdk.bin_folder + "/hlfaceposer.exe"):
-        sdk.btn_hlfaceposer = tk.Button(root, text="hlfaceposer", command=open_hlfaceposer, image=iconHlposer, compound=tk.LEFT)
+        sdk.btn_hlfaceposer = tk.Button(root, text="hlfaceposer", command=open_hlfaceposer, image=iconHlposer, compound=tk.LEFT, background="#4c5844",fg="white")
         sdk.btn_hlfaceposer.pack(side="left")
 
     if os.path.exists(sdk.selected_folder + "/src/games.sln"):
-        sdk.btn_games = tk.Button(root, text="games", command=open_games, image=iconVisualStudio, compound=tk.LEFT)
+        sdk.btn_games = tk.Button(root, text="games", command=open_games, image=iconVisualStudio, compound=tk.LEFT, background="#4c5844",fg="white")
         sdk.btn_games.pack(side="left")
 
     if os.path.exists(sdk.selected_folder + "/src/everything.sln"):
-        sdk.btn_everything = tk.Button(root, text="everything", command=open_everything, image=iconVisualStudio, compound=tk.LEFT)
+        sdk.btn_everything = tk.Button(root, text="everything", command=open_everything, image=iconVisualStudio, compound=tk.LEFT, background="#4c5844",fg="white")
         sdk.btn_everything.pack(side="left")
 
-    sdk.btn_particle = tk.Button(root, text="Particle", command=particle, image=iconSource, compound=tk.LEFT)
+    sdk.btn_particle = tk.Button(root, text="Particle", command=particle, image=iconSource, compound=tk.LEFT, background="#4c5844",fg="white")
     sdk.btn_particle.pack(side="left")
 
-    sdk.btn_Launch_dev = tk.Button(root, text="Launch Dev", command=Launch_dev, image=iconSource, compound=tk.LEFT)
+    sdk.btn_Launch_dev = tk.Button(root, text="Launch Dev", command=Launch_dev, image=iconSource, compound=tk.LEFT, background="#4c5844",fg="white")
     sdk.btn_Launch_dev.pack(side="left")
 
-    sdk.btn_Launch = tk.Button(root, text="Launch", command=Launch, image=iconSource, compound=tk.LEFT)
+    sdk.btn_Launch = tk.Button(root, text="Launch", command=Launch, image=iconSource, compound=tk.LEFT, background="#4c5844",fg="white")
     sdk.btn_Launch.pack(side="left")
 
     if sdk.first_init == 0:
@@ -601,11 +601,14 @@ def downbload_source_code():
 
     download_github_code("https://github.com/ValveSoftware/source-sdk-2013", sdk.selected_folder + "/src/")
 
-
     shutil.rmtree(sdk.selected_folder + "/src/mp/")
     move_files(sdk.selected_folder + "/src/sp/src/", sdk.selected_folder + "/src/")
     shutil.rmtree(sdk.selected_folder + "/src/sp/")
-    shutil.rmtree(sdk.selected_folder + "/src/.git/")
+
+    generate_games()
+    generate_everything()
+
+    Init()
 
 def download_github_code(repo_url, destination_folder):
     git.Repo.clone_from(repo_url, destination_folder)
@@ -632,10 +635,10 @@ root = tk.Tk()
 root.title("Source SDK")
 
 sdk.menu_bar = tk.Menu(root)
-root.config(menu=sdk.menu_bar)
+root.config(menu=sdk.menu_bar,background="#3e4637")
 
 # Create a "File" menu
-file_menu = tk.Menu(sdk.menu_bar, tearoff=0)
+file_menu = tk.Menu(sdk.menu_bar, tearoff=0,background="#4c5844",fg="white")
 sdk.menu_bar.add_cascade(label="File", menu=file_menu)
 
 # Add "Open" option to the "File" menu
@@ -647,7 +650,7 @@ file_menu.add_command(label="Exit", command=launch_exit)
 
 help_menu = tk.Menu(sdk.menu_bar, tearoff=0)
 sdk.menu_bar.add_cascade(label="Help", menu=help_menu)
-help_menu.add_command(label="About", command=open_about_window, )
+help_menu.add_command(label="About", command=open_about_window)
 
 # Create a Text widget to display terminal output
 terminal = Terminal(root, wrap=tk.WORD, height=20, width=80)
@@ -657,7 +660,7 @@ terminal.pack()
 sys.stdout = terminal
 sys.stderr = terminal
 
-lbl_result = tk.Label(root, text="Tools", wraplength=400)
+lbl_result = tk.Label(root, text="Tools", wraplength=400, background="#3e4637",fg='white')
 lbl_result.pack()
 
 # Bind keyboard shortcuts to the root window
