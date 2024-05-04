@@ -13,6 +13,9 @@ import shutil
 #from PIL import Image
 import git
 import ctypes as ct
+import requests
+import webbrowser
+from tkinter import messagebox
 
 class SourceSDK():
     selected_folder : string
@@ -626,6 +629,42 @@ def move_files(source_folder, destination_folder):
         destination_file = os.path.join(destination_folder, file)
         shutil.move(source_file, destination_file)
 
+
+def get_latest_release_version(repo_owner, repo_name):
+    url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases/latest"
+    response = requests.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        return data['tag_name']
+    else:
+        return None
+
+def check_software_version(local_version, github_version):
+    if local_version == github_version:
+        print("You have the latest version installed.")
+    else:
+        print(f"There is a newer version ({github_version}) available on GitHub.")
+
+# Replace these with your GitHub repository owner and name
+repo_owner = "ChocoScaff"
+repo_name = "SourceSDK-"
+
+# Replace this with the version of your local software
+local_version = "0.0.1"
+
+github_version = get_latest_release_version(repo_owner, repo_name)
+
+if github_version:
+    check_software_version(local_version, github_version)
+else:
+    print("Failed to fetch the latest version from GitHub.")
+    download = messagebox.askyesno("New Version Available", f"There is a newer version ({github_version}) available on GitHub. Do you want to download it?")
+    if download:
+        webbrowser.open(f"https://github.com/{repo_owner}/{repo_name}/releases/latest")
+    else:
+        messagebox.showinfo("Version Check", "You chose not to download the new version.")
+
+# Replace these with your GitHub repository owner and name
 
 sdk = SourceSDK() 
 
