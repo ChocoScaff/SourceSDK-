@@ -13,7 +13,8 @@ import shutil
 #from PIL import Image
 import git
 import ctypes as ct
-import requests
+import urllib.request
+import json
 import webbrowser
 from tkinter import messagebox
 
@@ -632,12 +633,13 @@ def move_files(source_folder, destination_folder):
 
 def get_latest_release_version(repo_owner, repo_name):
     url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases/latest"
-    response = requests.get(url)
-    if response.status_code == 200:
-        data = response.json()
-        return data['tag_name']
-    else:
-        return None
+    try:
+        with urllib.request.urlopen(url) as response:
+            data = json.loads(response.read())
+            latest_version = data['tag_name']
+            return latest_version
+    except Exception as e:
+        return f"Error: {e}"
 
 def check_software_version(local_version, github_version):
     if local_version == github_version:
