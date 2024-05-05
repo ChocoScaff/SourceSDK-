@@ -43,7 +43,6 @@ class SourceSDK():
     def __init__(self):
         self.first_init = 0
 
-
 class Terminal(tk.Text):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
@@ -400,6 +399,7 @@ def button_init():
 
         sdk.model_menu.add_command(label="Build Model", command=build_model)
         sdk.model_menu.add_command(label="Build All Models", command=build_all_model)
+        sdk.model_menu.add_command(label="Generate QC File", command=generate_qc_file)
 
         sdk.other_menu.add_command(label="Create VPK", command=create_VPK)
         sdk.other_menu.add_command(label="Display VPK", command=display_VPK)
@@ -438,7 +438,6 @@ def reload_button():
     sdk.btn_Launch.destroy()
     sdk.btn_particle.destroy()
     sdk.btn_Launch_dev.destroy()
-    
 
 def new_project():
     
@@ -471,27 +470,27 @@ def new_project():
             os.mkdir(directory + "/src")
 
             gameinfo_content = """
-            "GameInfo"
-            {
-            game 		"replace"
-            title 		"replace"
-            type		singleplayer_only
-            icon		"resource/game"
+"GameInfo"
+{
+    game 		"replace"
+    title 		"replace"
+    type		singleplayer_only
+    icon		"resource/game"
 
-            FileSystem
-            {
-                SteamAppId		243730		// Source SDK Base 2013
-                
-                SearchPaths
-                {
-                    mod+mod_write+default_write_path		|gameinfo_path|.
-                    game+game_write		replace
-                    gamebin				replace/bin
-                    Game				|gameinfo_path|.
-                    Game				|all_source_engine_paths|replace
-                }
-            }
-            }
+    FileSystem
+    {
+        SteamAppId		243730		// Source SDK Base 2013
+        
+        SearchPaths
+        {
+            mod+mod_write+default_write_path		|gameinfo_path|.
+            game+game_write		replace
+            gamebin				replace/bin
+            Game				|gameinfo_path|.
+            Game				|all_source_engine_paths|replace
+        }
+    }
+}
             """
 
             # Write the content to the file
@@ -650,6 +649,64 @@ def check_software_version(local_version, github_version):
 def SDK_Doc():
     webbrowser.open("https://developer.valvesoftware.com/wiki/SDK_Docs")
 
+def generate_qc_file():
+
+    filenameModel = filedialog.askopenfile(title="Select .smd or .dmx file", filetypes=[("model file", "*.smd *.dmx")], initialdir=sdk.selected_folder + "/modelsrc")
+    print(filenameModel)
+    print(filenameModel.name)
+    TexureDirectory = filedialog.askdirectory(title="Select Texure Directory",initialdir=sdk.selected_folder + "/materials/models")
+    print(TexureDirectory)
+
+    popup = tk.Toplevel(root)
+    popup.title("Material Selector")
+
+    materials = ["Concrete", "Wood", "Dirt", "Grass", "Water", "Ice", "Metal", "Sand", "Rock"]
+
+    selected_materialTK = tk.StringVar()
+
+    def select_material(material):
+        selected_materialTK.set(material)
+        popup.destroy() 
+
+    for material in materials:
+        button = tk.Button(popup, text=material, command=lambda m=material: select_material(m))
+        button.pack()
+
+    popup.wait_window()
+
+    selected_material = selected_materialTK.get()
+
+    qc_file="""
+$modelname "modelNameToReplace"
+$cdmaterials "textureDirectoryToReplace"
+$collisionmodel	"modelNameToReplace"
+$sequence idle	"modelNameToReplace"
+$body bodystrToReplace "modelNameToReplace"
+$surfaceprop sufaceReplace
+$scale 1
+    """
+
+    modelstr = filenameModel.name[filenameModel.name.find("/modelsrc/") + 10:]
+    texturestr = TexureDirectory[TexureDirectory.find("/materials/") + 11:]
+    bodystr = modelstr[:-4]
+
+    qc_file = qc_file.replace("modelNameToReplace",modelstr)
+    qc_file = qc_file.replace("textureDirectoryToReplace",texturestr)
+    qc_file = qc_file.replace("bodystrToReplace",bodystr)
+    qc_file = qc_file.replace("sufaceReplace",selected_material)
+
+    print(qc_file)
+
+    fileQC = sdk.selected_folder + "/modelsrc/" + bodystr + ".qc"
+    print(fileQC)
+
+    try:
+        with open(fileQC, 'w') as file:
+            file.write(qc_file)
+        print(f"String saved to '{filenameModel}' successfully.")
+    except Exception as e:
+        print(f"Error: {e}")
+
 # Replace these with your GitHub repository owner and name
 repo_owner = "ChocoScaff"
 repo_name = "SourceSDK-"
@@ -669,9 +726,7 @@ else:
     else:
         messagebox.showinfo("Version Check", "You chose not to download the new version.")
 
-# Replace these with your GitHub repository owner and name
-
-sdk = SourceSDK() 
+sdk = SourceSDK()
 
 # Create the main window
 root = tk.Tk()
@@ -697,10 +752,8 @@ file_menu.add_command(label="Exit", command=launch_exit)
 
 help_menu = tk.Menu(sdk.menu_bar, tearoff=0,background="#4c5844",fg="white")
 sdk.menu_bar.add_cascade(label="Help", menu=help_menu)
-help_menu.add_command(label="About", command=open_about_window)
 help_menu.add_command(label="SDK Doc", command=SDK_Doc)
-
-
+help_menu.add_command(label="About", command=open_about_window)
 
 # Create a Text widget to display terminal output
 terminal = Terminal(root, wrap=tk.WORD, height=20, width=80)
