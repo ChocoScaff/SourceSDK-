@@ -647,12 +647,15 @@ def check_software_version(local_version, github_version):
     else:
         print(f"There is a newer version ({github_version}) available on GitHub.")
 
+def SDK_Doc():
+    webbrowser.open("https://developer.valvesoftware.com/wiki/SDK_Docs")
+
 # Replace these with your GitHub repository owner and name
 repo_owner = "ChocoScaff"
 repo_name = "SourceSDK-"
 
 # Replace this with the version of your local software
-local_version = "0.0.1"
+local_version = "0.0.2"
 
 github_version = get_latest_release_version(repo_owner, repo_name)
 
@@ -695,6 +698,9 @@ file_menu.add_command(label="Exit", command=launch_exit)
 help_menu = tk.Menu(sdk.menu_bar, tearoff=0,background="#4c5844",fg="white")
 sdk.menu_bar.add_cascade(label="Help", menu=help_menu)
 help_menu.add_command(label="About", command=open_about_window)
+help_menu.add_command(label="SDK Doc", command=SDK_Doc)
+
+
 
 # Create a Text widget to display terminal output
 terminal = Terminal(root, wrap=tk.WORD, height=20, width=80)
