@@ -1,5 +1,7 @@
+from asyncio.windows_events import NULL
 import string
 import tkinter as tk
+from turtle import st
 import srctools
 import os
 import subprocess
@@ -393,6 +395,7 @@ def button_init():
         sdk.texture_menu.add_command(label="Build All Textures", command=build_all_texture)
         sdk.texture_menu.add_command(label="See Texture", command=open_vtf)
         sdk.texture_menu.add_command(label="Texture To TGA", command=texture_to_tga)
+        sdk.texture_menu.add_command(label="Generate vmt", command=generate_vmt)
 
         sdk.model_menu.add_command(label="Build Model", command=build_model)
         sdk.model_menu.add_command(label="Build All Models", command=build_all_model)
@@ -712,6 +715,75 @@ def texture_to_tga():
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
     print(result)
 
+def generate_vmt():
+
+    filenameVMTs = filedialog.askopenfilenames(title="Select .vtf file", filetypes=[("texture file", "*.vtf")], initialdir=sdk.selected_folder + "/materials")
+
+    diffuse_texture = NULL
+    normal_texture = NULL
+    if len(filenameVMTs) == 1:
+        print(filenameVMTs)
+        vtfName = str(filenameVMTs)
+        print(vtfName)
+        diffuse_texture = vtfName[:-3]
+    else:
+        for vmt in filenameVMTs:
+            print(vmt)
+            if "diffuse" in vmt.lower():
+                diffuse_texture = vmt
+            elif "normal" in vmt.lower():
+                normal_texture = vmt
+
+    popup = tk.Toplevel(root)
+    popup.title("shader Selector")
+
+    shaders = ["LightmappedGeneric", "VertexLitGeneric", "WorldVertexTransition", "UnlitGeneric", "Sky"]
+
+    selected_shaderTK = tk.StringVar()
+
+    def select_shader(shader):
+        selected_shaderTK.set(shader)
+        popup.destroy() 
+
+    for shader in shaders:
+        button = tk.Button(popup, text=shader, command=lambda m=shader: select_shader(m))
+        button.pack()
+
+    popup.wait_window()
+
+    selected_shader = selected_shaderTK.get()
+
+    vmt="""
+"shader"
+{
+	"$basetexture" "texture_diffuse"
+    "$normalmap" "texture_normal"
+}
+"""
+    vmt = vmt.replace("shader",selected_shader)
+
+    diffuse_texture = diffuse_texture[diffuse_texture.find("/materials/") + 11:]
+    vmt = vmt.replace("texture_diffuse",diffuse_texture)
+    if normal_texture != NULL:
+        normal_texture = normal_texture[normal_texture.find("/materials/") + 11:]
+        vmt = vmt.replace("texture_normal",normal_texture)
+    else:
+        vmt = vmt.replace('"$normalmap" "texture_normal"',"")
+
+    print(vmt)
+
+    fileVMT = sdk.selected_folder + "/materials/" + diffuse_texture[:-4] + ".vmt"
+    fileVMT = str(fileVMT)
+    fileVMT = fileVMT.replace("_diffuse", "")
+    
+    print(fileVMT)
+
+    try:
+        with open(fileVMT, 'w') as file:
+            file.write(vmt)
+        print(f"String saved to '{fileVMT}' successfully.")
+    except Exception as e:
+        print(f"Error: {e}")
 
 # Replace these with your GitHub repository owner and name
 repo_owner = "ChocoScaff"
