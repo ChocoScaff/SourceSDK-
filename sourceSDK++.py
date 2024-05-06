@@ -1,8 +1,5 @@
-#import re
 import string
 import tkinter as tk
-#from turtle import st
-#from numpy import source
 import srctools
 import os
 import subprocess
@@ -10,7 +7,6 @@ from tkinter import filedialog
 import sys
 from vtf2img import Parser
 import shutil
-#from PIL import Image
 import git
 import ctypes as ct
 import urllib.request
@@ -396,6 +392,7 @@ def button_init():
         sdk.texture_menu.add_command(label="Build Texture", command=build_texture)
         sdk.texture_menu.add_command(label="Build All Textures", command=build_all_texture)
         sdk.texture_menu.add_command(label="See Texture", command=open_vtf)
+        sdk.texture_menu.add_command(label="Texture To TGA", command=texture_to_tga)
 
         sdk.model_menu.add_command(label="Build Model", command=build_model)
         sdk.model_menu.add_command(label="Build All Models", command=build_all_model)
@@ -708,6 +705,13 @@ $scale 1
         print(f"String saved to '{filenameModel}' successfully.")
     except Exception as e:
         print(f"Error: {e}")
+
+def texture_to_tga():
+    filenameVTF = filedialog.askopenfile(title="Select .vtf file", filetypes=[("VTF file", "*.vtf")], initialdir=sdk.selected_folder + "/materials")
+    command = '"' + sdk.bin_folder + "/vtf2tga.exe" + '"'+ " -i " + '"' + filenameVTF.name + '"' 
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    print(result)
+
 
 # Replace these with your GitHub repository owner and name
 repo_owner = "ChocoScaff"
