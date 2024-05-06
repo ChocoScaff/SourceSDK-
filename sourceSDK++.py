@@ -679,25 +679,27 @@ def generate_qc_file():
     qc_file="""
 $modelname "modelNameToReplace"
 $cdmaterials "textureDirectoryToReplace"
-$collisionmodel	"modelNameToReplace"
-$sequence idle	"modelNameToReplace"
-$body bodystrToReplace "modelNameToReplace"
+$collisionmodel	"modelToReplace"
+$sequence idle	"modelToReplace"
+$body bodystrToReplace "modelToReplace"
 $surfaceprop sufaceReplace
 $scale 1
     """
 
-    modelstr = filenameModel.name[filenameModel.name.find("/modelsrc/") + 10:]
+    modelNamestr = filenameModel.name[filenameModel.name.find("/modelsrc/") + 10:]
     texturestr = TexureDirectory[TexureDirectory.find("/materials/") + 11:]
+    modelstr =modelNamestr[modelNamestr.find('/') + 1:]
     bodystr = modelstr[:-4]
 
-    qc_file = qc_file.replace("modelNameToReplace",modelstr)
+    qc_file = qc_file.replace("modelNameToReplace",modelNamestr)
     qc_file = qc_file.replace("textureDirectoryToReplace",texturestr)
     qc_file = qc_file.replace("bodystrToReplace",bodystr)
     qc_file = qc_file.replace("sufaceReplace",selected_material)
+    qc_file = qc_file.replace("modelToReplace",modelstr)
 
     print(qc_file)
 
-    fileQC = sdk.selected_folder + "/modelsrc/" + bodystr + ".qc"
+    fileQC = sdk.selected_folder + "/modelsrc/" + modelNamestr[:-4] + ".qc"
     print(fileQC)
 
     try:
@@ -712,7 +714,7 @@ repo_owner = "ChocoScaff"
 repo_name = "SourceSDK-"
 
 # Replace this with the version of your local software
-local_version = "0.0.2"
+local_version = "0.1.0"
 
 github_version = get_latest_release_version(repo_owner, repo_name)
 
