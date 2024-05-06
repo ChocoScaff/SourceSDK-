@@ -334,7 +334,7 @@ def Init(folder=False):
     except tk.TclError:
         print("Error: Failed to set icon.")
     
-    print("Projet open")
+    print("Project open")
 
     button_init()
 
@@ -790,7 +790,7 @@ repo_owner = "ChocoScaff"
 repo_name = "SourceSDK-"
 
 # Replace this with the version of your local software
-local_version = "0.1.0"
+local_version = "0.1.1"
 
 github_version = get_latest_release_version(repo_owner, repo_name)
 
