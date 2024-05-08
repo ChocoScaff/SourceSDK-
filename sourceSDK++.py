@@ -289,12 +289,12 @@ def open_hlfaceposer():
     subprocess.Popen([sdk.bin_folder + "/hlfaceposer.exe"])
 
 def particle():
-    command = ('"' + sdk.executable_game + '"' + " -game " + '"' + sdk.selected_folder + '"' + " -tools -nop4 -w 1920 -h 1080 -dev ")
+    command = ('"' + sdk.executable_game + '"' + " -game " + '"' + sdk.selected_folder + '"' + " -tools -nop4 -dev -sw -console")
     print(command)
     subprocess.Popen(command)
 
 def Launch_dev():
-    command = ('"' + sdk.executable_game + '"' + " -game " + '"' + sdk.selected_folder + '"' + " -console -dev")
+    command = ('"' + sdk.executable_game + '"' + " -game " + '"' + sdk.selected_folder + '"' + " -console -dev -w 1280 -h 720  -sw -sv_cheats 1")
     print(command)
     subprocess.Popen(command)
 
@@ -335,6 +335,8 @@ def Init(folder=False):
         print("Error: Failed to set icon.")
     
     print("Project open")
+
+    Launch_dev()
 
     button_init()
 
