@@ -883,7 +883,7 @@ repo_owner = "ChocoScaff"
 repo_name = "SourceSDK-"
 
 # Replace this with the version of your local software
-local_version = "0.1.1"
+local_version = "0.1.2"
 
 github_version = get_latest_release_version(repo_owner, repo_name)
 
