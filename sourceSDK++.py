@@ -425,7 +425,6 @@ def button_init():
 
         sdk.other_menu.add_command(label="Download source code", command=downbload_source_code)
 
-
     sdk.first_init = 1
 
 def reload_button():
@@ -811,7 +810,7 @@ def display_files():
     files = list_files()
 
     # Création du widget Listbox
-    sdk.listbox = tk.Listbox(root)
+    sdk.listbox = Listbox(root)
     
     # Création du widget Scrollbar
     sdk.scrollbar = tk.Scrollbar(root)
@@ -853,12 +852,12 @@ def open_file(event):
         open_file_source_extension(file_extension,sdk.selected_folder + "/" + file)
 
 def open_file_source_extension(file_extension, file):
-    if file_extension == ".vtf":
-        view_vtf_image(file)
+    if file_extension == ".vtf":   
         try:
             os.startfile(file)
         except Exception as e:
             messagebox.showerror("Error", f"Failed to open file: {e}")
+        view_vtf_image(file)
         
     elif file_extension == ".mdl":
         command = '"' + sdk.bin_folder + "/hlmv.exe" + '"'+ ' "' + file + '"' 
