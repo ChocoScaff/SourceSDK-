@@ -861,17 +861,14 @@ def open_file_source_extension(file_extension, file):
         
     elif file_extension == ".mdl":
         command = '"' + sdk.bin_folder + "/hlmv.exe" + '"'+ ' "' + file + '"' 
-        result = subprocess.run(command, shell=True, capture_output=True, text=True)
-        print(result)
+        subprocess.Popen(command)
     elif file_extension == ".vmf":
         #subprocess.Popen([sdk.bin_folder + "/hammer.exe" + ' "' + file + '"'])
         command = '"' + sdk.bin_folder + "/hammer.exe" + '"'+ ' "' + file + '"' 
-        result = subprocess.run(command, shell=True, capture_output=True, text=True)
-        print(result)
+        subprocess.Popen(command)
     elif file_extension == ".vcd":
         command = '"' + sdk.bin_folder + "/hlfaceposer.exe" + '"'+ ' "' + file + '"' 
-        result = subprocess.run(command, shell=True, capture_output=True, text=True)
-        print(result)
+        subprocess.Popen(command)
     else:
         try:
             os.startfile(file)
