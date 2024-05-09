@@ -346,7 +346,7 @@ def Init(folder=False):
 
     button_init()
 
-    #display_files()
+    display_files()
 
 def button_init():
 
@@ -425,7 +425,6 @@ def button_init():
 
         sdk.other_menu.add_command(label="Download source code", command=downbload_source_code)
 
-        file_menu.add_command(label="Open file", command=open_file_source)
 
     sdk.first_init = 1
 
@@ -798,7 +797,14 @@ def generate_vmt():
         print(f"Error: {e}")
 
 def list_files():
-    files = os.listdir(sdk.selected_folder)
+    target_extensions = [".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res"]
+    files = []
+    for root, dirs, files_in_dir in os.walk(sdk.selected_folder):
+        for file_name in files_in_dir:
+            for ext in target_extensions:
+                if file_name.endswith(ext):
+                    files.append(os.path.relpath(os.path.join(root, file_name), sdk.selected_folder))
+    files.sort()  # Sort files alphabetically
     return files
 
 def display_files():
@@ -810,16 +816,18 @@ def display_files():
     # Création du widget Scrollbar
     sdk.scrollbar = tk.Scrollbar(root)
     
-    # Configuration de la relation entre le Listbox et le Scrollbar
+    # Configure the Listbox to use the Scrollbar
     sdk.listbox.config(yscrollcommand=sdk.scrollbar.set)
     sdk.scrollbar.config(command=sdk.listbox.yview)
 
-    sdk.listbox.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
+    sdk.listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
     sdk.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
+    # Insert files into the Listbox
     for file in files:
-        sdk.listbox = tk.Label(root, text=file)
-        sdk.listbox.pack()
+        sdk.listbox.insert(tk.END, file)
+    
+    sdk.listbox.bind("<Double-Button-1>", open_file)
 
 def open_file_source():
     file = filedialog.askopenfilenames(title="Select file", filetypes=[("file", "*.vmf *.txt *.cfg *.bat *.vtf *.vmt *.qc *.mdl *.vcd *.res")], initialdir=sdk.selected_folder)
@@ -833,10 +841,20 @@ def open_file_source():
     print(file_extension)
     file = file[1:-1]
     print(file)
+    open_file_source_extension(file_extension,file)
+
+def open_file(event):
+    selected_index = sdk.listbox.curselection()
     
+    if selected_index:
+        file = sdk.listbox.get(selected_index)
+        file_name, file_extension = os.path.splitext(file)
+        print(file)
+        open_file_source_extension(file_extension,sdk.selected_folder + "/" + file)
+
+def open_file_source_extension(file_extension, file):
     if file_extension == ".vtf":
         view_vtf_image(file)
-        
         try:
             os.startfile(file)
         except Exception as e:
@@ -852,7 +870,9 @@ def open_file_source():
         result = subprocess.run(command, shell=True, capture_output=True, text=True)
         print(result)
     elif file_extension == ".vcd":
-        subprocess.Popen([sdk.bin_folder + "/hlfaceposer.exe" + ' "' + file + '"'])
+        command = '"' + sdk.bin_folder + "/hlfaceposer.exe" + '"'+ ' "' + file + '"' 
+        result = subprocess.run(command, shell=True, capture_output=True, text=True)
+        print(result)
     else:
         try:
             os.startfile(file)
