@@ -2,10 +2,11 @@ from asyncio.windows_events import NULL
 import string
 import tkinter as tk
 from turtle import st
+from click import open_file
 import srctools
 import os
 import subprocess
-from tkinter import filedialog
+from tkinter import Listbox, filedialog
 import sys
 from vtf2img import Parser
 import shutil
@@ -37,6 +38,8 @@ class SourceSDK():
     map_menu : tk.Menu
     model_menu : tk.Menu
     menu_bar : tk.Menu
+    scrollbar : tk.Scrollbar
+    listbox : tk.Listbox
 
     def __init__(self):
         self.first_init = 0
@@ -338,7 +341,12 @@ def Init(folder=False):
 
     Launch_dev()
 
+    lbl_result = tk.Label(root, text="Tools", wraplength=400, background="#3e4637",fg='white')
+    lbl_result.pack()
+
     button_init()
+
+    #display_files()
 
 def button_init():
 
@@ -416,6 +424,8 @@ def button_init():
         sdk.other_menu.add_command(label="Generate everything", command=generate_everything)
 
         sdk.other_menu.add_command(label="Download source code", command=downbload_source_code)
+
+        file_menu.add_command(label="Open file", command=open_file_source)
 
     sdk.first_init = 1
 
@@ -787,6 +797,68 @@ def generate_vmt():
     except Exception as e:
         print(f"Error: {e}")
 
+def list_files():
+    files = os.listdir(sdk.selected_folder)
+    return files
+
+def display_files():
+    files = list_files()
+
+    # Création du widget Listbox
+    sdk.listbox = tk.Listbox(root)
+    
+    # Création du widget Scrollbar
+    sdk.scrollbar = tk.Scrollbar(root)
+    
+    # Configuration de la relation entre le Listbox et le Scrollbar
+    sdk.listbox.config(yscrollcommand=sdk.scrollbar.set)
+    sdk.scrollbar.config(command=sdk.listbox.yview)
+
+    sdk.listbox.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
+    sdk.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+    for file in files:
+        sdk.listbox = tk.Label(root, text=file)
+        sdk.listbox.pack()
+
+def open_file_source():
+    file = filedialog.askopenfilenames(title="Select file", filetypes=[("file", "*.vmf *.txt *.cfg *.bat *.vtf *.vmt *.qc *.mdl *.vcd *.res")], initialdir=sdk.selected_folder)
+    file = str(file)
+    file = file[:-2]
+    file = file[1:]
+    
+    file_name, file_extension = os.path.splitext(file)
+    file_extension = file_extension[:-1]
+
+    print(file_extension)
+    file = file[1:-1]
+    print(file)
+    
+    if file_extension == ".vtf":
+        view_vtf_image(file)
+        
+        try:
+            os.startfile(file)
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to open file: {e}")
+        
+    elif file_extension == ".mdl":
+        command = '"' + sdk.bin_folder + "/hlmv.exe" + '"'+ ' "' + file + '"' 
+        result = subprocess.run(command, shell=True, capture_output=True, text=True)
+        print(result)
+    elif file_extension == ".vmf":
+        #subprocess.Popen([sdk.bin_folder + "/hammer.exe" + ' "' + file + '"'])
+        command = '"' + sdk.bin_folder + "/hammer.exe" + '"'+ ' "' + file + '"' 
+        result = subprocess.run(command, shell=True, capture_output=True, text=True)
+        print(result)
+    elif file_extension == ".vcd":
+        subprocess.Popen([sdk.bin_folder + "/hlfaceposer.exe" + ' "' + file + '"'])
+    else:
+        try:
+            os.startfile(file)
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to open file: {e}")
+
 # Replace these with your GitHub repository owner and name
 repo_owner = "ChocoScaff"
 repo_name = "SourceSDK-"
@@ -842,9 +914,6 @@ terminal.pack()
 # Redirect sys.stdout and sys.stderr to the Terminal widget
 sys.stdout = terminal
 sys.stderr = terminal
-
-lbl_result = tk.Label(root, text="Tools", wraplength=400, background="#3e4637",fg='white')
-lbl_result.pack()
 
 # Bind keyboard shortcuts to the root window
 root.bind("<Control-n>", handle_shortcut)
