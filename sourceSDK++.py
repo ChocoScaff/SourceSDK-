@@ -2,7 +2,7 @@ from asyncio.windows_events import NULL
 import string
 import tkinter as tk
 from turtle import st
-from click import open_file
+from click import command, open_file
 import srctools
 import os
 import subprocess
@@ -455,6 +455,8 @@ def reload_button():
         sdk.btn_hlmv.destroy()
     if os.path.isfile(sdk.bin_folder + "/hlfaceposer.exe"):
         sdk.btn_hlfaceposer.destroy()
+    if os.path.isfile(os.getcwd() + "/VTfEdit/x64/VTFEdit.exe"):
+        sdk.btn_vtf_edit.destroy()
 
     sdk.btn_Launch.destroy()
     sdk.btn_particle.destroy()
@@ -814,6 +816,10 @@ def list_files():
             for ext in target_extensions:
                 if file_name.endswith(ext):
                     files.append(os.path.relpath(os.path.join(root, file_name), sdk.selected_folder))
+                elif file_name.endswith(".vpk"):
+                    vpk_files = list_vpk_files(os.path.join(root, file_name))
+                    files.extend(vpk_files)
+
     files.sort()  # Sort files alphabetically
     return files
 
@@ -899,8 +905,10 @@ def download_VTF_Edit():
 
 def open_VTF(file=""):
     command = '"' + os.getcwd() + "/VTFEdit/x64/VTFEdit.exe" + '" ' + '"' + file + '"'
-    print(command)
     subprocess.Popen(command)
+
+def list_vpk_files(vpk_path):
+    pass
 
 # Replace these with your GitHub repository owner and name
 repo_owner = "ChocoScaff"
