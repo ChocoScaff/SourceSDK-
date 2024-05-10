@@ -297,7 +297,7 @@ def particle():
     subprocess.Popen(command)
 
 def Launch_dev():
-    command = ('"' + sdk.executable_game + '"' + " -game " + '"' + sdk.selected_folder + '"' + " -console -dev -w 1280 -h 720  -sw -sv_cheats 1")
+    command = ('"' + sdk.executable_game + '"' + " -game " + '"' + sdk.selected_folder + '"' + " -console -dev -w 1280 -h 720 -usercon -sw +sv_cheats 1")
     print(command)
     subprocess.Popen(command)
 
@@ -796,7 +796,7 @@ def generate_vmt():
         print(f"Error: {e}")
 
 def list_files():
-    target_extensions = [".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res"]
+    target_extensions = [".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp"]
     files = []
     for root, dirs, files_in_dir in os.walk(sdk.selected_folder):
         for file_name in files_in_dir:
@@ -828,20 +828,6 @@ def display_files():
     
     sdk.listbox.bind("<Double-Button-1>", open_file)
 
-def open_file_source():
-    file = filedialog.askopenfilenames(title="Select file", filetypes=[("file", "*.vmf *.txt *.cfg *.bat *.vtf *.vmt *.qc *.mdl *.vcd *.res")], initialdir=sdk.selected_folder)
-    file = str(file)
-    file = file[:-2]
-    file = file[1:]
-    
-    file_name, file_extension = os.path.splitext(file)
-    file_extension = file_extension[:-1]
-
-    print(file_extension)
-    file = file[1:-1]
-    print(file)
-    open_file_source_extension(file_extension,file)
-
 def open_file(event):
     selected_index = sdk.listbox.curselection()
     
@@ -849,29 +835,33 @@ def open_file(event):
         file = sdk.listbox.get(selected_index)
         file_name, file_extension = os.path.splitext(file)
         print(file)
-        open_file_source_extension(file_extension,sdk.selected_folder + "/" + file)
+        open_file_source_extension(file_extension,sdk.selected_folder + "/" + file, file[5:-4])
 
-def open_file_source_extension(file_extension, file):
+def open_file_source_extension(file_extension, filepath, file):
     if file_extension == ".vtf":   
         try:
-            os.startfile(file)
+            os.startfile(filepath)
         except Exception as e:
             messagebox.showerror("Error", f"Failed to open file: {e}")
-        view_vtf_image(file)
+        view_vtf_image(filepath)
         
     elif file_extension == ".mdl":
-        command = '"' + sdk.bin_folder + "/hlmv.exe" + '"'+ ' "' + file + '"' 
+        command = '"' + sdk.bin_folder + "/hlmv.exe" + '"'+ ' "' + filepath + '"' 
         subprocess.Popen(command)
     elif file_extension == ".vmf":
         #subprocess.Popen([sdk.bin_folder + "/hammer.exe" + ' "' + file + '"'])
-        command = '"' + sdk.bin_folder + "/hammer.exe" + '"'+ ' "' + file + '"' 
+        command = '"' + sdk.bin_folder + "/hammer.exe" + '"'+ ' "' + filepath + '"' 
         subprocess.Popen(command)
     elif file_extension == ".vcd":
-        command = '"' + sdk.bin_folder + "/hlfaceposer.exe" + '"'+ ' "' + file + '"' 
+        command = '"' + sdk.bin_folder + "/hlfaceposer.exe" + '"'+ ' "' + filepath + '"' 
+        subprocess.Popen(command)
+    elif file_extension == ".bsp":
+        command = ('"' + sdk.executable_game + '"' + " -game " + '"' + sdk.selected_folder + '"' + " -console -dev -w 1280 -h 720  -sw +sv_cheats 1 +map " + file)
+        print(command)
         subprocess.Popen(command)
     else:
         try:
-            os.startfile(file)
+            os.startfile(filepath)
         except Exception as e:
             messagebox.showerror("Error", f"Failed to open file: {e}")
 
