@@ -16,6 +16,8 @@ import urllib.request
 import json
 import webbrowser
 from tkinter import messagebox
+import requests
+import zipfile
 
 class SourceSDK():
     selected_folder : string
@@ -28,6 +30,7 @@ class SourceSDK():
     btn_hlmv : tk.Button
     btn_hlfaceposer : tk.Button
     btn_qc_eyes : tk.Button
+    btn_vtf_edit : tk.Button
     btn_games : tk.Button
     btn_everything : tk.Button
     btn_particle : tk.Button
@@ -369,6 +372,14 @@ def button_init():
     if os.path.isfile(sdk.bin_folder + "/hlfaceposer.exe"):
         sdk.btn_hlfaceposer = tk.Button(root, text="hlfaceposer", command=open_hlfaceposer, image=iconHlposer, compound=tk.LEFT, background="#4c5844",fg="white")
         sdk.btn_hlfaceposer.pack(side="left")
+
+    if os.path.isfile(os.getcwd() + "/VTfEdit/x64/VTFEdit.exe"):
+        sdk.btn_vtf_edit = tk.Button(root, text="vtfEdit", command=open_VTF, image=iconVTFEdit, compound=tk.LEFT, background="#4c5844",fg="white")
+        sdk.btn_vtf_edit.pack(side="left")
+    else:
+        download_VTF_Edit()
+        sdk.btn_vtf_edit = tk.Button(root, text="vtfEdit", command=open_VTF, image=iconVTFEdit, compound=tk.LEFT, background="#4c5844",fg="white")
+        sdk.btn_vtf_edit.pack(side="left")
 
     if os.path.exists(sdk.selected_folder + "/src/games.sln"):
         sdk.btn_games = tk.Button(root, text="games", command=open_games, image=iconVisualStudio, compound=tk.LEFT, background="#4c5844",fg="white")
@@ -839,11 +850,7 @@ def open_file(event):
 
 def open_file_source_extension(file_extension, filepath, file):
     if file_extension == ".vtf":   
-        try:
-            os.startfile(filepath)
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to open file: {e}")
-        view_vtf_image(filepath)
+        open_VTF(filepath)
         
     elif file_extension == ".mdl":
         command = '"' + sdk.bin_folder + "/hlmv.exe" + '"'+ ' "' + filepath + '"' 
@@ -864,6 +871,36 @@ def open_file_source_extension(file_extension, filepath, file):
             os.startfile(filepath)
         except Exception as e:
             messagebox.showerror("Error", f"Failed to open file: {e}")
+
+def download_VTF_Edit():
+    url = "https://github.com/NeilJed/VTFLib/releases/download/1.3.2/vtfedit133.zip"
+    response = requests.get(url)
+    
+    if response.status_code == 200:
+        # Create a temporary file to save the zip content
+        temp_zip_file = os.path.join(os.getcwd(), "VTF.zip")
+        
+        # Write the zip content to the temporary file
+        with open(temp_zip_file, "wb") as f:
+            f.write(response.content)
+        
+        os.makedirs(os.getcwd() + "/VTFEdit/")
+
+        # Extract the contents of the zip file
+        with zipfile.ZipFile(temp_zip_file, "r") as zip_ref:
+            zip_ref.extractall(os.getcwd() + "/VTFEdit/")
+
+        # Remove the temporary zip file
+        os.remove(temp_zip_file)
+        
+        print("Download and extraction completed successfully.")
+    else:
+        print(f"Failed to download zip file. Status code: {response.status_code}")
+
+def open_VTF(file=""):
+    command = '"' + os.getcwd() + "/VTFEdit/x64/VTFEdit.exe" + '" ' + '"' + file + '"'
+    print(command)
+    subprocess.Popen(command)
 
 # Replace these with your GitHub repository owner and name
 repo_owner = "ChocoScaff"
@@ -932,6 +969,7 @@ iconHLMV = tk.PhotoImage(file=os.getcwd() + "/icons/hlmv.png")
 iconQc_eyes = tk.PhotoImage(file=os.getcwd() + "/icons/qc_eyes.png")
 iconHlposer = tk.PhotoImage(file=os.getcwd() + "/icons/hlposer.png")
 iconVisualStudio = tk.PhotoImage(file=os.getcwd() + "/icons/Visual_Studio.png")
+iconVTFEdit = tk.PhotoImage(file=os.getcwd() + "/icons/VTFEdit.png")
 
 # Start the GUI event loop
 root.mainloop()
