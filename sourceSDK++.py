@@ -923,7 +923,7 @@ sdk = SourceSDK()
 
 # Create the main window
 root = tk.Tk()
-root.title("Source SDK")
+root.title("Source SDK " + local_version)
 
 root.tk_setPalette(background="#4c5844", foreground="white")
 
