@@ -3,6 +3,7 @@ import string
 import tkinter as tk
 from turtle import st
 from click import command, open_file
+import click
 import srctools
 import os
 import subprocess
@@ -44,6 +45,8 @@ class SourceSDK():
     menu_bar : tk.Menu
     scrollbar : tk.Scrollbar
     listbox : tk.Listbox
+    text_widget : tk.Text
+    vpk_path : string
 
     def __init__(self):
         self.first_init = 0
@@ -902,31 +905,37 @@ def display_vpk_contents(file=""):
 
     if file == "":
         # Open file dialog to select a VPK file
-        vpk_path = filedialog.askopenfilename(title="Select VPK file", filetypes=[("VPK files", "*.vpk")])
-        if not vpk_path:
+        sdk.vpk_path = filedialog.askopenfilename(title="Select VPK file", filetypes=[("VPK files", "*.vpk")])
+        if not sdk.vpk_path:
             return  # User cancelled selection or closed dialog
     else:
-        vpk_path=file
+        sdk.vpk_path=file
         
-    print(vpk_path)
+    print(sdk.vpk_path)
 
     # Create Tkinter window
     root = tk.Tk()
     root.title("VPK Contents")
 
     # Create text widget to display contents
-    text_widget = tk.Text(root, wrap="none")
-    text_widget.pack(fill="both", expand=True)
+    sdk.text_widget = tk.Text(root, wrap="none")
+    sdk.text_widget.pack(fill="both", expand=True)
 
     # Display VPK file contents in text widget
-    text_widget.insert("end", f"Contents of {os.path.basename(vpk_path)}:\n")
-    with vpk.open(vpk_path) as vpk_file:
+    sdk.text_widget.insert("end", f"Contents of {os.path.basename(sdk.vpk_path)}:\n")
+    with vpk.open(sdk.vpk_path) as vpk_file:
         for file_path in vpk_file:
-            text_widget.insert("end", f"{file_path}\n")
+            sdk.text_widget.insert("end", f"{file_path}\n")
     
-    text_widget.bind("<Double-Button-1>", open_file)
+    sdk.text_widget.bind("<Double-Button-1>", open_file_vpk)
 
     root.mainloop()
+
+def open_file_vpk(event):
+    selected_index = sdk.text_widget.index(tk.CURRENT)
+    line_num = int(selected_index.split('.')[0])
+    line = sdk.text_widget.get(f"{line_num}.0", f"{line_num}.end")
+    print(line)
 
 
 # Replace these with your GitHub repository owner and name
