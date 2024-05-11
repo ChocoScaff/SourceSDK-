@@ -18,6 +18,7 @@ import webbrowser
 from tkinter import messagebox
 import requests
 import zipfile
+import vpk
 
 class SourceSDK():
     selected_folder : string
@@ -424,8 +425,10 @@ def button_init():
 
         sdk.other_menu.add_command(label="Create VPK", command=create_VPK)
         sdk.other_menu.add_command(label="Display VPK", command=display_VPK)
+        sdk.other_menu.add_command(label="Display VPK Contents", command=display_vpk_contents)
         sdk.other_menu.add_command(label="Extract VPK", command=extract_VPK)
         sdk.other_menu.add_command(label="Build Caption", command=build_caption)
+
         sdk.other_menu.add_command(label="Build All Captions", command=build_all_caption)
 
         #if os.path.exists(sdk.selected_folder + "/src/creategameprojects.bat"):
@@ -897,8 +900,30 @@ def open_VTF(file=""):
     command = '"' + os.getcwd() + "/VTFEdit/x64/VTFEdit.exe" + '" ' + '"' + file + '"'
     subprocess.Popen(command)
 
-def list_vpk_files(vpk_path):
-    pass
+def display_vpk_contents(file=""):
+
+    if file == "":
+        # Open file dialog to select a VPK file
+        vpk_path = filedialog.askopenfilename(title="Select VPK file", filetypes=[("VPK files", "*.vpk")])
+        if not vpk_path:
+            return  # User cancelled selection or closed dialog
+
+    # Create Tkinter window
+    root = tk.Tk()
+    root.title("VPK Contents")
+
+    # Create text widget to display contents
+    text_widget = tk.Text(root, wrap="none")
+    text_widget.pack(fill="both", expand=True)
+
+    # Display VPK file contents in text widget
+    text_widget.insert("end", f"Contents of {os.path.basename(vpk_path)}:\n")
+    with vpk.open(vpk_path) as vpk_file:
+        for file_path in vpk_file:
+            text_widget.insert("end", f"{file_path}\n")
+    
+    root.mainloop()
+
 
 # Replace these with your GitHub repository owner and name
 repo_owner = "ChocoScaff"
