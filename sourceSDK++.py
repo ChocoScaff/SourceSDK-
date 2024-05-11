@@ -801,17 +801,13 @@ def generate_vmt():
         print(f"Error: {e}")
 
 def list_files():
-    target_extensions = [".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp"]
+    target_extensions = [".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", ".vpk"]
     files = []
     for root, dirs, files_in_dir in os.walk(sdk.selected_folder):
         for file_name in files_in_dir:
             for ext in target_extensions:
                 if file_name.endswith(ext):
                     files.append(os.path.relpath(os.path.join(root, file_name), sdk.selected_folder))
-                elif file_name.endswith(".vpk"):
-                    #vpk_files = list_vpk_files(os.path.join(root, file_name))
-                    #files.extend(vpk_files)
-                    pass
 
     files.sort()  # Sort files alphabetically
     return files
@@ -865,6 +861,8 @@ def open_file_source_extension(file_extension, filepath, file):
         command = ('"' + sdk.executable_game + '"' + " -game " + '"' + sdk.selected_folder + '"' + " -console -dev -w 1280 -h 720  -sw +sv_cheats 1 +map " + file)
         print(command)
         subprocess.Popen(command)
+    elif file_extension == ".vpk": 
+        display_vpk_contents(filepath)
     else:
         try:
             os.startfile(filepath)
@@ -907,6 +905,10 @@ def display_vpk_contents(file=""):
         vpk_path = filedialog.askopenfilename(title="Select VPK file", filetypes=[("VPK files", "*.vpk")])
         if not vpk_path:
             return  # User cancelled selection or closed dialog
+    else:
+        vpk_path=file
+        
+    print(vpk_path)
 
     # Create Tkinter window
     root = tk.Tk()
@@ -922,6 +924,8 @@ def display_vpk_contents(file=""):
         for file_path in vpk_file:
             text_widget.insert("end", f"{file_path}\n")
     
+    text_widget.bind("<Double-Button-1>", open_file)
+
     root.mainloop()
 
 
