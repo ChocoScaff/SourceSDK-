@@ -531,21 +531,10 @@ def new_project():
         else:
             print("The directory must be empty")
             
-def view_vtf_image(file_path):
-
-    parser = Parser(file_path)
-    header = parser.header
-
-    print(f"VTF version: {header.version}, Image size: {header.width}x{header.height}")
-    # VTF version: 7.5, Image size: 2048x2048
-
-    image = parser.get_image()
-
-    image.show()   
         
 def open_vtf():
     filenamevtf = filedialog.askopenfile(title="Select .vtf file", filetypes=[("VTF files", "*.vtf")], initialdir=sdk.selected_folder + "/materials")
-    view_vtf_image(filenamevtf.name)
+    open_VTF(filenamevtf.name)
 
 # Function to handle keyboard shortcuts
 def handle_shortcut(event):
@@ -817,8 +806,9 @@ def list_files():
                 if file_name.endswith(ext):
                     files.append(os.path.relpath(os.path.join(root, file_name), sdk.selected_folder))
                 elif file_name.endswith(".vpk"):
-                    vpk_files = list_vpk_files(os.path.join(root, file_name))
-                    files.extend(vpk_files)
+                    #vpk_files = list_vpk_files(os.path.join(root, file_name))
+                    #files.extend(vpk_files)
+                    pass
 
     files.sort()  # Sort files alphabetically
     return files
