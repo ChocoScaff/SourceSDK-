@@ -905,7 +905,7 @@ repo_owner = "ChocoScaff"
 repo_name = "SourceSDK-"
 
 # Replace this with the version of your local software
-local_version = "0.1.2"
+local_version = "0.1.3"
 
 github_version = get_latest_release_version(repo_owner, repo_name)
 
@@ -960,14 +960,15 @@ sys.stderr = terminal
 root.bind("<Control-n>", handle_shortcut)
 root.bind("<Control-o>", handle_shortcut)
 
-iconHpp = tk.PhotoImage(file=os.getcwd() + "/icons/hpp.png")
-iconHammer = tk.PhotoImage(file=os.getcwd() + "/icons/hammer.png")
-iconSource = tk.PhotoImage(file=os.getcwd() + "/icons/source.png")
-iconHLMV = tk.PhotoImage(file=os.getcwd() + "/icons/hlmv.png")
-iconQc_eyes = tk.PhotoImage(file=os.getcwd() + "/icons/qc_eyes.png")
-iconHlposer = tk.PhotoImage(file=os.getcwd() + "/icons/hlposer.png")
-iconVisualStudio = tk.PhotoImage(file=os.getcwd() + "/icons/Visual_Studio.png")
-iconVTFEdit = tk.PhotoImage(file=os.getcwd() + "/icons/VTFEdit.png")
+base_path = os.path.dirname(os.path.abspath(__file__))
+iconHpp = tk.PhotoImage(file=os.path.join(base_path, "icons", "hpp.png"))
+iconHammer = tk.PhotoImage(file=os.path.join(base_path, "icons", "hammer.png"))
+iconSource = tk.PhotoImage(file=os.path.join(base_path, "icons", "source.png"))
+iconHLMV = tk.PhotoImage(file=os.path.join(base_path, "icons", "hlmv.png"))
+iconQc_eyes = tk.PhotoImage(file=os.path.join(base_path, "icons", "qc_eyes.png"))
+iconHlposer = tk.PhotoImage(file=os.path.join(base_path, "icons", "hlposer.png"))
+iconVisualStudio = tk.PhotoImage(file=os.path.join(base_path, "icons", "Visual_Studio.png"))
+iconVTFEdit = tk.PhotoImage(file=os.path.join(base_path, "icons", "VTFEdit.png"))
 
 # Start the GUI event loop
 root.mainloop()
