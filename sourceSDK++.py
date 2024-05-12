@@ -1,18 +1,12 @@
-from asyncio.windows_events import NULL
 import string
 import tkinter as tk
-from turtle import st
-from click import command, open_file
-import click
 import srctools
 import os
 import subprocess
 from tkinter import Listbox, filedialog
 import sys
-from vtf2img import Parser
 import shutil
 import git
-import ctypes as ct
 import urllib.request
 import json
 import webbrowser
@@ -436,11 +430,11 @@ def button_init():
 
         #if os.path.exists(sdk.selected_folder + "/src/creategameprojects.bat"):
         sdk.other_menu.add_command(label="Generate games", command=generate_games)
-
         #if os.path.exists(sdk.selected_folder + "/src/createallprojects.bat"):
         sdk.other_menu.add_command(label="Generate everything", command=generate_everything)
-
         sdk.other_menu.add_command(label="Download source code", command=downbload_source_code)
+        sdk.other_menu.add_command(label="MsBuild", command=msbuild_compile)
+
 
     sdk.first_init = 1
 
@@ -937,6 +931,29 @@ def open_file_vpk(event):
     line = sdk.text_widget.get(f"{line_num}.0", f"{line_num}.end")
     print(line)
 
+def msbuild_compile():
+    msbuildpath = find_msbuild()
+    if msbuildpath == None:
+        print("don't find msbuild")
+        return
+    
+    sln_path = filedialog.askopenfilename(title="Select sln file", filetypes=[("sln files", "*.sln")])
+    command= '"' + msbuildpath + '"' + ' ' + '"' + sln_path + '"' + " /p:Configuration=Debug"
+    print(command)
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    print(result)
+
+
+
+def find_msbuild():
+    # Walk through all directories and subdirectories starting from the root directory
+    for dirpath, _, filenames in os.walk("C:\Program Files (x86)\MSBuild"):
+        # Check if MSBuild.exe exists in the current directory
+        if 'MSBuild.exe' in filenames:
+            return os.path.join(dirpath, 'MSBuild.exe')
+
+    # MSBuild.exe not found in any directory under the root directory
+    return None
 
 # Replace these with your GitHub repository owner and name
 repo_owner = "ChocoScaff"
@@ -987,7 +1004,7 @@ help_menu.add_command(label="SDK Doc", command=SDK_Doc)
 help_menu.add_command(label="About", command=open_about_window)
 
 # Create a Text widget to display terminal output
-terminal = Terminal(root, wrap=tk.WORD, height=20, width=80)
+terminal = Terminal(root, wrap=tk.WORD, height=20, width=100)
 terminal.pack()
 
 # Redirect sys.stdout and sys.stderr to the Terminal widget
