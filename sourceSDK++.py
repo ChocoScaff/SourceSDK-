@@ -14,6 +14,7 @@ from tkinter import messagebox
 import requests
 import zipfile
 import vpk
+from PIL import Image, ImageTk
 
 class SourceSDK():
     selected_folder : string
@@ -798,7 +799,7 @@ def generate_vmt():
         print(f"Error: {e}")
 
 def list_files():
-    target_extensions = [".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", ".vpk"]
+    target_extensions = [".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", ".vpk", ".tga"]
     files = []
     for root, dirs, files_in_dir in os.walk(sdk.selected_folder):
         for file_name in files_in_dir:
@@ -860,6 +861,8 @@ def open_file_source_extension(file_extension, filepath, file):
         subprocess.Popen(command)
     elif file_extension == ".vpk": 
         display_vpk_contents(filepath)
+    elif file_extension == ".tga": 
+        display_tga_file(filepath)
     else:
         try:
             os.startfile(filepath)
@@ -954,6 +957,22 @@ def find_msbuild():
 
     # MSBuild.exe not found in any directory under the root directory
     return None
+
+def display_tga_file(filename):
+
+    image_windows = []
+
+    image = Image.open(filename)
+    image_window = tk.Toplevel(root)
+    image_window.title(filename)
+    image_window.geometry(f"{image.width}x{image.height}")
+
+    photo = ImageTk.PhotoImage(image)
+    label = tk.Label(image_window, image=photo)
+    label.photo = photo  # Prevents garbage collection
+    label.pack()
+
+    image_windows.append(image_window)
 
 # Replace these with your GitHub repository owner and name
 repo_owner = "ChocoScaff"
