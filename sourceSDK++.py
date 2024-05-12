@@ -731,8 +731,8 @@ def generate_vmt():
 
     filenameVMTs = filedialog.askopenfilenames(title="Select .vtf file", filetypes=[("texture file", "*.vtf")], initialdir=sdk.selected_folder + "/materials")
 
-    diffuse_texture = NULL
-    normal_texture = NULL
+    diffuse_texture = None
+    normal_texture = None
     if len(filenameVMTs) == 1:
         print(filenameVMTs)
         vtfName = str(filenameVMTs)
@@ -776,7 +776,7 @@ def generate_vmt():
 
     diffuse_texture = diffuse_texture[diffuse_texture.find("/materials/") + 11:]
     vmt = vmt.replace("texture_diffuse",diffuse_texture)
-    if normal_texture != NULL:
+    if normal_texture != None:
         normal_texture = normal_texture[normal_texture.find("/materials/") + 11:]
         vmt = vmt.replace("texture_normal",normal_texture)
     else:
