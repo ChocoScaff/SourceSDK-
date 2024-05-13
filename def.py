@@ -1,6 +1,5 @@
 import string
 import tkinter as tk
-import srctools
 import os
 import subprocess
 from tkinter import Listbox, filedialog
@@ -16,10 +15,15 @@ import zipfile
 import vpk
 from sourceSDK import SourceSDK
 from texture import Texture
+from model import Model
+from map import Map
 
 class Test():
     sdk : SourceSDK
     texure : Texture
+    model : Model
+    map : Map
+
 
 class Terminal(tk.Text):
     def __init__(self, master, **kwargs):
@@ -91,127 +95,6 @@ def find_gameinfo_folder():
         print("gameinfo.txt not found in selected folder.")
         return -1
 
-def build_all_map():  
-    print("wait...")
-    mapsrc_directory = os.path.join(test.sdk.selected_folder, "mapsrc")
-    map_directory = os.path.join(test.sdk.selected_folder, "maps")
-    vbsp = (test.sdk.bin_folder + "/vbsp.exe")
-    vvis = (test.sdk.bin_folder + "/vvis.exe")
-    vrad = (test.sdk.bin_folder + "/vrad.exe")
-
-    try:
-        os.makedirs(map_directory, exist_ok=True)
-    except OSError as e:
-        print(f"Error creating folder: {e}")
-
-    for root, dirs, files in os.walk(test.sdk.selected_folder + "/mapsrc"):
-        for file in files:
-            if file.endswith(".vmf"):
-                    vmf_file_path = os.path.join(root, file)
-                    command = ('"' + vbsp + '"' + " -game " + '"' + test.sdk.selected_folder + '"' + " " + '"' + vmf_file_path + '"')
-                    print(command)
-                    #Execute the command in cmd
-                    result = subprocess.run(command, shell=True, capture_output=True, text=True)
-                    print(result)
-
-                    fileBSP = vmf_file_path
-                    #file_directory = os.path.dirname(fileBSP)
-                    fileBSP = os.path.splitext(os.path.basename(fileBSP))[0]
-
-                    # Create the new .bsp file path
-                    fileBSP = fileBSP + ".bsp"
-
-                    command = ('"' + vvis + '"' + " -game " + '"' + test.sdk.selected_folder + '"' + " " + '"' + mapsrc_directory + "/" + fileBSP + '"')
-                    print(command)
-                    result = subprocess.run(command, shell=True, capture_output=True, text=True)
-                    print(result)
-
-                    command = ('"' + vrad + '"' + " -game " + '"' + test.sdk.selected_folder + '"' + " " + '"' + mapsrc_directory + "/" + fileBSP + '"')
-                    print(command)
-                    result = subprocess.run(command, shell=True, capture_output=True, text=True)
-                    print(result)
-
-                    # Move bsp file to maps directory
-                    directoryBSP = mapsrc_directory + "/" + fileBSP
-                    try:
-                        os.remove(map_directory + "/" + fileBSP)
-                    except os.error:
-                        print("cant remove :" + map_directory + "/" + fileBSP)
-                    
-                    shutil.move(directoryBSP, map_directory)
-
-def build_map():  
-
-    mapsrc_directory = os.path.join(test.sdk.selected_folder, "mapsrc")
-    map_directory = os.path.join(test.sdk.selected_folder, "maps")
-
-    filenameVMF = filedialog.askopenfile(title="Select .vmf file", filetypes=[("VMF files", "*.vmf")], initialdir=mapsrc_directory)
-
-    print("file =", filenameVMF.name)
-    # Execute vbsp.exe
-
-    fileBSP = filenameVMF.name
-    #file_directory = os.path.dirname(fileBSP)
-    fileBSP = os.path.splitext(os.path.basename(fileBSP))[0]
-
-    # Create the new .bsp file path
-    fileBSP = fileBSP + ".bsp"
-    print("bsp =", fileBSP)
-
-    print(test.sdk.bin_folder)
-
-    vbsp = (test.sdk.bin_folder + "/vbsp.exe")
-    command = ('"' + vbsp + '"' + " -game " + '"' + test.sdk.selected_folder + '"' + " " + '"' + filenameVMF.name + '"')
-    print(command)
-    #Execute the command in cmd
-    result = subprocess.run(command, shell=True, capture_output=True, text=True)
-    print(result)
-
-    vvis = (test.sdk.bin_folder + "/vvis.exe")
-    command = ('"' + vvis + '"' + " -game " + '"' + test.sdk.selected_folder + '"' + " " + '"' + mapsrc_directory + "/" + fileBSP + '"')
-    print(command)
-    result = subprocess.run(command, shell=True, capture_output=True, text=True)
-    print(result)
-
-    vrad = (test.sdk.bin_folder + "/vrad.exe")
-    command = ('"' + vrad + '"' + " -game " + '"' + test.sdk.selected_folder + '"' + " " + '"' + mapsrc_directory + "/" + fileBSP + '"')
-    print(command)
-    result = subprocess.run(command, shell=True, capture_output=True, text=True)
-    print(result)
-
-    try:
-        os.makedirs(map_directory, exist_ok=True)
-    except OSError as e:
-        print(f"Error creating folder: {e}")
-
-    # Move bsp file to maps directory
-    directoryBSP = mapsrc_directory + "/" + fileBSP
-    try:
-        os.remove(map_directory + "/" + fileBSP)
-    except os.error:
-        print("cant remove :" + map_directory + "/" + fileBSP)
-    
-    shutil.move(directoryBSP, map_directory)
-
-def build_model():
-    filenameQC = filedialog.askopenfile(title="Select .qc file", filetypes=[("QC files", "*.qc")], initialdir=test.sdk.selected_folder + "/modelsrc")
-    mdl = (test.sdk.bin_folder + "/studiomdl.exe")
-    command = ('"' + mdl + '"' + " -game " + '"' + test.sdk.selected_folder + '"' + " " + '"' + filenameQC.name + '"')
-    print(command)
-    result = subprocess.run(command, shell=True, capture_output=True, text=True)
-    print(result)
-
-def build_all_model():
-    print("wait...")
-    mdl = (test.sdk.bin_folder + "/captioncompiler.exe")
-    for root, dirs, files in os.walk(test.sdk.selected_folder + "/modelsrc"):
-        for file in files:
-            if file.endswith(".qc"):
-                qc_file_path = os.path.join(root, file)
-                command = ('"' + mdl + '"' + " -game " + '"' + test.sdk.selected_folder + '"' + " " + '"' + qc_file_path + '"')
-                print(command)
-                result = subprocess.run(command, shell=True, capture_output=True, text=True)
-                print(result)
 
 def build_caption():
     filenameTXT = filedialog.askopenfile(title="Select .txt file", filetypes=[("TXT files", "closecaption*.txt")], initialdir=test.sdk.selected_folder + "/resource")
@@ -238,9 +121,6 @@ def open_hammer(file=""):
 
 def open_hammer_plus_plus():
     subprocess.Popen([test.sdk.bin_folder + "/hammerplusplus.exe"])
-
-def open_hlmv():
-    subprocess.Popen([test.sdk.bin_folder + "/hlmv.exe"])
 
 def open_qc_eyes():
     subprocess.Popen([test.sdk.bin_folder + "/qc_eyes.exe"])
@@ -303,6 +183,8 @@ def Init(folder=False):
     lbl_result.pack()
 
     test.texture = Texture(test.sdk)
+    test.model = Model(test.sdk)
+    test.map = Map(test.sdk)
 
     button_init()
 
@@ -319,7 +201,7 @@ def button_init():
         test.sdk.btn_hammer_plus_plus.pack(side="left")
 
     if os.path.isfile(test.sdk.bin_folder + "/hlmv.exe"):
-        test.sdk.btn_hlmv = tk.Button(test.sdk.root, text="hlmv", command=open_hlmv, image=iconHLMV, compound=tk.LEFT, background="#4c5844",fg="white")
+        test.sdk.btn_hlmv = tk.Button(test.sdk.root, text="hlmv", command=test.model.open_hlmv, image=iconHLMV, compound=tk.LEFT, background="#4c5844",fg="white")
         test.sdk.btn_hlmv.pack(side="left")
 
     if os.path.isfile(test.sdk.bin_folder + "/qc_eyes.exe"):
@@ -365,9 +247,9 @@ def button_init():
         test.sdk.other_menu = tk.Menu(test.sdk.menu_bar, tearoff=0,background="#4c5844",fg="white")
         test.sdk.menu_bar.add_cascade(label="Other", menu=test.sdk.other_menu)
 
-        test.sdk.map_menu.add_command(label="Build Map", command=build_map)
-        test.sdk.map_menu.add_command(label="Build All Maps", command=build_all_map)
-        test.sdk.map_menu.add_command(label="Info Map", command=info_map)
+        test.sdk.map_menu.add_command(label="Build Map", command=test.map.build_map)
+        test.sdk.map_menu.add_command(label="Build All Maps", command=test.map.build_all_map)
+        test.sdk.map_menu.add_command(label="Info Map", command=test.map.info_map)
 
         test.sdk.texture_menu.add_command(label="Build Texture", command=test.texture.build_texture)
         test.sdk.texture_menu.add_command(label="Build All Textures", command=test.texture.build_all_texture)
@@ -375,9 +257,9 @@ def button_init():
         test.sdk.texture_menu.add_command(label="Texture To TGA", command=test.texture.texture_to_tga)
         test.sdk.texture_menu.add_command(label="Generate vmt", command=test.texture.generate_vmt)
 
-        test.sdk.model_menu.add_command(label="Build Model", command=build_model)
-        test.sdk.model_menu.add_command(label="Build All Models", command=build_all_model)
-        test.sdk.model_menu.add_command(label="Generate QC File", command=generate_qc_file)
+        test.sdk.model_menu.add_command(label="Build Model", command=test.model.build_model)
+        test.sdk.model_menu.add_command(label="Build All Models", command=test.model.build_all_model)
+        test.sdk.model_menu.add_command(label="Generate QC File", command=test.model.generate_qc_file)
 
         test.sdk.other_menu.add_command(label="Create VPK", command=create_VPK)
         test.sdk.other_menu.add_command(label="Display VPK", command=display_VPK)
@@ -489,8 +371,7 @@ def new_project():
             Init(directory)
 
         else:
-            print("The directory must be empty")
-            
+            print("The directory must be empty")     
         
 def open_vtf():
     filenamevtf = filedialog.askopenfile(title="Select .vtf file", filetypes=[("VTF files", "*.vtf")], initialdir=test.sdk.selected_folder + "/materials")
@@ -503,16 +384,6 @@ def handle_shortcut(event):
         new_project()
     elif key == "o":
         Init()
-
-def info_map():
-    filenamevmf = filedialog.askopenfile(title="Select .vmf file", filetypes=[("VMF files", "*.vmf")], initialdir=test.sdk.selected_folder + "/mapsrc")
-    vmf = srctools.VMF.parse(filenamevmf.name)
-    entities = vmf.entities
-    print("Number of entities in the VMF:", len(entities))
-    print(entities)
-    cameras = vmf.cameras
-    print("Number of cameras in the VMF:", len(cameras))
-    print(cameras)
 
 def launch_exit():
     exit()
@@ -619,68 +490,7 @@ def check_software_version(local_version, github_version):
         print(f"There is a newer version ({github_version}) available on GitHub.")
 
 def sdk_Doc():
-    webbrowser.open("https://developer.valvesoftware.com/wiki/test.sdk_Docs")
-
-def generate_qc_file():
-
-    filenameModel = filedialog.askopenfile(title="Select .smd or .dmx file", filetypes=[("model file", "*.smd *.dmx")], initialdir=test.sdk.selected_folder + "/modelsrc")
-    print(filenameModel)
-    print(filenameModel.name)
-    TexureDirectory = filedialog.askdirectory(title="Select Texure Directory",initialdir=test.sdk.selected_folder + "/materials/models")
-    print(TexureDirectory)
-
-    popup = tk.Toplevel(test.sdk.root)
-    popup.title("Material Selector")
-
-    materials = ["Concrete", "Wood", "Dirt", "Grass", "Water", "Ice", "Metal", "Sand", "Rock"]
-
-    selected_materialTK = tk.StringVar()
-
-    def select_material(material):
-        selected_materialTK.set(material)
-        popup.destroy() 
-
-    for material in materials:
-        button = tk.Button(popup, text=material, command=lambda m=material: select_material(m))
-        button.pack()
-
-    popup.wait_window()
-
-    selected_material = selected_materialTK.get()
-
-    qc_file="""
-$modelname "modelNameToReplace"
-$cdmaterials "textureDirectoryToReplace"
-$collisionmodel	"modelToReplace"
-$sequence idle	"modelToReplace"
-$body bodystrToReplace "modelToReplace"
-$surfaceprop sufaceReplace
-$scale 1
-    """
-
-    modelNamestr = filenameModel.name[filenameModel.name.find("/modelsrc/") + 10:]
-    texturestr = TexureDirectory[TexureDirectory.find("/materials/") + 11:]
-    modelstr =modelNamestr[modelNamestr.find('/') + 1:]
-    bodystr = modelstr[:-4]
-
-    qc_file = qc_file.replace("modelNameToReplace",modelNamestr)
-    qc_file = qc_file.replace("textureDirectoryToReplace",texturestr)
-    qc_file = qc_file.replace("bodystrToReplace",bodystr)
-    qc_file = qc_file.replace("sufaceReplace",selected_material)
-    qc_file = qc_file.replace("modelToReplace",modelstr)
-
-    print(qc_file)
-
-    fileQC = test.sdk.selected_folder + "/modelsrc/" + modelNamestr[:-4] + ".qc"
-    print(fileQC)
-
-    try:
-        with open(fileQC, 'w') as file:
-            file.write(qc_file)
-        print(f"String saved to '{filenameModel}' successfully.")
-    except Exception as e:
-        print(f"Error: {e}")
-
+    webbrowser.open("https://developer.valvesoftware.com/wiki/SDK_Docs")
 
 def list_files():
     target_extensions = [".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", ".vpk", ".tga"]
@@ -843,7 +653,7 @@ def open_file_explorer():
 
 # Replace these with your GitHub repository owner and name
 repo_owner = "ChocoScaff"
-repo_name = "test.sdk-"
+repo_name = "SourceSDK-"
 
 # Replace this with the version of your local software
 local_version = "0.1.3"
@@ -866,7 +676,7 @@ test.sdk = SourceSDK()
 
 # Create the main window
 test.sdk.root = tk.Tk()
-test.sdk.root.title("Source test.sdk " + local_version)
+test.sdk.root.title("Source SDK : assetBrowser " + local_version)
 
 test.sdk.root.tk_setPalette(background="#4c5844", foreground="white")
 
@@ -888,7 +698,7 @@ file_menu.add_command(label="Exit", command=launch_exit)
 
 help_menu = tk.Menu(test.sdk.menu_bar, tearoff=0,background="#4c5844",fg="white")
 test.sdk.menu_bar.add_cascade(label="Help", menu=help_menu)
-help_menu.add_command(label="test.sdk Doc", command=sdk_Doc)
+help_menu.add_command(label="sdk Doc", command=sdk_Doc)
 help_menu.add_command(label="About", command=open_about_window)
 
 # Create a Text widget to display terminal output

@@ -1,7 +1,7 @@
 import tkinter as tk
 from PIL import Image, ImageTk
 import sourceSDK
-from tkinter import Listbox, filedialog
+from tkinter import filedialog
 import os
 import subprocess
 
