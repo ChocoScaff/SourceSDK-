@@ -26,8 +26,6 @@ class SourceSDK():
     menu_bar : tk.Menu
     scrollbar : tk.Scrollbar
     listbox : tk.Listbox
-    text_widget : tk.Text
-    vpk_path : string
     root : tk.Tk
 
     def __init__(self):

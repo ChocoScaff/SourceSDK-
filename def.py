@@ -12,17 +12,19 @@ import webbrowser
 from tkinter import messagebox
 import requests
 import zipfile
-import vpk
+
 from sourceSDK import SourceSDK
 from texture import Texture
 from model import Model
 from map import Map
+from vpk import VPK
 
 class Test():
     sdk : SourceSDK
     texure : Texture
     model : Model
     map : Map
+    vpk : VPK
 
 
 class Terminal(tk.Text):
@@ -185,6 +187,7 @@ def Init(folder=False):
     test.texture = Texture(test.sdk)
     test.model = Model(test.sdk)
     test.map = Map(test.sdk)
+    test.vpk = VPK(test.sdk)
 
     button_init()
 
@@ -261,12 +264,12 @@ def button_init():
         test.sdk.model_menu.add_command(label="Build All Models", command=test.model.build_all_model)
         test.sdk.model_menu.add_command(label="Generate QC File", command=test.model.generate_qc_file)
 
-        test.sdk.other_menu.add_command(label="Create VPK", command=create_VPK)
-        test.sdk.other_menu.add_command(label="Display VPK", command=display_VPK)
-        test.sdk.other_menu.add_command(label="Display VPK Contents", command=display_vpk_contents)
-        test.sdk.other_menu.add_command(label="Extract VPK", command=extract_VPK)
-        test.sdk.other_menu.add_command(label="Build Caption", command=build_caption)
+        test.sdk.other_menu.add_command(label="Create VPK", command=test.vpk.create_VPK)
+        test.sdk.other_menu.add_command(label="Display VPK", command=test.vpk.display_VPK)
+        test.sdk.other_menu.add_command(label="Display VPK Contents", command=test.vpk.display_vpk_contents)
+        test.sdk.other_menu.add_command(label="Extract VPK", command=test.vpk.extract_VPK)
 
+        test.sdk.other_menu.add_command(label="Build Caption", command=build_caption)
         test.sdk.other_menu.add_command(label="Build All Captions", command=build_all_caption)
 
         #if os.path.exists(test.sdk.selected_folder + "/src/creategameprojects.bat"):
@@ -387,24 +390,6 @@ def handle_shortcut(event):
 
 def launch_exit():
     exit()
-
-def create_VPK():
-    directory = filedialog.askdirectory(title="Select a Directory")
-    command = '"' + test.sdk.bin_folder + "/vpk.exe" + '" ' + '"' + directory + '"'
-    result = subprocess.run(command, shell=True, capture_output=True, text=True)
-    print(result)
-
-def extract_VPK():
-    filenamevpk = filedialog.askopenfile(title="Select .vpk file", filetypes=[("VPK files", "*.vpk")], initialdir=test.sdk.selected_folder)
-    command = '"' + test.sdk.bin_folder + "/vpk.exe" + '" ' + '"' + filenamevpk.name + '"'
-    result = subprocess.run(command, shell=True, capture_output=True, text=True)
-    print(result)
-
-def display_VPK():
-    filenamevpk = filedialog.askopenfile(title="Select .vpk file", filetypes=[("VPK files", "*.vpk")], initialdir=test.sdk.selected_folder)
-    command = '"' + test.sdk.bin_folder + "/vpk.exe" + '"' + " L " + '"' + filenamevpk.name + '"'
-    result = subprocess.run(command, shell=True, capture_output=True, text=True)
-    print(result)
 
 def open_about_window():
     # Create a new window for about information
@@ -554,7 +539,7 @@ def open_file_source_extension(file_extension, filepath, file):
         print(command)
         subprocess.Popen(command)
     elif file_extension == ".vpk": 
-        display_vpk_contents(filepath)
+        test.vpk.display_vpk_contents(filepath)
     elif file_extension == ".tga": 
         test.texture.display_tga_file(filepath)
     else:
@@ -588,42 +573,6 @@ def download_VTF_Edit():
     else:
         print(f"Failed to download zip file. Status code: {response.status_code}")
 
-
-def display_vpk_contents(file=""):
-
-    if file == "":
-        # Open file dialog to select a VPK file
-        test.sdk.vpk_path = filedialog.askopenfilename(title="Select VPK file", filetypes=[("VPK files", "*.vpk")])
-        if not test.sdk.vpk_path:
-            return  # User cancelled selection or closed dialog
-    else:
-        test.sdk.vpk_path=file
-        
-    print(test.sdk.vpk_path)
-
-    # Create Tkinter window
-    test.sdk.root = tk.Tk()
-    test.sdk.root.title("VPK Contents")
-
-    # Create text widget to display contents
-    test.sdk.text_widget = tk.Text(test.sdk.root, wrap="none")
-    test.sdk.text_widget.pack(fill="both", expand=True)
-
-    # Display VPK file contents in text widget
-    test.sdk.text_widget.insert("end", f"Contents of {os.path.basename(test.sdk.vpk_path)}:\n")
-    with vpk.open(test.sdk.vpk_path) as vpk_file:
-        for file_path in vpk_file:
-            test.sdk.text_widget.insert("end", f"{file_path}\n")
-    
-    test.sdk.text_widget.bind("<Double-Button-1>", open_file_vpk)
-
-    test.sdk.root.mainloop()
-
-def open_file_vpk(event):
-    selected_index = test.sdk.text_widget.index(tk.CURRENT)
-    line_num = int(selected_index.split('.')[0])
-    line = test.sdk.text_widget.get(f"{line_num}.0", f"{line_num}.end")
-    print(line)
 
 def msbuild_compile():
     msbuildpath = find_msbuild()
