@@ -508,10 +508,10 @@ def display_files():
     files = list_files()
 
     # Création du widget Listbox
-    test.sdk.listbox = Listbox(test.sdk.root)
+    test.sdk.listbox = Listbox()
     
     # Création du widget Scrollbar
-    test.sdk.scrollbar = tk.Scrollbar(test.sdk.root)
+    test.sdk.scrollbar = tk.Scrollbar()
     
     # Configure the Listbox to use the Scrollbar
     test.sdk.listbox.config(yscrollcommand=test.sdk.scrollbar.set)
@@ -556,7 +556,7 @@ def open_file_source_extension(file_extension, filepath, file):
     elif file_extension == ".vpk": 
         display_vpk_contents(filepath)
     elif file_extension == ".tga": 
-        Texture.display_tga_file(filepath)
+        test.texture.display_tga_file(filepath)
     else:
         try:
             os.startfile(filepath)

@@ -43,7 +43,7 @@ class Model:
         TexureDirectory = filedialog.askdirectory(title="Select Texure Directory",initialdir=self.sdk.selected_folder + "/materials/models")
         print(TexureDirectory)
 
-        popup = tk.Toplevel(self.sdk.root)
+        popup = tk.Toplevel()
         popup.title("Material Selector")
 
         materials = ["Concrete", "Wood", "Dirt", "Grass", "Water", "Ice", "Metal", "Sand", "Rock"]

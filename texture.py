@@ -18,7 +18,7 @@ class Texture:
         image_windows = []
 
         image = Image.open(filename)
-        image_window = tk.Toplevel(self.sdk.root)
+        image_window = tk.Toplevel()
         image_window.title(filename)
         image_window.geometry(f"{image.width}x{image.height}")
 
@@ -82,7 +82,7 @@ class Texture:
                 elif "normal" in vmt.lower():
                     normal_texture = vmt
 
-        popup = tk.Toplevel(self.sdk.root)
+        popup = tk.Toplevel()
         popup.title("shader Selector")
 
         shaders = ["LightmappedGeneric", "VertexLitGeneric", "WorldVertexTransition", "UnlitGeneric", "Sky"]
