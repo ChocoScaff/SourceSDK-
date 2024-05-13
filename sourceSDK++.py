@@ -379,7 +379,7 @@ def button_init():
         download_VTF_Edit()
         sdk.btn_vtf_edit = tk.Button(root, text="vtfEdit", command=open_VTF, image=iconVTFEdit, compound=tk.LEFT, background="#4c5844",fg="white")
         sdk.btn_vtf_edit.pack(side="left")
-
+    
     if os.path.exists(sdk.selected_folder + "/src/games.sln"):
         sdk.btn_games = tk.Button(root, text="games", command=open_games, image=iconVisualStudio, compound=tk.LEFT, background="#4c5844",fg="white")
         sdk.btn_games.pack(side="left")
@@ -435,6 +435,7 @@ def button_init():
         sdk.other_menu.add_command(label="Generate everything", command=generate_everything)
         sdk.other_menu.add_command(label="Download source code", command=downbload_source_code)
         sdk.other_menu.add_command(label="MsBuild", command=msbuild_compile)
+        sdk.other_menu.add_command(label="Open in file explorer", command=open_file_explorer)
 
 
     sdk.first_init = 1
@@ -946,8 +947,6 @@ def msbuild_compile():
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
     print(result)
 
-
-
 def find_msbuild():
     # Walk through all directories and subdirectories starting from the root directory
     for dirpath, _, filenames in os.walk("C:\Program Files (x86)\MSBuild"):
@@ -973,6 +972,9 @@ def display_tga_file(filename):
     label.pack()
 
     image_windows.append(image_window)
+
+def open_file_explorer():
+    os.startfile(sdk.selected_folder)
 
 # Replace these with your GitHub repository owner and name
 repo_owner = "ChocoScaff"
