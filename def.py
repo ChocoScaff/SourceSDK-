@@ -18,6 +18,7 @@ from texture import Texture
 from model import Model
 from map import Map
 from vpk import VPK
+from terminal import Terminal
 
 class Test():
     sdk : SourceSDK
@@ -25,20 +26,8 @@ class Test():
     model : Model
     map : Map
     vpk : VPK
+    terminal : Terminal
 
-
-class Terminal(tk.Text):
-    def __init__(self, master, **kwargs):
-        super().__init__(master, **kwargs)
-        self.tag_configure("stdout", foreground="black")
-        self.tag_configure("stderr", foreground="red")
-
-    def write(self, message):
-        self.insert(tk.END, message)
-        self.see(tk.END)
-
-    def flush(self):
-        pass
 
 def parse_gameinfo_txt(file_path):
     #gameinfo_path = os.path.join(folder_path, "gameinfo.txt")
@@ -171,12 +160,11 @@ def Init(folder=False):
     test.sdk.executable_game = find_executable_game(test.sdk.bin_folder)
     print("executable game : " + test.sdk.executable_game)
 
-    """
     try:
         test.sdk.root.iconbitmap(test.sdk.selected_folder + '/resource/game.ico')
     except tk.TclError:
         print("Error: Failed to set icon.")
-    """
+    
     print("Project open")
 
     Launch_dev()
@@ -651,12 +639,12 @@ help_menu.add_command(label="sdk Doc", command=sdk_Doc)
 help_menu.add_command(label="About", command=open_about_window)
 
 # Create a Text widget to display terminal output
-terminal = Terminal(test.sdk.root, wrap=tk.WORD, height=20, width=100)
-terminal.pack()
+test.terminal = Terminal(test.sdk.root, wrap=tk.WORD, height=20, width=100)
+test.terminal.pack()
 
 # Redirect sys.stdout and sys.stderr to the Terminal widget
-sys.stdout = terminal
-sys.stderr = terminal
+sys.stdout = test.terminal
+sys.stderr = test.terminal
 
 # Bind keyboard shortcuts to the root window
 test.sdk.root.bind("<Control-n>", handle_shortcut)
