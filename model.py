@@ -25,7 +25,7 @@ class Model:
 
     def build_all_model(self):
         print("wait...")
-        mdl = (self.sdk.bin_folder + "/captioncompiler.exe")
+        mdl = (self.sdk.bin_folder + "/studiomdl.exe")
         for root, dirs, files in os.walk(self.sdk.selected_folder + "/modelsrc"):
             for file in files:
                 if file.endswith(".qc"):

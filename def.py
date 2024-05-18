@@ -643,7 +643,7 @@ help_menu.add_command(label="sdk Doc", command=sdk_Doc)
 help_menu.add_command(label="About", command=open_about_window)
 
 # Create a Text widget to display terminal output
-test.terminal = Terminal(test.sdk.root, wrap=tk.WORD, height=20, width=100)
+test.terminal = Terminal(test.sdk.root, wrap=tk.WORD, height=30, width=120)
 test.terminal.pack()
 
 # Redirect sys.stdout and sys.stderr to the Terminal widget

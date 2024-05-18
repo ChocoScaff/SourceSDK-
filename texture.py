@@ -35,7 +35,7 @@ class Texture:
         for root, dirs, files in os.walk(self.sdk.selected_folder + "/materialsrc"):
             for file in files:
                 if file.endswith(".tga"):
-                    tga_file_path = os.path.join(self.sdk.root, file)
+                    tga_file_path = os.path.join(root, file)
                     command = ('"' + vtex + '"' + " -game " + '"' + self.sdk.selected_folder + '"' + " -nopause "  + '"' + tga_file_path + '"' )
                     print(command)
                     result = subprocess.run(command, shell=True, capture_output=True, text=True)
