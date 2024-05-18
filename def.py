@@ -125,7 +125,7 @@ def particle():
     subprocess.Popen(command)
 
 def Launch_dev():
-    command = ('"' + test.sdk.executable_game + '"' + " -game " + '"' + test.sdk.selected_folder + '"' + " -console -dev -w 1280 -h 720 -usercon -sw +sv_cheats 1")
+    command = ('"' + test.sdk.executable_game + '"' + " -game " + '"' + test.sdk.selected_folder + '"' + " -console -dev -w 1280 -h 720 -sw +sv_cheats 1")
     print(command)
     subprocess.Popen(command)
 
@@ -380,13 +380,20 @@ def launch_exit():
     exit()
 
 def open_about_window():
-    # Create a new window for about information
     about_window = tk.Toplevel(test.sdk.root)
     about_window.title("About")
 
     # Add text to the window
-    about_text = tk.Label(about_window, text="Software create by ChocoScaff.\nYou can find source code.\nhttps://github.com/ChocoScaff/test.sdk-")
+    about_text = tk.Label(about_window, text="Software created by ChocoScaff.\nYou can find the source code here:")
     about_text.pack()
+
+    # Add hyperlink
+    def open_link(event):
+        webbrowser.open_new("https://github.com/ChocoScaff/SourceSDK-")
+
+    hyperlink = tk.Label(about_window, text="https://github.com/ChocoScaff/SourceSDK-", fg="blue", cursor="hand2")
+    hyperlink.pack()
+    hyperlink.bind("<Button-1>", open_link)
 
 def open_sln_file(sln_file_path):
     
