@@ -34,8 +34,15 @@ class VPK:
         popup = tk.Toplevel()
         popup.title("vpk contents")
 
-        self.text_widget = tk.Text(popup, wrap="none")
-        self.text_widget.pack(fill="both", expand=True)
+        frame = tk.Frame(popup)
+        frame.pack(fill="both", expand=True)
+
+        self.text_widget = tk.Text(frame, wrap="none")
+        self.text_widget.pack(side="left", fill="both", expand=True)
+
+        scrollbar = tk.Scrollbar(frame, orient="vertical", command=self.text_widget.yview)
+        scrollbar.pack(side="right", fill="y")
+        self.text_widget.config(yscrollcommand=scrollbar.set)
 
         # Display VPK file contents in text widget
         self.text_widget.insert("end", f"Contents of {os.path.basename(self.vpk_path)}:\n")
