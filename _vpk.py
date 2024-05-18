@@ -7,6 +7,7 @@ from tkinter import filedialog
 import os
 import subprocess
 import tempfile
+from texture import Texture
 
 class VPK:
 
@@ -63,10 +64,22 @@ class VPK:
             temp_file_path = temp_file.name
 
         # Open the file with the default associated application
-        try:
-            os.startfile(temp_file_path)
-        except Exception as e:
-            print(f"Failed to open file {temp_file_path}: {e}")
+        file_name, file_extension = os.path.splitext(temp_file_path)
+
+        if file_extension == ".vtf":   
+            texture = Texture(self.sdk)
+            texture.open_VTF(temp_file_path)
+        elif file_extension == ".mdl":
+            command = '"' + self.sdk.bin_folder + "/hlmv.exe" + '"'+ ' "' + temp_file_path + '"' 
+            subprocess.Popen(command)
+        elif file_extension == ".vcd":
+            command = '"' + self.sdk.bin_folder + "/hlfaceposer.exe" + '"'+ ' "' + temp_file_path + '"' 
+            subprocess.Popen(command)
+        else:
+            try:
+                os.startfile(temp_file_path)
+            except Exception as e:
+                print(f"Failed to open file {temp_file_path}: {e}")
         
     def open_file_in_vpk(self,event):
         selected_index = self.text_widget.index(tk.CURRENT)

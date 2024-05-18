@@ -17,8 +17,9 @@ from sourceSDK import SourceSDK
 from texture import Texture
 from model import Model
 from map import Map
-from vpk import VPK
+from _vpk import VPK
 from terminal import Terminal
+from file import File
 
 class Test():
     sdk : SourceSDK
@@ -27,7 +28,7 @@ class Test():
     map : Map
     vpk : VPK
     terminal : Terminal
-
+    file : File
 
 def parse_gameinfo_txt(file_path):
     #gameinfo_path = os.path.join(folder_path, "gameinfo.txt")
@@ -176,10 +177,11 @@ def Init(folder=False):
     test.model = Model(test.sdk)
     test.map = Map(test.sdk)
     test.vpk = VPK(test.sdk)
+    test.file = File(test.sdk)
 
     button_init()
 
-    display_files()
+    test.file.display_files()
 
 def button_init():
 
@@ -469,76 +471,7 @@ def check_software_version(local_version, github_version):
 def sdk_Doc():
     webbrowser.open("https://developer.valvesoftware.com/wiki/SDK_Docs")
 
-def list_files():
-    target_extensions = [".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", ".vpk", ".tga"]
-    files = []
-    for test.sdk.root, dirs, files_in_dir in os.walk(test.sdk.selected_folder):
-        for file_name in files_in_dir:
-            for ext in target_extensions:
-                if file_name.endswith(ext):
-                    files.append(os.path.relpath(os.path.join(test.sdk.root, file_name), test.sdk.selected_folder))
 
-    files.sort()  # Sort files alphabetically
-    return files
-
-def display_files():
-    files = list_files()
-
-    # Création du widget Listbox
-    test.sdk.listbox = Listbox()
-    
-    # Création du widget Scrollbar
-    test.sdk.scrollbar = tk.Scrollbar()
-    
-    # Configure the Listbox to use the Scrollbar
-    test.sdk.listbox.config(yscrollcommand=test.sdk.scrollbar.set)
-    test.sdk.scrollbar.config(command=test.sdk.listbox.yview)
-
-    test.sdk.listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-    test.sdk.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-
-    # Insert files into the Listbox
-    for file in files:
-        test.sdk.listbox.insert(tk.END, file)
-    
-    test.sdk.listbox.bind("<Double-Button-1>", open_file)
-
-def open_file(event):
-    selected_index = test.sdk.listbox.curselection()
-    
-    if selected_index:
-        file = test.sdk.listbox.get(selected_index)
-        file_name, file_extension = os.path.splitext(file)
-        print(file)
-        open_file_source_extension(file_extension,test.sdk.selected_folder + "/" + file, file[5:-4])
-
-def open_file_source_extension(file_extension, filepath, file):
-    if file_extension == ".vtf":   
-        test.texture.open_VTF(filepath)
-        
-    elif file_extension == ".mdl":
-        command = '"' + test.sdk.bin_folder + "/hlmv.exe" + '"'+ ' "' + filepath + '"' 
-        subprocess.Popen(command)
-    elif file_extension == ".vmf":
-        #subprocess.Popen([test.sdk.bin_folder + "/hammer.exe" + ' "' + file + '"'])
-        command = '"' + test.sdk.bin_folder + "/hammer.exe" + '"'+ ' "' + filepath + '"' 
-        subprocess.Popen(command)
-    elif file_extension == ".vcd":
-        command = '"' + test.sdk.bin_folder + "/hlfaceposer.exe" + '"'+ ' "' + filepath + '"' 
-        subprocess.Popen(command)
-    elif file_extension == ".bsp":
-        command = ('"' + test.sdk.executable_game + '"' + " -game " + '"' + test.sdk.selected_folder + '"' + " -console -dev -w 1280 -h 720  -sw +sv_cheats 1 +map " + file)
-        print(command)
-        subprocess.Popen(command)
-    elif file_extension == ".vpk": 
-        test.vpk.display_vpk_contents(filepath)
-    elif file_extension == ".tga": 
-        test.texture.display_tga_file(filepath)
-    else:
-        try:
-            os.startfile(filepath)
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to open file: {e}")
 
 def download_VTF_Edit():
     url = "https://github.com/NeilJed/VTFLib/releases/download/1.3.2/vtfedit133.zip"
