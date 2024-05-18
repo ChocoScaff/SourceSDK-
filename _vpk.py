@@ -6,7 +6,7 @@ import sourceSDK
 from tkinter import filedialog
 import os
 import subprocess
-
+import tempfile
 
 class VPK:
 
@@ -38,19 +38,42 @@ class VPK:
 
         # Display VPK file contents in text widget
         self.text_widget.insert("end", f"Contents of {os.path.basename(self.vpk_path)}:\n")
-        with vpk.open(self.vpk_path) as vpk_file:
-            for file_path in vpk_file:
+        with vpk.open(self.vpk_path) as self.vpk_file:
+            for file_path in self.vpk_file:
                 self.text_widget.insert("end", f"{file_path}\n")
 
-        self.text_widget.bind("<Double-Button-1>", self.open_file_vpk)
+        self.text_widget.bind("<Double-Button-1>", self.open_file_in_vpk)
+        
+    def extract_and_open_file_in_vpk(self,fileName):
+        if not self.vpk_file:
+            print("VPK file is not loaded.")
+            return
 
+        pakfile = self.vpk_file.get_file(fileName)
+        if not pakfile:
+            print(f"File {fileName} not found in VPK.")
+            return
 
+        # Read the file content
+        file_content = pakfile.read()
 
-    def open_file_vpk(self,event):
+        # Create a temporary file and write the content to it
+        with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(fileName)[1]) as temp_file:
+            temp_file.write(file_content)
+            temp_file_path = temp_file.name
+
+        # Open the file with the default associated application
+        try:
+            os.startfile(temp_file_path)
+        except Exception as e:
+            print(f"Failed to open file {temp_file_path}: {e}")
+        
+    def open_file_in_vpk(self,event):
         selected_index = self.text_widget.index(tk.CURRENT)
         line_num = int(selected_index.split('.')[0])
         line = self.text_widget.get(f"{line_num}.0", f"{line_num}.end")
         print(line)
+        self.extract_and_open_file_in_vpk(line)
 
     def create_VPK(self):
         directory = filedialog.askdirectory(title="Select a Directory")
