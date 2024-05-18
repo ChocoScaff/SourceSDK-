@@ -364,9 +364,6 @@ def new_project():
         else:
             print("The directory must be empty")     
         
-def open_vtf():
-    filenamevtf = filedialog.askopenfile(title="Select .vtf file", filetypes=[("VTF files", "*.vtf")], initialdir=test.sdk.selected_folder + "/materials")
-    test.texture.open_VTF(filenamevtf.name)
 
 # Function to handle keyboard shortcuts
 def handle_shortcut(event):
