@@ -6,6 +6,7 @@ import subprocess
 from model import Model
 from texture import Texture
 from openSLN import OpenSLN
+from download import Download
 
 class Button:
 
@@ -77,7 +78,7 @@ class Button:
             self.btn_vtf_edit = tk.Button(self.sdk.root, text="vtfEdit", command=self.texture.open_VTF, image=self.iconVTFEdit, compound=tk.LEFT, background="#4c5844",fg="white")
             self.btn_vtf_edit.pack(side="left")
         else:
-            self.sdk.download_VTF_Edit()
+            Download.download_VTF_Edit()
             self.btn_vtf_edit = tk.Button(self.sdk.root, text="vtfEdit", command=self.texture.open_VTF, image=self.iconVTFEdit, compound=tk.LEFT, background="#4c5844",fg="white")
             self.btn_vtf_edit.pack(side="left")
         

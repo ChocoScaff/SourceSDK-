@@ -10,8 +10,7 @@ import urllib.request
 import json
 import webbrowser
 from tkinter import messagebox
-import requests
-import zipfile
+
 
 from sourceSDK import SourceSDK
 from texture import Texture
@@ -388,34 +387,6 @@ class Test():
     def sdk_Doc(self):
         webbrowser.open("https://developer.valvesoftware.com/wiki/SDK_Docs")
 
-
-
-    def download_VTF_Edit(self):
-        url = "https://github.com/NeilJed/VTFLib/releases/download/1.3.2/vtfedit133.zip"
-        response = requests.get(url)
-        
-        if response.status_code == 200:
-            # Create a temporary file to save the zip content
-            temp_zip_file = os.path.join(os.getcwd(), "VTF.zip")
-            
-            # Write the zip content to the temporary file
-            with open(temp_zip_file, "wb") as f:
-                f.write(response.content)
-            
-            os.makedirs(os.getcwd() + "/VTFEdit/")
-
-            # Extract the contents of the zip file
-            with zipfile.ZipFile(temp_zip_file, "r") as zip_ref:
-                zip_ref.extractall(os.getcwd() + "/VTFEdit/")
-
-            # Remove the temporary zip file
-            os.remove(temp_zip_file)
-            
-            print("Download and extraction completed successfully.")
-        else:
-            print(f"Failed to download zip file. Status code: {response.status_code}")
-
-
     def msbuild_compile(self):
         msbuildpath = self.find_msbuild()
         if msbuildpath == None:
@@ -469,7 +440,7 @@ else:
 
 # Create the main window
 test.sdk.root = tk.Tk()
-test.sdk.root.title("Source SDK : assetBrowser " + local_version)
+test.sdk.root.title("Source SDK : assetsBrowser " + local_version)
 
 test.sdk.root.tk_setPalette(background="#4c5844", foreground="white")
 
