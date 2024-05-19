@@ -7,13 +7,21 @@ import subprocess
 
 
 class Texture:
+    """
+    @Brief Class Texture
+    """
+
 
     sdk : sourceSDK
 
     def __init__(self, sourceSDK) -> None:
+        """
+        """
         self.sdk = sourceSDK
 
     def display_tga_file(self,filename):
+        """
+        """
 
         image_windows = []
 
@@ -30,6 +38,10 @@ class Texture:
         image_windows.append(image_window)
 
     def build_all_texture(self):
+        """
+        Build all textures in materialsrc
+        """
+
         print("wait...")
         vtex = (self.sdk.bin_folder + "/vtex.exe")
         for root, dirs, files in os.walk(self.sdk.selected_folder + "/materialsrc"):
@@ -42,6 +54,9 @@ class Texture:
                     print(result)
 
     def build_texture(self):
+        """
+        """
+
         filenameTGA = filedialog.askopenfile(title="Select .tga file", filetypes=[("TGA files", "*.tga")], initialdir=self.sdk.selected_folder + "/materialsrc")
         vtex = (self.sdk.bin_folder + "/vtex.exe")
         command = ('"' + vtex + '"' + " -game " + '"' + self.sdk.selected_folder + '"' + " -nopause "  + '"' + filenameTGA.name + '"' )
@@ -50,20 +65,31 @@ class Texture:
         print(result)
     
     def open_vtf(self):
+        """
+        """
+
         filenamevtf = filedialog.askopenfile(title="Select .vtf file", filetypes=[("VTF files", "*.vtf")], initialdir=self.sdk.selected_folder + "/materials")
         self.open_VTF(filenamevtf.name)
     
     def open_VTF(self,file=""):
+        """
+        """
+
         command = '"' + os.getcwd() + "/VTFEdit/x64/VTFEdit.exe" + '" ' + '"' + file + '"'
         subprocess.Popen(command)
 
     def texture_to_tga(self):
+        """
+        """
+
         filenameVTF = filedialog.askopenfile(title="Select .vtf file", filetypes=[("VTF file", "*.vtf")], initialdir=self.sdk.selected_folder + "/materials")
         command = '"' + self.sdk.bin_folder + "/vtf2tga.exe" + '"'+ " -i " + '"' + filenameVTF.name + '"' 
         result = subprocess.run(command, shell=True, capture_output=True, text=True)
         print(result)
     
     def generate_vmt(self):
+        """
+        """
 
         filenameVMTs = filedialog.askopenfilenames(title="Select .vtf file", filetypes=[("texture file", "*.vtf")], initialdir=self.sdk.selected_folder + "/materials")
 
@@ -102,12 +128,12 @@ class Texture:
         selected_shader = selected_shaderTK.get()
 
         vmt="""
-    "shader"
-    {
-        "$basetexture" "texture_diffuse"
-        "$normalmap" "texture_normal"
-    }
-    """
+"shader"
+{
+    "$basetexture" "texture_diffuse"
+    "$normalmap" "texture_normal"
+}
+"""
         vmt = vmt.replace("shader",selected_shader)
 
         diffuse_texture = diffuse_texture[diffuse_texture.find("/materials/") + 11:]

@@ -9,6 +9,9 @@ from openSLN import OpenSLN
 from download import Download
 
 class Button:
+    """
+    @brief Class Button
+    """
 
     sdk : sourceSDK
     openSLN : OpenSLN
@@ -37,6 +40,10 @@ class Button:
     texture : Texture
 
     def __init__(self,sourceSDK):
+        """
+        @param sourceSDK get class sourceSDK
+        """
+
         self.sdk = sourceSDK
         self.model = Model(self.sdk)
         self.texture = Texture(self.sdk)
@@ -52,7 +59,37 @@ class Button:
         self.iconVisualStudio = tk.PhotoImage(file=os.path.join(base_path, "icons", "Visual_Studio.png"))
         self.iconVTFEdit = tk.PhotoImage(file=os.path.join(base_path, "icons", "VTFEdit.png"))
 
+    def destroy_button(self):
+        """
+        """
+
+        print("reload")   
+
+        if os.path.isfile(self.sdk.bin_folder + "/hammer.exe"):
+            self.btn_hammer.destroy()
+        if os.path.isfile(self.sdk.bin_folder + "/hammerplusplus.exe"):
+            self.btn_hammer_plus_plus.destroy()
+        if os.path.isfile(self.sdk.bin_folder + "/qc_eyes.exe"):
+            self.btn_qc_eyes.destroy()
+        if os.path.exists(self.sdk.selected_folder + "/src/everything.sln"):
+            self.btn_everything.destroy()
+        if os.path.exists(self.sdk.selected_folder + "/src/games.sln"):
+            self.btn_games.destroy()
+        if os.path.isfile(self.sdk.bin_folder + "/hlmv.exe"):
+            self.btn_hlmv.destroy()
+        if os.path.isfile(self.sdk.bin_folder + "/hlfaceposer.exe"):
+            self.btn_hlfaceposer.destroy()
+        if os.path.isfile(os.getcwd() + "/VTfEdit/x64/VTFEdit.exe"):
+            self.btn_vtf_edit.destroy()
+
+        self.btn_Launch.destroy()
+        self.btn_particle.destroy()
+        self.btn_Launch_dev.destroy()
+
     def display(self):
+        """
+        display button on gui
+        """
 
         if os.path.isfile(self.sdk.bin_folder + "/hammer.exe"):
             self.btn_hammer = tk.Button(self.sdk.root, text="hammer", command=self.open_hammer,image=self.iconHammer,compound=tk.LEFT, background="#4c5844",fg="white")
@@ -99,29 +136,43 @@ class Button:
         self.btn_Launch = tk.Button(self.sdk.root, text="Launch", command=self.Launch, image=self.iconSource, compound=tk.LEFT, background="#4c5844",fg="white")
         self.btn_Launch.pack(side="left")
     
-    def open_hammer(self,file=""):
+    def open_hammer(self):
+        """
+        """
         subprocess.Popen([self.sdk.bin_folder + "/hammer.exe"])
 
     def open_hammer_plus_plus(self):
+        """
+        """
         subprocess.Popen([self.sdk.bin_folder + "/hammerplusplus.exe"])
 
     def open_qc_eyes(self):
+        """
+        """
         subprocess.Popen([self.sdk.bin_folder + "/qc_eyes.exe"])
 
     def open_hlfaceposer(self):
+        """
+        """
         subprocess.Popen([self.sdk.bin_folder + "/hlfaceposer.exe"])
 
     def particle(self):
+        """
+        """
         command = ('"' + self.sdk.executable_game + '"' + " -game " + '"' + self.sdk.selected_folder + '"' + " -tools -nop4 -dev -sw -console")
         print(command)
         subprocess.Popen(command)
 
     def Launch_dev(self):
+        """
+        """
         command = ('"' + self.sdk.executable_game + '"' + " -game " + '"' + self.sdk.selected_folder + '"' + " -console -dev -w 1280 -h 720 -sw +sv_cheats 1")
         print(command)
         subprocess.Popen(command)
 
     def Launch(self):
+        """
+        """
         command = ('"' + self.sdk.executable_game + '"' + " -game " + '"' + self.sdk.selected_folder + '"')
         print(command)
         subprocess.Popen(command)

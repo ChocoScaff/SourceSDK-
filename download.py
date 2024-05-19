@@ -3,8 +3,15 @@ import zipfile
 import os
 
 class Download:
+    """
+    @brief Class Download
+    TODO add github download
+    """
 
     def download_VTF_Edit():
+        """
+        """
+
         url = "https://github.com/NeilJed/VTFLib/releases/download/1.3.2/vtfedit133.zip"
         response = requests.get(url)
         

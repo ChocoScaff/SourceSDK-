@@ -21,7 +21,11 @@ from terminal import Terminal
 from file import File
 from button import Button
 
-class Test():
+class AssetsBrowser():
+    """
+    @brief Class
+    """
+
     sdk : SourceSDK
     texure : Texture
     model : Model
@@ -32,6 +36,11 @@ class Test():
     button : Button
 
     def parse_gameinfo_txt(self,file_path):
+        """
+        parse game info txt
+        @param file_path The path to the gameinfo.txt
+        """
+
         #gameinfo_path = os.path.join(folder_path, "gameinfo.txt")
         print(file_path)
         if os.path.isfile(file_path):
@@ -49,6 +58,12 @@ class Test():
                         print("Paths:", paths)
 
     def bin_folder(self,folder_path):
+        """
+        fin bin folder
+        @param folder_path to the game
+        @return binFolder
+        """
+
         parent_folder = os.path.dirname(folder_path)
         binFolder = parent_folder + "/bin"
         if os.path.exists(binFolder):
@@ -60,6 +75,12 @@ class Test():
         return binFolder
 
     def find_executable_game(self,folder_path):
+        """
+        fin exe
+        @param folder_path to the game
+        @return executable
+        """
+
         parent_folder = os.path.dirname(folder_path)
         executables = []
         for root, dirs, files in os.walk(parent_folder):
@@ -70,10 +91,19 @@ class Test():
         return executables[0]
 
     def find_game_name(self,folder_path):
+        """
+        fin game name
+        @param folder_path to the game
+        @return game name
+        """
         game_name = os.path.basename(folder_path)
         return game_name
 
     def find_gameinfo_folder(self):
+        """
+        open folder whre gameinfo txt
+        """
+
         # Recursively search through directories
         selected_folder = filedialog.askdirectory()
         
@@ -90,6 +120,10 @@ class Test():
 
 
     def build_caption(self):
+        """
+        Compile caption
+        """
+
         filenameTXT = filedialog.askopenfile(title="Select .txt file", filetypes=[("TXT files", "closecaption*.txt")], initialdir=self.sdk.selected_folder + "/resource")
         captioncompiler = (self.sdk.bin_folder + "/captioncompiler.exe")
         command = ('"' + captioncompiler + '"' + " -game " + '"' + self.sdk.selected_folder + '"' + " " + '"' + filenameTXT.name + '"')
@@ -98,6 +132,10 @@ class Test():
         print(result)
 
     def build_all_caption(self):
+        """
+        compile all captions in ressource folder
+        """
+
         print("wait...")
         captioncompiler = (self.sdk.bin_folder + "/captioncompiler.exe")
         for root, dirs, files in os.walk(self.sdk.selected_folder + "/resource"):
@@ -109,20 +147,23 @@ class Test():
                     result = subprocess.run(command, shell=True, capture_output=True, text=True)
                     print(result)
 
-
-
     def Init(self, folder=False):
+        """
+        Init software with parameter of the game
+        @param folder=False
+        """
+
         print("Wait...")
 
         if folder == False:
             if self.sdk.first_init == 1:
-                self.reload_button()
+                self.button.destroy_button()
             self.sdk.selected_folder = self.find_gameinfo_folder()
             if self.sdk.selected_folder == -1:
                 return
         else:
             if self.sdk.first_init == 1:
-                self.reload_button()
+                self.button.destroy_button()
             self.sdk.selected_folder=folder
 
         print("selected directory : " + self.sdk.selected_folder)
@@ -153,11 +194,14 @@ class Test():
         self.file = File(self.sdk)
         self.button = Button(self.sdk)
 
-        self.button_init()
+        self.label_init()
 
         self.file.display_files()
 
-    def button_init(self):
+    def label_init(self):
+        """
+        Init Labet
+        """
 
         self.button.display()
 
@@ -204,31 +248,11 @@ class Test():
 
         self.sdk.first_init = 1
 
-    def reload_button(self):
-        print("reload")   
-
-        if os.path.isfile(self.sdk.bin_folder + "/hammer.exe"):
-            self.sdk.btn_hammer.destroy()
-        if os.path.isfile(self.sdk.bin_folder + "/hammerplusplus.exe"):
-            self.sdk.btn_hammer_plus_plus.destroy()
-        if os.path.isfile(self.sdk.bin_folder + "/qc_eyes.exe"):
-            self.sdk.btn_qc_eyes.destroy()
-        if os.path.exists(self.sdk.selected_folder + "/src/everything.sln"):
-            self.sdk.btn_everything.destroy()
-        if os.path.exists(self.sdk.selected_folder + "/src/games.sln"):
-            self.sdk.btn_games.destroy()
-        if os.path.isfile(self.sdk.bin_folder + "/hlmv.exe"):
-            self.sdk.btn_hlmv.destroy()
-        if os.path.isfile(self.sdk.bin_folder + "/hlfaceposer.exe"):
-            self.sdk.btn_hlfaceposer.destroy()
-        if os.path.isfile(os.getcwd() + "/VTfEdit/x64/VTFEdit.exe"):
-            self.sdk.btn_vtf_edit.destroy()
-
-        self.sdk.btn_Launch.destroy()
-        self.sdk.btn_particle.destroy()
-        self.sdk.btn_Launch_dev.destroy()
 
     def new_project(self):
+        """
+        Init New project
+        """
         
         directory = filedialog.askdirectory(title="Select a Directory")
         game_name = self.find_game_name(directory)
@@ -300,6 +324,9 @@ class Test():
 
     # Function to handle keyboard shortcuts
     def handle_shortcut(self, event):
+        """
+        @param event get event keyboard
+        """
         key = event.keysym
         if key == "n":
             self.new_project()
@@ -307,9 +334,14 @@ class Test():
             self.Init()
 
     def launch_exit(self):
+        """
+        exit program
+        """
         exit()
 
     def open_about_window(self):
+        """
+        """
         about_window = tk.Toplevel(self.sdk.root)
         about_window.title("About")
 
@@ -326,18 +358,27 @@ class Test():
         hyperlink.bind("<Button-1>", open_link)
 
     def generate_games(self):
+        """
+        execute creategameprojects.bat'
+        """
         command = f'cd /D "{self.sdk.selected_folder}\\src" && creategameprojects.bat'
         print(command)
         result = subprocess.run(command, shell=True, capture_output=True, text=True)
         print(result)
 
     def generate_everything(self):
+        """
+        execute createallprojects.bat'
+        """
         command = f'cd /D "{self.sdk.selected_folder}\\src" && createallprojects.bat'
         print(command)
         result = subprocess.run(command, shell=True, capture_output=True, text=True)
         print(result)
 
     def downbload_source_code(self):
+        """
+        Download source code source sdk 2013
+        """
 
         self.download_github_code("https://github.com/ValveSoftware/source-test.sdk-2013", self.sdk.selected_folder + "/src/")
 
@@ -351,9 +392,13 @@ class Test():
         self.Init()
 
     def download_github_code(self, repo_url, destination_folder):
+        """
+        """
         git.Repo.clone_from(repo_url, destination_folder)
 
     def move_files(self, source_folder, destination_folder):
+        """
+        """
         # Create the destination folder if it doesn't exist
         if not os.path.exists(destination_folder):
             os.makedirs(destination_folder)
@@ -369,6 +414,9 @@ class Test():
 
 
     def get_latest_release_version(self, repo_owner, repo_name):
+        """
+        return last version
+        """
         url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases/latest"
         try:
             with urllib.request.urlopen(url) as response:
@@ -379,15 +427,24 @@ class Test():
             return f"Error: {e}"
 
     def check_software_version(self, local_version, github_version):
+        """
+        check local version
+        """
         if local_version == github_version:
             print("You have the latest version installed.")
         else:
             print(f"There is a newer version ({github_version}) available on GitHub.")
 
     def sdk_Doc(self):
+        """
+        Open SDK Docs
+        """
         webbrowser.open("https://developer.valvesoftware.com/wiki/SDK_Docs")
 
     def msbuild_compile(self):
+        """
+        compile SLN with msbuild
+        """
         msbuildpath = self.find_msbuild()
         if msbuildpath == None:
             print("don't find msbuild")
@@ -400,6 +457,9 @@ class Test():
         print(result)
 
     def find_msbuild(self):
+        """
+        find msbuild
+        """
         # Walk through all directories and subdirectories starting from the root directory
         for dirpath, _, filenames in os.walk("C:\Program Files (x86)\MSBuild"):
             # Check if MSBuild.exe exists in the current directory
@@ -411,11 +471,15 @@ class Test():
 
 
     def open_file_explorer(self):
+        """
+        open folder in file explorer
+        TODO open exe if same name of the folder
+        """
         os.startfile(self.sdk.selected_folder)
 
 
 
-test = Test()
+test = AssetsBrowser()
 
 test.sdk = SourceSDK()
 

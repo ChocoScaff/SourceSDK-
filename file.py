@@ -7,13 +7,20 @@ from texture import Texture
 from _vpk import VPK
 
 class File:
+    """
+    @brief Class File
+    """
 
     sdk : sourceSDK
 
     def __init__(self, sourceSDK) -> None:
+        """
+        """
         self.sdk = sourceSDK
 
     def list_files(self):
+        """
+        """
         target_extensions = [".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", "dir.vpk", ".tga"]
         files = []
         for root, dirs, files_in_dir in os.walk(self.sdk.selected_folder):
@@ -26,6 +33,9 @@ class File:
         return files
 
     def display_files(self):
+        """
+        """
+
         files = self.list_files()
 
         # Création du widget Listbox
@@ -48,6 +58,8 @@ class File:
         self.sdk.listbox.bind("<Double-Button-1>", self.open_file)
 
     def open_file(self, event):
+        """
+        """
         selected_index = self.sdk.listbox.curselection()
         
         if selected_index:
@@ -57,6 +69,8 @@ class File:
             self.open_file_source_extension(file_extension,self.sdk.selected_folder + "/" + file, file[5:-4])
 
     def open_file_source_extension(self, file_extension, filepath, file):
+        """
+        """
         if file_extension == ".vtf":   
             Texture.open_VTF(filepath)
             

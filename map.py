@@ -8,13 +8,20 @@ import shutil
 
 
 class Map:
+    """
+    @brief Class Map
+    """
 
     sdk : sourceSDK
 
     def __init__(self, sourceSDK) -> None:
+        """
+        """
         self.sdk = sourceSDK
 
-    def build_map(self):  
+    def build_map(self):
+        """
+        """
 
         mapsrc_directory = os.path.join(self.sdk.selected_folder, "mapsrc")
         map_directory = os.path.join(self.sdk.selected_folder, "maps")
@@ -67,7 +74,10 @@ class Map:
         
         shutil.move(directoryBSP, map_directory)
     
-    def build_all_map(self):  
+    def build_all_map(self):
+        """
+        """
+
         print("wait...")
         mapsrc_directory = os.path.join(self.sdk.selected_folder, "mapsrc")
         map_directory = os.path.join(self.sdk.selected_folder, "maps")
@@ -117,6 +127,9 @@ class Map:
                         shutil.move(directoryBSP, map_directory)
     
     def info_map(self):
+        """
+        """
+
         filenamevmf = filedialog.askopenfile(title="Select .vmf file", filetypes=[("VMF files", "*.vmf")], initialdir=self.sdk.selected_folder + "/mapsrc")
         vmf = srctools.VMF.parse(filenamevmf.name)
         entities = vmf.entities

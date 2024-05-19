@@ -5,17 +5,29 @@ import os
 import subprocess
 
 class Model:
+    """
+    @brief Class Model
+    """
 
     sdk : sourceSDK
 
     def __init__(self, sourceSDK) -> None:
+        """
+        """
+
         self.sdk = sourceSDK
 
 
     def open_hlmv(self):
+        """
+        """
+
         subprocess.Popen([self.sdk.bin_folder + "/hlmv.exe"])
 
     def build_model(self):
+        """
+        """
+
         filenameQC = filedialog.askopenfile(title="Select .qc file", filetypes=[("QC files", "*.qc")], initialdir=self.sdk.selected_folder + "/modelsrc")
         mdl = (self.sdk.bin_folder + "/studiomdl.exe")
         command = ('"' + mdl + '"' + " -game " + '"' + self.sdk.selected_folder + '"' + " " + '"' + filenameQC.name + '"')
@@ -24,6 +36,10 @@ class Model:
         print(result)
 
     def build_all_model(self):
+        """
+        build_all_model in modelsrc
+        """
+
         print("wait...")
         mdl = (self.sdk.bin_folder + "/studiomdl.exe")
         for root, dirs, files in os.walk(self.sdk.selected_folder + "/modelsrc"):
@@ -36,6 +52,8 @@ class Model:
                     print(result)
     
     def generate_qc_file(self):
+        """
+        """
 
         filenameModel = filedialog.askopenfile(title="Select .smd or .dmx file", filetypes=[("model file", "*.smd *.dmx")], initialdir=self.sdk.selected_folder + "/modelsrc")
         print(filenameModel)

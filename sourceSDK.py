@@ -3,6 +3,10 @@ import tkinter as tk
 
 
 class SourceSDK():
+    """
+    @brief SourceSDK
+    """
+
     selected_folder : string
     bin_folder : string
     executable_game : string
@@ -29,6 +33,8 @@ class SourceSDK():
     root : tk.Tk
 
     def __init__(self):
+        """
+        """
         self.first_init = 0
 
 
