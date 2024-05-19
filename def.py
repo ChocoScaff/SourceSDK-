@@ -20,6 +20,7 @@ from map import Map
 from _vpk import VPK
 from terminal import Terminal
 from file import File
+from button import Button
 
 class Test():
     sdk : SourceSDK
@@ -29,305 +30,236 @@ class Test():
     vpk : VPK
     terminal : Terminal
     file : File
+    button : Button
 
-def parse_gameinfo_txt(file_path):
-    #gameinfo_path = os.path.join(folder_path, "gameinfo.txt")
-    print(file_path)
-    if os.path.isfile(file_path):
-        with open(file_path, 'r') as file:
-            for line in file:
-                # Example of parsing logic, modify as needed
-                if "game" in line:
-                    game_name = line.split('"')[1]
-                    print("game", game_name)
-                elif "FileSystem" in line:
-                    # Example of parsing FileSystem section, modify as needed
-                    # Assuming the next line contains the paths
-                    next_line = next(file)
-                    paths = next_line.strip().split('"')[1::2]
-                    print("Paths:", paths)
+    def parse_gameinfo_txt(self,file_path):
+        #gameinfo_path = os.path.join(folder_path, "gameinfo.txt")
+        print(file_path)
+        if os.path.isfile(file_path):
+            with open(file_path, 'r') as file:
+                for line in file:
+                    # Example of parsing logic, modify as needed
+                    if "game" in line:
+                        game_name = line.split('"')[1]
+                        print("game", game_name)
+                    elif "FileSystem" in line:
+                        # Example of parsing FileSystem section, modify as needed
+                        # Assuming the next line contains the paths
+                        next_line = next(file)
+                        paths = next_line.strip().split('"')[1::2]
+                        print("Paths:", paths)
 
-def bin_folder(folder_path):
-    parent_folder = os.path.dirname(folder_path)
-    binFolder = parent_folder + "/bin"
-    if os.path.exists(binFolder):
-        pass
-    else:
-        #with open(folder_path + "bin.txt", 'r') as file:   
-        folder = filedialog.askdirectory(title="Open bin Engine path",initialdir=parent_folder)
-        binFolder = bin_folder(folder)
-    return binFolder
+    def bin_folder(self,folder_path):
+        parent_folder = os.path.dirname(folder_path)
+        binFolder = parent_folder + "/bin"
+        if os.path.exists(binFolder):
+            pass
+        else:
+            #with open(folder_path + "bin.txt", 'r') as file:   
+            folder = filedialog.askdirectory(title="Open bin Engine path",initialdir=parent_folder)
+            binFolder = self.bin_folder(folder)
+        return binFolder
 
-def find_executable_game(folder_path):
-    parent_folder = os.path.dirname(folder_path)
-    executables = []
-    for root, dirs, files in os.walk(parent_folder):
-        for file in files:
-            if file.endswith('.exe'):
-                executables.append(os.path.join(root, file))
-    #print(executables)
-    return executables[0]
+    def find_executable_game(self,folder_path):
+        parent_folder = os.path.dirname(folder_path)
+        executables = []
+        for root, dirs, files in os.walk(parent_folder):
+            for file in files:
+                if file.endswith('.exe'):
+                    executables.append(os.path.join(root, file))
+        #print(executables)
+        return executables[0]
 
-def find_game_name(folder_path):
-    game_name = os.path.basename(folder_path)
-    return game_name
+    def find_game_name(self,folder_path):
+        game_name = os.path.basename(folder_path)
+        return game_name
 
-def find_gameinfo_folder():
-    # Recursively search through directories
-    selected_folder = filedialog.askdirectory()
-    
-    gameinfo_path = os.path.join(selected_folder, "gameinfo.txt")
+    def find_gameinfo_folder(self):
+        # Recursively search through directories
+        selected_folder = filedialog.askdirectory()
+        
+        gameinfo_path = os.path.join(selected_folder, "gameinfo.txt")
 
-    if os.path.isfile(gameinfo_path):
-        command = "setx VProject " + '"' + selected_folder + '"'
-        result = subprocess.run(command, shell=True)
+        if os.path.isfile(gameinfo_path):
+            command = "setx VProject " + '"' + selected_folder + '"'
+            result = subprocess.run(command, shell=True)
+            print(result)
+            return selected_folder
+        else:
+            print("gameinfo.txt not found in selected folder.")
+            return -1
+
+
+    def build_caption(self):
+        filenameTXT = filedialog.askopenfile(title="Select .txt file", filetypes=[("TXT files", "closecaption*.txt")], initialdir=self.sdk.selected_folder + "/resource")
+        captioncompiler = (self.sdk.bin_folder + "/captioncompiler.exe")
+        command = ('"' + captioncompiler + '"' + " -game " + '"' + self.sdk.selected_folder + '"' + " " + '"' + filenameTXT.name + '"')
+        print(command)
+        result = subprocess.run(command, shell=True, capture_output=True, text=True)
         print(result)
-        return selected_folder
-    else:
-        print("gameinfo.txt not found in selected folder.")
-        return -1
+
+    def build_all_caption(self):
+        print("wait...")
+        captioncompiler = (self.sdk.bin_folder + "/captioncompiler.exe")
+        for root, dirs, files in os.walk(self.sdk.selected_folder + "/resource"):
+            for file in files:
+                if file.startswith("closecaption") and file.endswith(".txt"):
+                    caption_file_path = os.path.join(root, file)
+                    command = ('"' + captioncompiler + '"' + " -game " + '"' + self.sdk.selected_folder + '"' + " " + '"' + caption_file_path + '"')
+                    print(command)
+                    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+                    print(result)
 
 
-def build_caption():
-    filenameTXT = filedialog.askopenfile(title="Select .txt file", filetypes=[("TXT files", "closecaption*.txt")], initialdir=test.sdk.selected_folder + "/resource")
-    captioncompiler = (test.sdk.bin_folder + "/captioncompiler.exe")
-    command = ('"' + captioncompiler + '"' + " -game " + '"' + test.sdk.selected_folder + '"' + " " + '"' + filenameTXT.name + '"')
-    print(command)
-    result = subprocess.run(command, shell=True, capture_output=True, text=True)
-    print(result)
 
-def build_all_caption():
-    print("wait...")
-    captioncompiler = (test.sdk.bin_folder + "/captioncompiler.exe")
-    for root, dirs, files in os.walk(test.sdk.selected_folder + "/resource"):
-        for file in files:
-            if file.startswith("closecaption") and file.endswith(".txt"):
-                caption_file_path = os.path.join(root, file)
-                command = ('"' + captioncompiler + '"' + " -game " + '"' + test.sdk.selected_folder + '"' + " " + '"' + caption_file_path + '"')
-                print(command)
-                result = subprocess.run(command, shell=True, capture_output=True, text=True)
-                print(result)
+    def Init(self, folder=False):
+        print("Wait...")
 
-def open_hammer(file=""):
-    subprocess.Popen([test.sdk.bin_folder + "/hammer.exe" + " " + file])
+        if folder == False:
+            if self.sdk.first_init == 1:
+                self.reload_button()
+            self.sdk.selected_folder = self.find_gameinfo_folder()
+            if self.sdk.selected_folder == -1:
+                return
+        else:
+            if self.sdk.first_init == 1:
+                self.reload_button()
+            self.sdk.selected_folder=folder
 
-def open_hammer_plus_plus():
-    subprocess.Popen([test.sdk.bin_folder + "/hammerplusplus.exe"])
+        print("selected directory : " + self.sdk.selected_folder)
 
-def open_qc_eyes():
-    subprocess.Popen([test.sdk.bin_folder + "/qc_eyes.exe"])
+        self.sdk.game_name = self.find_game_name(self.sdk.selected_folder)
+        print("game name : " + self.sdk.game_name)
 
-def open_hlfaceposer():
-    subprocess.Popen([test.sdk.bin_folder + "/hlfaceposer.exe"])
+        self.sdk.bin_folder = self.bin_folder(self.sdk.selected_folder)
+        print("bin directory : " + self.sdk.bin_folder)
 
-def particle():
-    command = ('"' + test.sdk.executable_game + '"' + " -game " + '"' + test.sdk.selected_folder + '"' + " -tools -nop4 -dev -sw -console")
-    print(command)
-    subprocess.Popen(command)
+        self.sdk.executable_game = self.find_executable_game(self.sdk.bin_folder)
+        print("executable game : " + self.sdk.executable_game)
 
-def Launch_dev():
-    command = ('"' + test.sdk.executable_game + '"' + " -game " + '"' + test.sdk.selected_folder + '"' + " -console -dev -w 1280 -h 720 -sw +sv_cheats 1")
-    print(command)
-    subprocess.Popen(command)
+        try:
+            self.sdk.root.iconbitmap(self.sdk.selected_folder + '/resource/game.ico')
+        except tk.TclError:
+            print("Error: Failed to set icon.")
+        
+        print("Project open")
 
-def Launch():
-    command = ('"' + test.sdk.executable_game + '"' + " -game " + '"' + test.sdk.selected_folder + '"')
-    print(command)
-    subprocess.Popen(command)
+        lbl_result = tk.Label(self.sdk.root, text="Tools", wraplength=400, background="#3e4637",fg='white')
+        lbl_result.pack()
 
+        self.texture = Texture(self.sdk)
+        self.model = Model(self.sdk)
+        self.map = Map(self.sdk)
+        self.vpk = VPK(self.sdk)
+        self.file = File(self.sdk)
+        self.button = Button(self.sdk)
 
-def Init(folder=False):
-    print("Wait...")
+        self.button_init()
 
-    if folder == False:
-        if test.sdk.first_init == 1:
-            reload_button()
-        test.sdk.selected_folder = find_gameinfo_folder()
-        if test.sdk.selected_folder == -1:
-            return
-    else:
-        if test.sdk.first_init == 1:
-            reload_button()
-        test.sdk.selected_folder=folder
+        self.file.display_files()
 
-    print("selected directory : " + test.sdk.selected_folder)
+    def button_init(self):
 
-    test.sdk.game_name = find_game_name(test.sdk.selected_folder)
-    print("game name : " + test.sdk.game_name)
+        self.button.display()
 
-    test.sdk.bin_folder = bin_folder(test.sdk.selected_folder)
-    print("bin directory : " + test.sdk.bin_folder)
+        if self.sdk.first_init == 0:
+            self.sdk.texture_menu = tk.Menu(self.sdk.menu_bar, tearoff=0,background="#4c5844",fg="white")
+            self.sdk.menu_bar.add_cascade(label="Texture", menu=self.sdk.texture_menu)
+            self.sdk.map_menu = tk.Menu(self.sdk.menu_bar, tearoff=0,background="#4c5844",fg="white")
+            self.sdk.menu_bar.add_cascade(label="Map", menu=self.sdk.map_menu)
+            self.sdk.model_menu = tk.Menu(self.sdk.menu_bar, tearoff=0,background="#4c5844",fg="white")
+            self.sdk.menu_bar.add_cascade(label="Model", menu=self.sdk.model_menu)
+            self.sdk.other_menu = tk.Menu(self.sdk.menu_bar, tearoff=0,background="#4c5844",fg="white")
+            self.sdk.menu_bar.add_cascade(label="Other", menu=self.sdk.other_menu)
 
-    test.sdk.executable_game = find_executable_game(test.sdk.bin_folder)
-    print("executable game : " + test.sdk.executable_game)
+            self.sdk.map_menu.add_command(label="Build Map", command=self.map.build_map)
+            self.sdk.map_menu.add_command(label="Build All Maps", command=self.map.build_all_map)
+            self.sdk.map_menu.add_command(label="Info Map", command=self.map.info_map)
 
-    try:
-        test.sdk.root.iconbitmap(test.sdk.selected_folder + '/resource/game.ico')
-    except tk.TclError:
-        print("Error: Failed to set icon.")
-    
-    print("Project open")
+            self.sdk.texture_menu.add_command(label="Build Texture", command=self.texture.build_texture)
+            self.sdk.texture_menu.add_command(label="Build All Textures", command=self.texture.build_all_texture)
+            self.sdk.texture_menu.add_command(label="See Texture", command=self.texture.open_vtf)
+            self.sdk.texture_menu.add_command(label="Texture To TGA", command=self.texture.texture_to_tga)
+            self.sdk.texture_menu.add_command(label="Generate vmt", command=self.texture.generate_vmt)
 
-    Launch_dev()
+            self.sdk.model_menu.add_command(label="Build Model", command=self.model.build_model)
+            self.sdk.model_menu.add_command(label="Build All Models", command=self.model.build_all_model)
+            self.sdk.model_menu.add_command(label="Generate QC File", command=self.model.generate_qc_file)
 
-    lbl_result = tk.Label(test.sdk.root, text="Tools", wraplength=400, background="#3e4637",fg='white')
-    lbl_result.pack()
+            self.sdk.other_menu.add_command(label="Create VPK", command=self.vpk.create_VPK)
+            self.sdk.other_menu.add_command(label="Display VPK", command=self.vpk.display_VPK)
+            self.sdk.other_menu.add_command(label="Display VPK Contents", command=self.vpk.display_vpk_contents)
+            self.sdk.other_menu.add_command(label="Extract VPK", command=self.vpk.extract_VPK)
 
-    test.texture = Texture(test.sdk)
-    test.model = Model(test.sdk)
-    test.map = Map(test.sdk)
-    test.vpk = VPK(test.sdk)
-    test.file = File(test.sdk)
+            self.sdk.other_menu.add_command(label="Build Caption", command=self.build_caption)
+            self.sdk.other_menu.add_command(label="Build All Captions", command=self.build_all_caption)
 
-    button_init()
-
-    test.file.display_files()
-
-def button_init():
-
-    if os.path.isfile(test.sdk.bin_folder + "/hammer.exe"):
-        test.sdk.btn_hammer = tk.Button(test.sdk.root, text="hammer", command=open_hammer,image=iconHammer,compound=tk.LEFT, background="#4c5844",fg="white")
-        test.sdk.btn_hammer.pack(side="left")
-    
-    if os.path.isfile(test.sdk.bin_folder + "/hammerplusplus.exe"):
-        test.sdk.btn_hammer_plus_plus = tk.Button(test.sdk.root, text="hammer++", command=open_hammer_plus_plus, image=iconHpp, compound=tk.LEFT, background="#4c5844",fg="white")    
-        test.sdk.btn_hammer_plus_plus.pack(side="left")
-
-    if os.path.isfile(test.sdk.bin_folder + "/hlmv.exe"):
-        test.sdk.btn_hlmv = tk.Button(test.sdk.root, text="hlmv", command=test.model.open_hlmv, image=iconHLMV, compound=tk.LEFT, background="#4c5844",fg="white")
-        test.sdk.btn_hlmv.pack(side="left")
-
-    if os.path.isfile(test.sdk.bin_folder + "/qc_eyes.exe"):
-        test.sdk.btn_qc_eyes= tk.Button(test.sdk.root, text="qc_eyes", command=open_qc_eyes, image=iconQc_eyes, compound=tk.LEFT, background="#4c5844",fg="white")
-        test.sdk.btn_qc_eyes.pack(side="left")
-
-    if os.path.isfile(test.sdk.bin_folder + "/hlfaceposer.exe"):
-        test.sdk.btn_hlfaceposer = tk.Button(test.sdk.root, text="hlfaceposer", command=open_hlfaceposer, image=iconHlposer, compound=tk.LEFT, background="#4c5844",fg="white")
-        test.sdk.btn_hlfaceposer.pack(side="left")
-
-    if os.path.isfile(os.getcwd() + "/VTfEdit/x64/VTFEdit.exe"):
-        test.sdk.btn_vtf_edit = tk.Button(test.sdk.root, text="vtfEdit", command=test.texture.open_VTF, image=iconVTFEdit, compound=tk.LEFT, background="#4c5844",fg="white")
-        test.sdk.btn_vtf_edit.pack(side="left")
-    else:
-        download_VTF_Edit()
-        test.sdk.btn_vtf_edit = tk.Button(test.sdk.root, text="vtfEdit", command=test.texture.open_VTF, image=iconVTFEdit, compound=tk.LEFT, background="#4c5844",fg="white")
-        test.sdk.btn_vtf_edit.pack(side="left")
-    
-    if os.path.exists(test.sdk.selected_folder + "/src/games.sln"):
-        test.sdk.btn_games = tk.Button(test.sdk.root, text="games", command=open_games, image=iconVisualStudio, compound=tk.LEFT, background="#4c5844",fg="white")
-        test.sdk.btn_games.pack(side="left")
-
-    if os.path.exists(test.sdk.selected_folder + "/src/everything.sln"):
-        test.sdk.btn_everything = tk.Button(test.sdk.root, text="everything", command=open_everything, image=iconVisualStudio, compound=tk.LEFT, background="#4c5844",fg="white")
-        test.sdk.btn_everything.pack(side="left")
-
-    test.sdk.btn_particle = tk.Button(test.sdk.root, text="Particle", command=particle, image=iconSource, compound=tk.LEFT, background="#4c5844",fg="white")
-    test.sdk.btn_particle.pack(side="left")
-
-    test.sdk.btn_Launch_dev = tk.Button(test.sdk.root, text="Launch Dev", command=Launch_dev, image=iconSource, compound=tk.LEFT, background="#4c5844",fg="white")
-    test.sdk.btn_Launch_dev.pack(side="left")
-
-    test.sdk.btn_Launch = tk.Button(test.sdk.root, text="Launch", command=Launch, image=iconSource, compound=tk.LEFT, background="#4c5844",fg="white")
-    test.sdk.btn_Launch.pack(side="left")
-
-    if test.sdk.first_init == 0:
-        test.sdk.texture_menu = tk.Menu(test.sdk.menu_bar, tearoff=0,background="#4c5844",fg="white")
-        test.sdk.menu_bar.add_cascade(label="Texture", menu=test.sdk.texture_menu)
-        test.sdk.map_menu = tk.Menu(test.sdk.menu_bar, tearoff=0,background="#4c5844",fg="white")
-        test.sdk.menu_bar.add_cascade(label="Map", menu=test.sdk.map_menu)
-        test.sdk.model_menu = tk.Menu(test.sdk.menu_bar, tearoff=0,background="#4c5844",fg="white")
-        test.sdk.menu_bar.add_cascade(label="Model", menu=test.sdk.model_menu)
-        test.sdk.other_menu = tk.Menu(test.sdk.menu_bar, tearoff=0,background="#4c5844",fg="white")
-        test.sdk.menu_bar.add_cascade(label="Other", menu=test.sdk.other_menu)
-
-        test.sdk.map_menu.add_command(label="Build Map", command=test.map.build_map)
-        test.sdk.map_menu.add_command(label="Build All Maps", command=test.map.build_all_map)
-        test.sdk.map_menu.add_command(label="Info Map", command=test.map.info_map)
-
-        test.sdk.texture_menu.add_command(label="Build Texture", command=test.texture.build_texture)
-        test.sdk.texture_menu.add_command(label="Build All Textures", command=test.texture.build_all_texture)
-        test.sdk.texture_menu.add_command(label="See Texture", command=test.texture.open_vtf)
-        test.sdk.texture_menu.add_command(label="Texture To TGA", command=test.texture.texture_to_tga)
-        test.sdk.texture_menu.add_command(label="Generate vmt", command=test.texture.generate_vmt)
-
-        test.sdk.model_menu.add_command(label="Build Model", command=test.model.build_model)
-        test.sdk.model_menu.add_command(label="Build All Models", command=test.model.build_all_model)
-        test.sdk.model_menu.add_command(label="Generate QC File", command=test.model.generate_qc_file)
-
-        test.sdk.other_menu.add_command(label="Create VPK", command=test.vpk.create_VPK)
-        test.sdk.other_menu.add_command(label="Display VPK", command=test.vpk.display_VPK)
-        test.sdk.other_menu.add_command(label="Display VPK Contents", command=test.vpk.display_vpk_contents)
-        test.sdk.other_menu.add_command(label="Extract VPK", command=test.vpk.extract_VPK)
-
-        test.sdk.other_menu.add_command(label="Build Caption", command=build_caption)
-        test.sdk.other_menu.add_command(label="Build All Captions", command=build_all_caption)
-
-        #if os.path.exists(test.sdk.selected_folder + "/src/creategameprojects.bat"):
-        test.sdk.other_menu.add_command(label="Generate games", command=generate_games)
-        #if os.path.exists(test.sdk.selected_folder + "/src/createallprojects.bat"):
-        test.sdk.other_menu.add_command(label="Generate everything", command=generate_everything)
-        test.sdk.other_menu.add_command(label="Download source code", command=downbload_source_code)
-        test.sdk.other_menu.add_command(label="MsBuild", command=msbuild_compile)
-        test.sdk.other_menu.add_command(label="Open in file explorer", command=open_file_explorer)
+            #if os.path.exists(self.sdk.selected_folder + "/src/creategameprojects.bat"):
+            self.sdk.other_menu.add_command(label="Generate games", command=self.generate_games)
+            #if os.path.exists(self.sdk.selected_folder + "/src/createallprojects.bat"):
+            self.sdk.other_menu.add_command(label="Generate everything", command=self.generate_everything)
+            self.sdk.other_menu.add_command(label="Download source code", command=self.downbload_source_code)
+            self.sdk.other_menu.add_command(label="MsBuild", command=self.msbuild_compile)
+            self.sdk.other_menu.add_command(label="Open in file explorer", command=self.open_file_explorer)
 
 
-    test.sdk.first_init = 1
+        self.sdk.first_init = 1
 
-def reload_button():
-    print("reload")   
+    def reload_button(self):
+        print("reload")   
 
-    if os.path.isfile(test.sdk.bin_folder + "/hammer.exe"):
-        test.sdk.btn_hammer.destroy()
-    if os.path.isfile(test.sdk.bin_folder + "/hammerplusplus.exe"):
-        test.sdk.btn_hammer_plus_plus.destroy()
-    if os.path.isfile(test.sdk.bin_folder + "/qc_eyes.exe"):
-        test.sdk.btn_qc_eyes.destroy()
-    if os.path.exists(test.sdk.selected_folder + "/src/everything.sln"):
-        test.sdk.btn_everything.destroy()
-    if os.path.exists(test.sdk.selected_folder + "/src/games.sln"):
-        test.sdk.btn_games.destroy()
-    if os.path.isfile(test.sdk.bin_folder + "/hlmv.exe"):
-        test.sdk.btn_hlmv.destroy()
-    if os.path.isfile(test.sdk.bin_folder + "/hlfaceposer.exe"):
-        test.sdk.btn_hlfaceposer.destroy()
-    if os.path.isfile(os.getcwd() + "/VTfEdit/x64/VTFEdit.exe"):
-        test.sdk.btn_vtf_edit.destroy()
+        if os.path.isfile(self.sdk.bin_folder + "/hammer.exe"):
+            self.sdk.btn_hammer.destroy()
+        if os.path.isfile(self.sdk.bin_folder + "/hammerplusplus.exe"):
+            self.sdk.btn_hammer_plus_plus.destroy()
+        if os.path.isfile(self.sdk.bin_folder + "/qc_eyes.exe"):
+            self.sdk.btn_qc_eyes.destroy()
+        if os.path.exists(self.sdk.selected_folder + "/src/everything.sln"):
+            self.sdk.btn_everything.destroy()
+        if os.path.exists(self.sdk.selected_folder + "/src/games.sln"):
+            self.sdk.btn_games.destroy()
+        if os.path.isfile(self.sdk.bin_folder + "/hlmv.exe"):
+            self.sdk.btn_hlmv.destroy()
+        if os.path.isfile(self.sdk.bin_folder + "/hlfaceposer.exe"):
+            self.sdk.btn_hlfaceposer.destroy()
+        if os.path.isfile(os.getcwd() + "/VTfEdit/x64/VTFEdit.exe"):
+            self.sdk.btn_vtf_edit.destroy()
 
-    test.sdk.btn_Launch.destroy()
-    test.sdk.btn_particle.destroy()
-    test.sdk.btn_Launch_dev.destroy()
+        self.sdk.btn_Launch.destroy()
+        self.sdk.btn_particle.destroy()
+        self.sdk.btn_Launch_dev.destroy()
 
-def new_project():
-    
-    directory = filedialog.askdirectory(title="Select a Directory")
-    game_name = find_game_name(directory)
+    def new_project(self):
+        
+        directory = filedialog.askdirectory(title="Select a Directory")
+        game_name = self.find_game_name(directory)
 
-    print(directory)
-    print(game_name)
-    if directory:
-        files_in_dir = os.listdir(directory)
-    
-        # Check if the directory is empty
-        if not files_in_dir:
+        print(directory)
+        print(game_name)
+        if directory:
+            files_in_dir = os.listdir(directory)
+        
+            # Check if the directory is empty
+            if not files_in_dir:
 
-            os.mkdir(directory + "/materialsrc")
-            os.mkdir(directory + "/materials")
-            os.mkdir(directory + "/models")
-            os.mkdir(directory + "/modelsrc")
-            os.mkdir(directory + "/bin")
-            os.mkdir(directory + "/cfg")
-            os.mkdir(directory + "/scripts")
-            os.mkdir(directory + "/maps")
-            os.mkdir(directory + "/mapsrc")
-            os.mkdir(directory + "/resource")
-            os.mkdir(directory + "/particles")
-            os.mkdir(directory + "/sound")
-            os.mkdir(directory + "/media")
-            os.mkdir(directory + "/expressions")
-            os.mkdir(directory + "/scenes")
-            os.mkdir(directory + "/src")
+                os.mkdir(directory + "/materialsrc")
+                os.mkdir(directory + "/materials")
+                os.mkdir(directory + "/models")
+                os.mkdir(directory + "/modelsrc")
+                os.mkdir(directory + "/bin")
+                os.mkdir(directory + "/cfg")
+                os.mkdir(directory + "/scripts")
+                os.mkdir(directory + "/maps")
+                os.mkdir(directory + "/mapsrc")
+                os.mkdir(directory + "/resource")
+                os.mkdir(directory + "/particles")
+                os.mkdir(directory + "/sound")
+                os.mkdir(directory + "/media")
+                os.mkdir(directory + "/expressions")
+                os.mkdir(directory + "/scenes")
+                os.mkdir(directory + "/src")
 
-            gameinfo_content = """
+                gameinfo_content = """
 "GameInfo"
 {
     game 		"replace"
@@ -351,179 +283,170 @@ def new_project():
 }
             """
 
-            # Write the content to the file
-            gameinfo_content.replace("replace", game_name)
-            gameInfo = directory + "/gameinfo.txt"
-            try:
-                with open(gameInfo, 'w') as file:
-                    file.write(gameinfo_content.replace('replace', game_name))
-                print(f"String saved to '{directory}' successfully.")
-            except Exception as e:
-                print(f"Error: {e}")
+                # Write the content to the file
+                gameinfo_content.replace("replace", game_name)
+                gameInfo = directory + "/gameinfo.txt"
+                try:
+                    with open(gameInfo, 'w') as file:
+                        file.write(gameinfo_content.replace('replace', game_name))
+                    print(f"String saved to '{directory}' successfully.")
+                except Exception as e:
+                    print(f"Error: {e}")
+                
+                self.Init(directory)
+
+            else:
+                print("The directory must be empty")     
             
-            Init(directory)
 
+    # Function to handle keyboard shortcuts
+    def handle_shortcut(self, event):
+        key = event.keysym
+        if key == "n":
+            self.new_project()
+        elif key == "o":
+            self.Init()
+
+    def launch_exit(self):
+        exit()
+
+    def open_about_window(self):
+        about_window = tk.Toplevel(self.sdk.root)
+        about_window.title("About")
+
+        # Add text to the window
+        about_text = tk.Label(about_window, text="Software created by ChocoScaff.\nYou can find the source code here:")
+        about_text.pack()
+
+        # Add hyperlink
+        def open_link(event):
+            webbrowser.open_new("https://github.com/ChocoScaff/SourceSDK-")
+
+        hyperlink = tk.Label(about_window, text="https://github.com/ChocoScaff/SourceSDK-", fg="blue", cursor="hand2")
+        hyperlink.pack()
+        hyperlink.bind("<Button-1>", open_link)
+
+    def generate_games(self):
+        command = f'cd /D "{self.sdk.selected_folder}\\src" && creategameprojects.bat'
+        print(command)
+        result = subprocess.run(command, shell=True, capture_output=True, text=True)
+        print(result)
+
+    def generate_everything(self):
+        command = f'cd /D "{self.sdk.selected_folder}\\src" && createallprojects.bat'
+        print(command)
+        result = subprocess.run(command, shell=True, capture_output=True, text=True)
+        print(result)
+
+    def downbload_source_code(self):
+
+        self.download_github_code("https://github.com/ValveSoftware/source-test.sdk-2013", self.sdk.selected_folder + "/src/")
+
+        shutil.rmtree(self.sdk.selected_folder + "/src/mp/")
+        self.move_files(self.sdk.selected_folder + "/src/sp/src/", self.sdk.selected_folder + "/src/")
+        shutil.rmtree(self.sdk.selected_folder + "/src/sp/")
+
+        self.generate_games()
+        self.generate_everything()
+
+        self.Init()
+
+    def download_github_code(self, repo_url, destination_folder):
+        git.Repo.clone_from(repo_url, destination_folder)
+
+    def move_files(self, source_folder, destination_folder):
+        # Create the destination folder if it doesn't exist
+        if not os.path.exists(destination_folder):
+            os.makedirs(destination_folder)
+
+        # Get a list of all files in the source folder
+        files = os.listdir(source_folder)
+
+        # Move each file to the destination folder
+        for file in files:
+            source_file = os.path.join(source_folder, file)
+            destination_file = os.path.join(destination_folder, file)
+            shutil.move(source_file, destination_file)
+
+
+    def get_latest_release_version(self, repo_owner, repo_name):
+        url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases/latest"
+        try:
+            with urllib.request.urlopen(url) as response:
+                data = json.loads(response.read())
+                latest_version = data['tag_name']
+                return latest_version
+        except Exception as e:
+            return f"Error: {e}"
+
+    def check_software_version(self, local_version, github_version):
+        if local_version == github_version:
+            print("You have the latest version installed.")
         else:
-            print("The directory must be empty")     
+            print(f"There is a newer version ({github_version}) available on GitHub.")
+
+    def sdk_Doc(self):
+        webbrowser.open("https://developer.valvesoftware.com/wiki/SDK_Docs")
+
+
+
+    def download_VTF_Edit(self):
+        url = "https://github.com/NeilJed/VTFLib/releases/download/1.3.2/vtfedit133.zip"
+        response = requests.get(url)
         
+        if response.status_code == 200:
+            # Create a temporary file to save the zip content
+            temp_zip_file = os.path.join(os.getcwd(), "VTF.zip")
+            
+            # Write the zip content to the temporary file
+            with open(temp_zip_file, "wb") as f:
+                f.write(response.content)
+            
+            os.makedirs(os.getcwd() + "/VTFEdit/")
 
-# Function to handle keyboard shortcuts
-def handle_shortcut(event):
-    key = event.keysym
-    if key == "n":
-        new_project()
-    elif key == "o":
-        Init()
+            # Extract the contents of the zip file
+            with zipfile.ZipFile(temp_zip_file, "r") as zip_ref:
+                zip_ref.extractall(os.getcwd() + "/VTFEdit/")
 
-def launch_exit():
-    exit()
-
-def open_about_window():
-    about_window = tk.Toplevel(test.sdk.root)
-    about_window.title("About")
-
-    # Add text to the window
-    about_text = tk.Label(about_window, text="Software created by ChocoScaff.\nYou can find the source code here:")
-    about_text.pack()
-
-    # Add hyperlink
-    def open_link(event):
-        webbrowser.open_new("https://github.com/ChocoScaff/SourceSDK-")
-
-    hyperlink = tk.Label(about_window, text="https://github.com/ChocoScaff/SourceSDK-", fg="blue", cursor="hand2")
-    hyperlink.pack()
-    hyperlink.bind("<Button-1>", open_link)
-
-def open_sln_file(sln_file_path):
-    
-    # Check if the .sln file exists
-    if os.path.exists(sln_file_path):
-        # Open the .sln file with the default application
-        os.startfile(sln_file_path)
-    else:
-        print("Error: .sln file not found!")
-
-def open_games():
-    open_sln_file(test.sdk.selected_folder + "/src/games.sln")
-
-def open_everything():
-    open_sln_file(test.sdk.selected_folder + "/src/everything.sln")
-
-def generate_games():
-    command = f'cd /D "{test.sdk.selected_folder}\\src" && creategameprojects.bat'
-    print(command)
-    result = subprocess.run(command, shell=True, capture_output=True, text=True)
-    print(result)
-
-def generate_everything():
-    command = f'cd /D "{test.sdk.selected_folder}\\src" && createallprojects.bat'
-    print(command)
-    result = subprocess.run(command, shell=True, capture_output=True, text=True)
-    print(result)
-
-def downbload_source_code():
-
-    download_github_code("https://github.com/ValveSoftware/source-test.sdk-2013", test.sdk.selected_folder + "/src/")
-
-    shutil.rmtree(test.sdk.selected_folder + "/src/mp/")
-    move_files(test.sdk.selected_folder + "/src/sp/src/", test.sdk.selected_folder + "/src/")
-    shutil.rmtree(test.sdk.selected_folder + "/src/sp/")
-
-    generate_games()
-    generate_everything()
-
-    Init()
-
-def download_github_code(repo_url, destination_folder):
-    git.Repo.clone_from(repo_url, destination_folder)
-
-def move_files(source_folder, destination_folder):
-    # Create the destination folder if it doesn't exist
-    if not os.path.exists(destination_folder):
-        os.makedirs(destination_folder)
-
-    # Get a list of all files in the source folder
-    files = os.listdir(source_folder)
-
-    # Move each file to the destination folder
-    for file in files:
-        source_file = os.path.join(source_folder, file)
-        destination_file = os.path.join(destination_folder, file)
-        shutil.move(source_file, destination_file)
+            # Remove the temporary zip file
+            os.remove(temp_zip_file)
+            
+            print("Download and extraction completed successfully.")
+        else:
+            print(f"Failed to download zip file. Status code: {response.status_code}")
 
 
-def get_latest_release_version(repo_owner, repo_name):
-    url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases/latest"
-    try:
-        with urllib.request.urlopen(url) as response:
-            data = json.loads(response.read())
-            latest_version = data['tag_name']
-            return latest_version
-    except Exception as e:
-        return f"Error: {e}"
-
-def check_software_version(local_version, github_version):
-    if local_version == github_version:
-        print("You have the latest version installed.")
-    else:
-        print(f"There is a newer version ({github_version}) available on GitHub.")
-
-def sdk_Doc():
-    webbrowser.open("https://developer.valvesoftware.com/wiki/SDK_Docs")
-
-
-
-def download_VTF_Edit():
-    url = "https://github.com/NeilJed/VTFLib/releases/download/1.3.2/vtfedit133.zip"
-    response = requests.get(url)
-    
-    if response.status_code == 200:
-        # Create a temporary file to save the zip content
-        temp_zip_file = os.path.join(os.getcwd(), "VTF.zip")
+    def msbuild_compile(self):
+        msbuildpath = self.find_msbuild()
+        if msbuildpath == None:
+            print("don't find msbuild")
+            return
         
-        # Write the zip content to the temporary file
-        with open(temp_zip_file, "wb") as f:
-            f.write(response.content)
-        
-        os.makedirs(os.getcwd() + "/VTFEdit/")
+        sln_path = filedialog.askopenfilename(title="Select sln file", filetypes=[("sln files", "*.sln")])
+        command= '"' + msbuildpath + '"' + ' ' + '"' + sln_path + '"' + " /p:Configuration=Debug"
+        print(command)
+        result = subprocess.run(command, shell=True, capture_output=True, text=True)
+        print(result)
 
-        # Extract the contents of the zip file
-        with zipfile.ZipFile(temp_zip_file, "r") as zip_ref:
-            zip_ref.extractall(os.getcwd() + "/VTFEdit/")
+    def find_msbuild(self):
+        # Walk through all directories and subdirectories starting from the root directory
+        for dirpath, _, filenames in os.walk("C:\Program Files (x86)\MSBuild"):
+            # Check if MSBuild.exe exists in the current directory
+            if 'MSBuild.exe' in filenames:
+                return os.path.join(dirpath, 'MSBuild.exe')
 
-        # Remove the temporary zip file
-        os.remove(temp_zip_file)
-        
-        print("Download and extraction completed successfully.")
-    else:
-        print(f"Failed to download zip file. Status code: {response.status_code}")
-
-
-def msbuild_compile():
-    msbuildpath = find_msbuild()
-    if msbuildpath == None:
-        print("don't find msbuild")
-        return
-    
-    sln_path = filedialog.askopenfilename(title="Select sln file", filetypes=[("sln files", "*.sln")])
-    command= '"' + msbuildpath + '"' + ' ' + '"' + sln_path + '"' + " /p:Configuration=Debug"
-    print(command)
-    result = subprocess.run(command, shell=True, capture_output=True, text=True)
-    print(result)
-
-def find_msbuild():
-    # Walk through all directories and subdirectories starting from the root directory
-    for dirpath, _, filenames in os.walk("C:\Program Files (x86)\MSBuild"):
-        # Check if MSBuild.exe exists in the current directory
-        if 'MSBuild.exe' in filenames:
-            return os.path.join(dirpath, 'MSBuild.exe')
-
-    # MSBuild.exe not found in any directory under the root directory
-    return None
+        # MSBuild.exe not found in any directory under the root directory
+        return None
 
 
-def open_file_explorer():
-    os.startfile(test.sdk.selected_folder)
+    def open_file_explorer(self):
+        os.startfile(self.sdk.selected_folder)
+
+
+
+test = Test()
+
+test.sdk = SourceSDK()
 
 # Replace these with your GitHub repository owner and name
 repo_owner = "ChocoScaff"
@@ -532,10 +455,10 @@ repo_name = "SourceSDK-"
 # Replace this with the version of your local software
 local_version = "0.2.0"
 
-github_version = get_latest_release_version(repo_owner, repo_name)
+github_version = test.get_latest_release_version(repo_owner, repo_name)
 
 if github_version:
-    check_software_version(local_version, github_version)
+    test.check_software_version(local_version, github_version)
 else:
     print("Failed to fetch the latest version from GitHub.")
     download = messagebox.askyesno("New Version Available", f"There is a newer version ({github_version}) available on GitHub. Do you want to download it?")
@@ -543,10 +466,6 @@ else:
         webbrowser.open(f"https://github.com/{repo_owner}/{repo_name}/releases/latest")
     else:
         messagebox.showinfo("Version Check", "You chose not to download the new version.")
-
-test = Test()
-
-test.sdk = SourceSDK()
 
 # Create the main window
 test.sdk.root = tk.Tk()
@@ -564,16 +483,16 @@ file_menu = tk.Menu(test.sdk.menu_bar, tearoff=0,background="#4c5844",fg="white"
 test.sdk.menu_bar.add_cascade(label="File", menu=file_menu)
 
 # Add "Open" option to the "File" menu
-file_menu.add_command(label="New", command=new_project, accelerator="Ctrl+N")
-file_menu.add_command(label="Open", command=Init, accelerator="Ctrl+O")
+file_menu.add_command(label="New", command=test.new_project, accelerator="Ctrl+N")
+file_menu.add_command(label="Open", command=test.Init, accelerator="Ctrl+O")
 #previous_projects_menu = tk.Menu(file_menu, tearoff=0)
 #file_menu.add_cascade(label="Previous Projects", menu=previous_projects_menu)
-file_menu.add_command(label="Exit", command=launch_exit)
+file_menu.add_command(label="Exit", command=test.launch_exit)
 
 help_menu = tk.Menu(test.sdk.menu_bar, tearoff=0,background="#4c5844",fg="white")
 test.sdk.menu_bar.add_cascade(label="Help", menu=help_menu)
-help_menu.add_command(label="sdk Doc", command=sdk_Doc)
-help_menu.add_command(label="About", command=open_about_window)
+help_menu.add_command(label="sdk Doc", command=test.sdk_Doc)
+help_menu.add_command(label="About", command=test.open_about_window)
 
 # Create a Text widget to display terminal output
 test.terminal = Terminal(test.sdk.root, wrap=tk.WORD, height=30, width=120)
@@ -584,18 +503,8 @@ sys.stdout = test.terminal
 sys.stderr = test.terminal
 
 # Bind keyboard shortcuts to the root window
-test.sdk.root.bind("<Control-n>", handle_shortcut)
-test.sdk.root.bind("<Control-o>", handle_shortcut)
-
-base_path = os.path.dirname(os.path.abspath(__file__))
-iconHpp = tk.PhotoImage(file=os.path.join(base_path, "icons", "hpp.png"))
-iconHammer = tk.PhotoImage(file=os.path.join(base_path, "icons", "hammer.png"))
-iconSource = tk.PhotoImage(file=os.path.join(base_path, "icons", "source.png"))
-iconHLMV = tk.PhotoImage(file=os.path.join(base_path, "icons", "hlmv.png"))
-iconQc_eyes = tk.PhotoImage(file=os.path.join(base_path, "icons", "qc_eyes.png"))
-iconHlposer = tk.PhotoImage(file=os.path.join(base_path, "icons", "hlposer.png"))
-iconVisualStudio = tk.PhotoImage(file=os.path.join(base_path, "icons", "Visual_Studio.png"))
-iconVTFEdit = tk.PhotoImage(file=os.path.join(base_path, "icons", "VTFEdit.png"))
+test.sdk.root.bind("<Control-n>", test.handle_shortcut)
+test.sdk.root.bind("<Control-o>", test.handle_shortcut)
 
 # Start the GUI event loop
 test.sdk.root.mainloop()
