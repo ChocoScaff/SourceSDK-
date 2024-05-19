@@ -14,7 +14,7 @@ class File:
         self.sdk = sourceSDK
 
     def list_files(self):
-        target_extensions = [".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", ".vpk", ".tga"]
+        target_extensions = [".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", "dir.vpk", ".tga"]
         files = []
         for root, dirs, files_in_dir in os.walk(self.sdk.selected_folder):
             for file_name in files_in_dir:
