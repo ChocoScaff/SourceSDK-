@@ -78,13 +78,12 @@ class AssetsBrowser():
         @return binFolder
         """
 
-        parent_folder = os.path.dirname(folder_path)
-        binFolder = parent_folder + "/bin"
+        binFolder = self.sdk.parent_folder + "/bin"
         if os.path.exists(binFolder):
             pass
         else:
             #with open(folder_path + "bin.txt", 'r') as file:   
-            folder = filedialog.askdirectory(title="Open bin Engine path",initialdir=parent_folder)
+            folder = filedialog.askdirectory(title="Open bin Engine path",initialdir=self.sdk.parent_folder)
             binFolder = self.bin_folder(folder)
         return binFolder
 
@@ -95,9 +94,8 @@ class AssetsBrowser():
         @return executable
         """
 
-        parent_folder = os.path.dirname(folder_path)
         executables = []
-        for root, dirs, files in os.walk(parent_folder):
+        for root, dirs, files in os.walk(self.sdk.parent_folder):
             for file in files:
                 if file.endswith('.exe'):
                     executables.append(os.path.join(root, file))
@@ -184,6 +182,8 @@ class AssetsBrowser():
 
         self.sdk.game_name = self.find_game_name(self.sdk.selected_folder)
         print("game name : " + self.sdk.game_name)
+
+        self.sdk.parent_folder = os.path.dirname(self.sdk.selected_folder)
 
         self.sdk.bin_folder = self.bin_folder(self.sdk.selected_folder)
         print("bin directory : " + self.sdk.bin_folder)

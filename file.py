@@ -26,21 +26,19 @@ class File:
         target_extensions = [".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", "dir.vpk", ".tga"]
         files = []
 
-        parent_folder = os.path.dirname(self.sdk.selected_folder)
-
         for root, dirs, files_in_dir in os.walk(self.sdk.selected_folder):
             for file_name in files_in_dir:
                 for ext in target_extensions:
                     if file_name.endswith(ext):
-                        files.append(os.path.relpath(os.path.join(root, file_name), parent_folder))
+                        files.append(os.path.relpath(os.path.join(root, file_name), self.sdk.parent_folder))
 
         for game in self.sdk.game_path:
 
-            for root, dirs, files_in_dir in os.walk(os.path.join(parent_folder, game)):
+            for root, dirs, files_in_dir in os.walk(os.path.join(self.sdk.parent_folder, game)):
                 for file_name in files_in_dir:
                     for ext in target_extensions:
                         if file_name.endswith(ext):
-                            files.append(os.path.relpath(os.path.join(root, file_name), parent_folder))
+                            files.append(os.path.relpath(os.path.join(root, file_name), self.sdk.parent_folder))
 
         files.sort()  # Sort files alphabetically
         return files
@@ -74,19 +72,19 @@ class File:
         """
         """
         selected_index = self.listbox.curselection()
-        parent_folder = os.path.dirname(self.sdk.selected_folder)
-        
+
         if selected_index:
             file = self.listbox.get(selected_index)
             file_name, file_extension = os.path.splitext(file)
             print(file)
-            self.open_file_source_extension(file_extension,parent_folder + "/" + file, file[5:-4])
+            self.open_file_source_extension(file_extension,self.sdk.parent_folder + "/" + file, file[5:-4])
 
     def open_file_source_extension(self, file_extension, filepath, file):
         """
         """
         if file_extension == ".vtf":   
-            Texture.open_VTF(filepath)
+            texture = Texture(self.sdk)
+            texture.open_VTF(filepath)
             
         elif file_extension == ".mdl":
             command = '"' + self.sdk.bin_folder + "/hlmv.exe" + '"'+ ' "' + filepath + '"' 
@@ -106,7 +104,8 @@ class File:
             vpk = VPK(self.sdk)
             vpk.display_vpk_contents(filepath)
         elif file_extension == ".tga": 
-            Texture.display_tga_file(filepath)
+            texture = Texture(self.sdk)
+            texture.display_tga_file(filepath)
         else:
             try:
                 os.startfile(filepath)

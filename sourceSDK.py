@@ -19,6 +19,7 @@ class SourceSDK():
     menu_bar : tk.Menu
     root : tk.Tk
     game_path = []
+    parent_folder : string
 
 
 
