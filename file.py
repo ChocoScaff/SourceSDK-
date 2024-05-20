@@ -12,6 +12,8 @@ class File:
     """
 
     sdk : sourceSDK
+    listbox : Listbox
+    scrollbar : tk.Scrollbar
 
     def __init__(self, sourceSDK) -> None:
         """
@@ -50,32 +52,32 @@ class File:
         files = self.list_files()
 
         # Création du widget Listbox
-        self.sdk.listbox = Listbox()
+        self.listbox = Listbox()
         
         # Création du widget Scrollbar
-        self.sdk.scrollbar = tk.Scrollbar()
+        self.scrollbar = tk.Scrollbar()
         
         # Configure the Listbox to use the Scrollbar
-        self.sdk.listbox.config(yscrollcommand=self.sdk.scrollbar.set)
-        self.sdk.scrollbar.config(command=self.sdk.listbox.yview)
+        self.listbox.config(yscrollcommand=self.scrollbar.set)
+        self.scrollbar.config(command=self.listbox.yview)
 
-        self.sdk.listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        self.sdk.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
         # Insert files into the Listbox
         for file in files:
-            self.sdk.listbox.insert(tk.END, file)
+            self.listbox.insert(tk.END, file)
         
-        self.sdk.listbox.bind("<Double-Button-1>", self.open_file)
+        self.listbox.bind("<Double-Button-1>", self.open_file)
 
     def open_file(self, event):
         """
         """
-        selected_index = self.sdk.listbox.curselection()
+        selected_index = self.listbox.curselection()
         parent_folder = os.path.dirname(self.sdk.selected_folder)
         
         if selected_index:
-            file = self.sdk.listbox.get(selected_index)
+            file = self.listbox.get(selected_index)
             file_name, file_extension = os.path.splitext(file)
             print(file)
             self.open_file_source_extension(file_extension,parent_folder + "/" + file, file[5:-4])

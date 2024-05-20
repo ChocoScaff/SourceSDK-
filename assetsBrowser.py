@@ -2,7 +2,7 @@ import string
 import tkinter as tk
 import os
 import subprocess
-from tkinter import Listbox, filedialog
+from tkinter import filedialog
 import sys
 import shutil
 import git
