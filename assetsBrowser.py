@@ -10,7 +10,7 @@ import urllib.request
 import json
 import webbrowser
 from tkinter import messagebox
-
+import re
 
 from sourceSDK import SourceSDK
 from texture import Texture
@@ -35,27 +35,41 @@ class AssetsBrowser():
     file : File
     button : Button
 
-    def parse_gameinfo_txt(self,file_path):
+    def parse_gameinfo_txt(self):
         """
         parse game info txt
         @param file_path The path to the gameinfo.txt
         """
 
-        #gameinfo_path = os.path.join(folder_path, "gameinfo.txt")
-        print(file_path)
-        if os.path.isfile(file_path):
-            with open(file_path, 'r') as file:
+        gameinfo_path = os.path.join(self.sdk.selected_folder, "gameinfo.txt")
+        print(gameinfo_path)
+
+        inside_search_paths = False
+        game_path_pattern = re.compile(r'^\s*game\s+([^\s]+)', re.MULTILINE)
+
+        if os.path.isfile(gameinfo_path):
+            with open(gameinfo_path, 'r') as file:
                 for line in file:
-                    # Example of parsing logic, modify as needed
-                    if "game" in line:
-                        game_name = line.split('"')[1]
-                        print("game", game_name)
-                    elif "FileSystem" in line:
-                        # Example of parsing FileSystem section, modify as needed
-                        # Assuming the next line contains the paths
-                        next_line = next(file)
-                        paths = next_line.strip().split('"')[1::2]
-                        print("Paths:", paths)
+                    
+                    if re.search(r'^\s*SearchPaths', line):
+                        inside_search_paths = True
+                        continue
+                    
+                    # Check if the line ends the SearchPaths section
+                    if inside_search_paths and re.search(r'^\s*}', line):
+                        inside_search_paths = False
+                        continue
+
+                    # If inside the SearchPaths block, find game paths
+                    if inside_search_paths:
+                        line = line.lower()
+                        if '|all_source_engine_paths|' in line:
+                            line = line.replace('|all_source_engine_paths|', '')
+                        match = game_path_pattern.match(line)
+                        if match:
+                            self.sdk.game_path.append(match.group(1).strip())
+
+        print(self.sdk.game_path)
 
     def bin_folder(self,folder_path):
         """
@@ -176,6 +190,8 @@ class AssetsBrowser():
 
         self.sdk.executable_game = self.find_executable_game(self.sdk.bin_folder)
         print("executable game : " + self.sdk.executable_game)
+
+        self.parse_gameinfo_txt()
 
         try:
             self.sdk.root.iconbitmap(self.sdk.selected_folder + '/resource/game.ico')

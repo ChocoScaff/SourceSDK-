@@ -11,7 +11,7 @@ class SourceSDK():
     bin_folder : string
     executable_game : string
     game_name : string
-    first_init : bool
+    first_init : bool = 0
     btn_hammer : tk.Button
     btn_hammer_plus_plus : tk.Button
     btn_hlmv : tk.Button
@@ -31,11 +31,7 @@ class SourceSDK():
     scrollbar : tk.Scrollbar
     listbox : tk.Listbox
     root : tk.Tk
-
-    def __init__(self):
-        """
-        """
-        self.first_init = 0
+    game_path = []
 
 
 

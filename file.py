@@ -23,11 +23,22 @@ class File:
         """
         target_extensions = [".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", "dir.vpk", ".tga"]
         files = []
+
+        parent_folder = os.path.dirname(self.sdk.selected_folder)
+
         for root, dirs, files_in_dir in os.walk(self.sdk.selected_folder):
             for file_name in files_in_dir:
                 for ext in target_extensions:
                     if file_name.endswith(ext):
-                        files.append(os.path.relpath(os.path.join(root, file_name), self.sdk.selected_folder))
+                        files.append(os.path.relpath(os.path.join(root, file_name), parent_folder))
+
+        for game in self.sdk.game_path:
+
+            for root, dirs, files_in_dir in os.walk(os.path.join(parent_folder, game)):
+                for file_name in files_in_dir:
+                    for ext in target_extensions:
+                        if file_name.endswith(ext):
+                            files.append(os.path.relpath(os.path.join(root, file_name), parent_folder))
 
         files.sort()  # Sort files alphabetically
         return files
@@ -61,12 +72,13 @@ class File:
         """
         """
         selected_index = self.sdk.listbox.curselection()
+        parent_folder = os.path.dirname(self.sdk.selected_folder)
         
         if selected_index:
             file = self.sdk.listbox.get(selected_index)
             file_name, file_extension = os.path.splitext(file)
             print(file)
-            self.open_file_source_extension(file_extension,self.sdk.selected_folder + "/" + file, file[5:-4])
+            self.open_file_source_extension(file_extension,parent_folder + "/" + file, file[5:-4])
 
     def open_file_source_extension(self, file_extension, filepath, file):
         """
