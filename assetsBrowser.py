@@ -203,6 +203,10 @@ class AssetsBrowser():
         lbl_result = tk.Label(self.sdk.root, text="Tools", wraplength=400, background="#3e4637",fg='white')
         lbl_result.pack()
 
+        self.sdk.FileWindow = tk.Toplevel(self.sdk.root)
+        #self.sdk.FileWindow.geometry("1000x400")
+        self.sdk.FileWindow.title("File Viewer")
+
         self.texture = Texture(self.sdk)
         self.model = Model(self.sdk)
         self.map = Map(self.sdk)
@@ -212,7 +216,7 @@ class AssetsBrowser():
 
         self.label_init()
 
-        self.file.display_files()
+        self.file.display_files_grid()
 
     def label_init(self):
         """

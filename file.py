@@ -2,9 +2,10 @@ import tkinter as tk
 import sourceSDK
 import os
 import subprocess
-from tkinter import Listbox, filedialog
+from tkinter import Listbox, filedialog, messagebox
 from texture import Texture
 from _vpk import VPK
+from PIL import Image, ImageTk
 
 class File:
     """
@@ -50,10 +51,10 @@ class File:
         files = self.list_files()
 
         # Création du widget Listbox
-        self.listbox = Listbox()
+        self.listbox = Listbox(self.sdk.FileWindow)
         
         # Création du widget Scrollbar
-        self.scrollbar = tk.Scrollbar()
+        self.scrollbar = tk.Scrollbar(self.sdk.FileWindow)
         
         # Configure the Listbox to use the Scrollbar
         self.listbox.config(yscrollcommand=self.scrollbar.set)
@@ -61,16 +62,39 @@ class File:
 
         self.listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-
+        
         # Insert files into the Listbox
         for file in files:
             self.listbox.insert(tk.END, file)
         
-        self.listbox.bind("<Double-Button-1>", self.open_file)
+        self.listbox.bind("<Double-Button-1>", self.open_file_listbox)
 
-    def open_file(self, event):
+    def create_grid(self):
+
+        files = self.list_files()
+
+        for i in range(5):
+            self.sdk.FileWindow.grid_rowconfigure(i, weight=1)
+        for i in range(30):
+            self.sdk.FileWindow.grid_columnconfigure(i, weight=1)
+
+    def display_files_grid(self):
+
+        self.create_grid()
+
+        files = self.list_files()
+
+        for i in range(30):
+            for j in range(1,6):
+                self.label = tk.Label(self.sdk.FileWindow, text=files[i*j+j], borderwidth=1, relief="solid")
+                self.label.grid(row=i, column=j, sticky="nsew")
+                self.label.bind("<Double-1>", lambda event, row=i, col=j: self.open_file_grid(event))
+        
+
+    def open_file_listbox(self, event):
         """
         """
+        
         selected_index = self.listbox.curselection()
 
         if selected_index:
@@ -78,6 +102,17 @@ class File:
             file_name, file_extension = os.path.splitext(file)
             print(file)
             self.open_file_source_extension(file_extension,self.sdk.parent_folder + "/" + file, file[5:-4])
+    
+    def open_file_grid(self, event):
+        """
+        """
+        
+        selected_text = event.widget.cget('text')
+
+        if selected_text:
+            file_name, file_extension = os.path.splitext(selected_text)
+            
+            self.open_file_source_extension(file_extension,self.sdk.parent_folder + "/" + selected_text, selected_text[5:-4])
 
     def open_file_source_extension(self, file_extension, filepath, file):
         """

@@ -20,6 +20,7 @@ class SourceSDK():
     root : tk.Tk
     game_path = []
     parent_folder : string
+    FileWindow : tk.Tk
 
 
 
