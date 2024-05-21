@@ -46,14 +46,17 @@ class File:
     def display_files(self):
         """
         """
+        root = tk.Tk()
 
         files = self.list_files()
 
         # Création du widget Listbox
-        self.listbox = Listbox()
-        
+        self.listbox = Listbox(root)
+        root.title("file explorer")
+        root.geometry("600x400")
+
         # Création du widget Scrollbar
-        self.scrollbar = tk.Scrollbar()
+        self.scrollbar = tk.Scrollbar(root)
         
         # Configure the Listbox to use the Scrollbar
         self.listbox.config(yscrollcommand=self.scrollbar.set)
