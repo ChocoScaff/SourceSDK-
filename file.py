@@ -1,116 +1,140 @@
 import tkinter as tk
-import sourceSDK
+from tkinter import ttk
 import os
 import subprocess
-from tkinter import Listbox, filedialog
 from texture import Texture
 from _vpk import VPK
 
 class File:
     """
-    @brief Class File
+    A class to handle file operations within the source SDK environment.
     """
-
-    sdk : sourceSDK
-    listbox : Listbox
-    scrollbar : tk.Scrollbar
 
     def __init__(self, sourceSDK) -> None:
         """
+        Initialize the File class with a given sourceSDK instance.
         """
         self.sdk = sourceSDK
+        self.tree = None
 
     def list_files(self):
         """
+        List all files in the selected folder and game paths with specified extensions.
+
+        Returns:
+            files (dict): A dictionary representing the folder structure.
         """
         target_extensions = [".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", "dir.vpk", ".tga"]
-        files = []
+        files = {}
 
+        # Walk through the selected folder
         for root, dirs, files_in_dir in os.walk(self.sdk.selected_folder):
-            for file_name in files_in_dir:
-                for ext in target_extensions:
-                    if file_name.endswith(ext):
-                        files.append(os.path.relpath(os.path.join(root, file_name), self.sdk.parent_folder))
+            relative_root = os.path.relpath(root, self.sdk.parent_folder)
+            file_list = [file for file in files_in_dir if any(file.endswith(ext) for ext in target_extensions)]
+            if file_list:
+                files[relative_root] = file_list
 
+        # Walk through other game paths
         for game in self.sdk.game_path:
+            if self.sdk.game_name != game:
+                game_folder = os.path.join(self.sdk.parent_folder, game)
+                for root, dirs, files_in_dir in os.walk(game_folder):
+                    relative_root = os.path.relpath(root, self.sdk.parent_folder)
+                    file_list = [file for file in files_in_dir if any(file.endswith(ext) for ext in target_extensions)]
+                    if file_list:
+                        if relative_root not in files:
+                            files[relative_root] = []
+                        files[relative_root].extend(file_list)
 
-            for root, dirs, files_in_dir in os.walk(os.path.join(self.sdk.parent_folder, game)):
-                for file_name in files_in_dir:
-                    for ext in target_extensions:
-                        if file_name.endswith(ext):
-                            files.append(os.path.relpath(os.path.join(root, file_name), self.sdk.parent_folder))
-
-        files.sort()  # Sort files alphabetically
         return files
 
     def display_files(self):
         """
+        Display the files in a Tkinter Treeview within a new Toplevel window.
         """
-        root = tk.Tk()
+        root = tk.Toplevel()
+        root.title("File Explorer")
+        root.geometry("600x400")
 
         files = self.list_files()
 
-        # Création du widget Listbox
-        self.listbox = Listbox(root)
-        root.title("file explorer")
-        root.geometry("600x400")
+        # Create the Treeview widget
+        self.tree = ttk.Treeview(root)
+        self.tree.pack(fill=tk.BOTH, expand=True)
 
-        # Création du widget Scrollbar
-        self.scrollbar = tk.Scrollbar(root)
-        
-        # Configure the Listbox to use the Scrollbar
-        self.listbox.config(yscrollcommand=self.scrollbar.set)
-        self.scrollbar.config(command=self.listbox.yview)
+        # Insert folders and files into the Treeview
+        for folder, file_list in files.items():
+            parent = ""
+            for subfolder in folder.split(os.sep):
+                if not parent:
+                    nodes = self.tree.get_children("")
+                    if subfolder in [self.tree.item(node, "text") for node in nodes]:
+                        parent = [node for node in nodes if self.tree.item(node, "text") == subfolder][0]
+                    else:
+                        parent = self.tree.insert("", "end", text=subfolder, open=True)
+                else:
+                    nodes = self.tree.get_children(parent)
+                    if subfolder in [self.tree.item(node, "text") for node in nodes]:
+                        parent = [node for node in nodes if self.tree.item(node, "text") == subfolder][0]
+                    else:
+                        parent = self.tree.insert(parent, "end", text=subfolder, open=True)
+            for file_name in file_list:
+                self.tree.insert(parent, "end", text=file_name, tags=(folder,))
 
-        self.listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-
-        # Insert files into the Listbox
-        for file in files:
-            self.listbox.insert(tk.END, file)
-        
-        self.listbox.bind("<Double-Button-1>", self.open_file)
+        # Bind double-click event to open the selected file
+        self.tree.bind("<Double-Button-1>", self.open_file)
 
     def open_file(self, event):
         """
+        Open the selected file from the Treeview.
         """
-        selected_index = self.listbox.curselection()
+        selected_item = self.tree.selection()[0]
+        item_text = self.tree.item(selected_item, "text")
+        parent_item = self.tree.parent(selected_item)
+        file_path_parts = [item_text]
 
-        if selected_index:
-            file = self.listbox.get(selected_index)
-            file_name, file_extension = os.path.splitext(file)
-            print(file)
-            self.open_file_source_extension(file_extension,self.sdk.parent_folder + "/" + file, file[5:-4])
+        while parent_item:
+            item_text = self.tree.item(parent_item, "text")
+            file_path_parts.append(item_text)
+            parent_item = self.tree.parent(parent_item)
+
+        file_path_parts.reverse()
+        file_path = os.path.join(self.sdk.parent_folder, *file_path_parts)
+        file_name, file_extension = os.path.splitext(file_path)
+        self.open_file_source_extension(file_extension, file_path, os.path.splitext(file_path_parts[-1])[0])
 
     def open_file_source_extension(self, file_extension, filepath, file):
         """
+        Open a file based on its extension using appropriate methods or applications.
+
+        Args:
+            file_extension (str): The file extension to determine the opening method.
+            filepath (str): The full path of the file to be opened.
+            file (str): The relative path or name of the file for some operations.
         """
-        if file_extension == ".vtf":   
+        if file_extension == ".vtf":
             texture = Texture(self.sdk)
             texture.open_VTF(filepath)
-            
         elif file_extension == ".mdl":
-            command = '"' + self.sdk.bin_folder + "/hlmv.exe" + '"'+ ' "' + filepath + '"' 
+            command = f'"{self.sdk.bin_folder}/hlmv.exe" "{filepath}"'
             subprocess.Popen(command)
         elif file_extension == ".vmf":
-            #subprocess.Popen([test.sdk.bin_folder + "/hammer.exe" + ' "' + file + '"'])
-            command = '"' + self.sdk.bin_folder + "/hammer.exe" + '"'+ ' "' + filepath + '"' 
+            command = f'"{self.sdk.bin_folder}/hammer.exe" "{filepath}"'
             subprocess.Popen(command)
         elif file_extension == ".vcd":
-            command = '"' + self.sdk.bin_folder + "/hlfaceposer.exe" + '"'+ ' "' + filepath + '"' 
+            command = f'"{self.sdk.bin_folder}/hlfaceposer.exe" "{filepath}"'
             subprocess.Popen(command)
         elif file_extension == ".bsp":
-            command = ('"' + self.sdk.executable_game + '"' + " -game " + '"' + self.sdk.selected_folder + '"' + " -console -dev -w 1280 -h 720  -sw +sv_cheats 1 +map " + file)
-            print(command)
+            command = f'"{self.sdk.executable_game}" -game "{self.sdk.selected_folder}" -console -dev -w 1280 -h 720 -sw +sv_cheats 1 +map {file}'
             subprocess.Popen(command)
-        elif file_extension == ".vpk": 
+        elif file_extension == ".vpk":
             vpk = VPK(self.sdk)
             vpk.display_vpk_contents(filepath)
-        elif file_extension == ".tga": 
+        elif file_extension == ".tga":
             texture = Texture(self.sdk)
             texture.display_tga_file(filepath)
         else:
             try:
                 os.startfile(filepath)
             except OSError as e:
-                print("Error", f"Failed to open file: {e}")
+                print("Error: Failed to open file:", e)
