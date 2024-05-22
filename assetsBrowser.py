@@ -20,6 +20,7 @@ from _vpk import VPK
 from terminal import Terminal
 from file import File
 from button import Button
+from caption import Caption
 
 class AssetsBrowser():
     """
@@ -34,6 +35,7 @@ class AssetsBrowser():
     terminal : Terminal
     file : File
     button : Button
+    caption : Caption
 
     def parse_gameinfo_txt(self):
         """
@@ -130,35 +132,6 @@ class AssetsBrowser():
             print("gameinfo.txt not found in selected folder.")
             return -1
 
-
-    def build_caption(self):
-        """
-        Compile caption
-        """
-
-        filenameTXT = filedialog.askopenfile(title="Select .txt file", filetypes=[("TXT files", "closecaption*.txt")], initialdir=self.sdk.selected_folder + "/resource")
-        captioncompiler = (self.sdk.bin_folder + "/captioncompiler.exe")
-        command = ('"' + captioncompiler + '"' + " -game " + '"' + self.sdk.selected_folder + '"' + " " + '"' + filenameTXT.name + '"')
-        print(command)
-        result = subprocess.run(command, shell=True, capture_output=True, text=True)
-        print(result)
-
-    def build_all_caption(self):
-        """
-        compile all captions in ressource folder
-        """
-
-        print("wait...")
-        captioncompiler = (self.sdk.bin_folder + "/captioncompiler.exe")
-        for root, dirs, files in os.walk(self.sdk.selected_folder + "/resource"):
-            for file in files:
-                if file.startswith("closecaption") and file.endswith(".txt"):
-                    caption_file_path = os.path.join(root, file)
-                    command = ('"' + captioncompiler + '"' + " -game " + '"' + self.sdk.selected_folder + '"' + " " + '"' + caption_file_path + '"')
-                    print(command)
-                    result = subprocess.run(command, shell=True, capture_output=True, text=True)
-                    print(result)
-
     def Init(self, folder=False):
         """
         Init software with parameter of the game
@@ -209,6 +182,7 @@ class AssetsBrowser():
         self.vpk = VPK(self.sdk)
         self.file = File(self.sdk)
         self.button = Button(self.sdk)
+        self.caption = Caption(self.sdk)
 
         self.label_init()
 
@@ -250,8 +224,8 @@ class AssetsBrowser():
             self.sdk.other_menu.add_command(label="Display VPK Contents", command=self.vpk.display_vpk_contents)
             self.sdk.other_menu.add_command(label="Extract VPK", command=self.vpk.extract_VPK)
 
-            self.sdk.other_menu.add_command(label="Build Caption", command=self.build_caption)
-            self.sdk.other_menu.add_command(label="Build All Captions", command=self.build_all_caption)
+            self.sdk.other_menu.add_command(label="Build Caption", command=self.caption.build_caption)
+            self.sdk.other_menu.add_command(label="Build All Captions", command=self.caption.build_all_caption)
 
             #if os.path.exists(self.sdk.selected_folder + "/src/creategameprojects.bat"):
             self.sdk.other_menu.add_command(label="Generate games", command=self.generate_games)

@@ -70,6 +70,7 @@ class VPK:
         files = {}
 
         for file_path in self.vpk_file:
+            
             folder_path, file_name = os.path.split(file_path)
             if folder_path not in files:
                 files[folder_path] = []
@@ -128,36 +129,56 @@ class VPK:
             print("VPK file is not loaded.")
             return
 
-        pakfile = self.vpk_file.get_file(file_name)
-        if not pakfile:
+        related_extensions = [".dx80.vtx", ".dx90.vtx", ".sw.vtx", ".phy", ".vvd"]
+        temp_dir = tempfile.mkdtemp()
+
+        def extract_file(path):
+            pakfile = self.vpk_file.get_file(path)
+            if pakfile:
+                file_content = pakfile.read()
+                temp_file_path = os.path.join(temp_dir, os.path.basename(path))
+                with open(temp_file_path, 'wb') as temp_file:
+                    temp_file.write(file_content)
+                return temp_file_path
+            return None
+
+        # Extract the primary file
+        primary_temp_path = extract_file(file_name)
+        if not primary_temp_path:
             print(f"File {file_name} not found in VPK.")
             return
 
-        # Read the file content
-        file_content = pakfile.read()
+        # Extract related files for .mdl if required
+        if file_name.endswith(".mdl"):
+            base_name = os.path.splitext(file_name)[0]
+            related_files = []
+            for ext in related_extensions:
+                related_temp_path = extract_file(base_name + ext)
+                if related_temp_path:
+                    related_files.append(related_temp_path)
 
-        # Create a temporary file and write the content to it
-        with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file_name)[1]) as temp_file:
-            temp_file.write(file_content)
-            temp_file_path = temp_file.name
+            # Ensure all required files are present
+            if len(related_files) != len(related_extensions):
+                print(f"Missing related files for {file_name}.")
+                return
 
-        # Open the file with the default associated application
-        file_name, file_extension = os.path.splitext(temp_file_path)
+        # Open the file with the appropriate application
+        file_name, file_extension = os.path.splitext(primary_temp_path)
 
         if file_extension == ".vtf":
             texture = Texture(self.sdk)
-            texture.open_VTF(temp_file_path)
+            texture.open_VTF(primary_temp_path)
         elif file_extension == ".mdl":
-            command = f'"{self.sdk.bin_folder}/hlmv.exe" "{temp_file_path}"'
+            command = f'"{self.sdk.bin_folder}/hlmv.exe" "{primary_temp_path}"'
             subprocess.Popen(command)
         elif file_extension == ".vcd":
-            command = f'"{self.sdk.bin_folder}/hlfaceposer.exe" "{temp_file_path}"'
+            command = f'"{self.sdk.bin_folder}/hlfaceposer.exe" "{primary_temp_path}"'
             subprocess.Popen(command)
         else:
             try:
-                os.startfile(temp_file_path)
+                os.startfile(primary_temp_path)
             except Exception as e:
-                print(f"Failed to open file {temp_file_path}: {e}")
+                print(f"Failed to open file {primary_temp_path}: {e}")
 
     def create_VPK(self):
         """
