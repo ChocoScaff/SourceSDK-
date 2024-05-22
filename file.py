@@ -56,6 +56,15 @@ class File:
         root.title("File Explorer")
         root.geometry("600x400")
 
+        # Search Label and Entry
+        search_frame = tk.Frame(root)
+        search_frame.pack(fill="x", padx=10, pady=5)
+        search_label = tk.Label(search_frame, text="Search:")
+        search_label.pack(side="left")
+        self.search_entry = tk.Entry(search_frame)
+        self.search_entry.pack(fill="x", expand=True, side="left")
+        self.search_entry.bind("<KeyRelease>", self.search_files)
+
         files = self.list_files()
 
         # Create the Treeview widget
@@ -138,3 +147,22 @@ class File:
                 os.startfile(filepath)
             except OSError as e:
                 print("Error: Failed to open file:", e)
+
+    def search_files(self, event=None):
+        """
+        Search for files in the Treeview based on the entry text.
+        """
+        search_text = self.search_entry.get().lower()
+        if search_text:
+            for item in self.tree.get_children():
+                self.tree.item(item, open=True)  # Expand all nodes to ensure search accuracy
+                if search_text in self.tree.item(item, "text").lower():
+                    self.tree.selection_set(item)
+                    self.tree.focus(item)
+                    self.tree.see(item)
+                else:
+                    self.tree.selection_remove(item)
+        else:
+            for item in self.tree.get_children():
+                self.tree.selection_remove(item)
+

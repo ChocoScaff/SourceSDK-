@@ -42,6 +42,15 @@ class VPK:
         popup.title("VPK Contents")
         popup.geometry("600x400")
 
+        # Search Label and Entry
+        search_frame = tk.Frame(popup)
+        search_frame.pack(fill="x", padx=10, pady=5)
+        search_label = tk.Label(search_frame, text="Search:")
+        search_label.pack(side="left")
+        self.search_entry = tk.Entry(search_frame)
+        self.search_entry.pack(fill="x", expand=True, side="left")
+        self.search_entry.bind("<KeyRelease>", self.search_files)
+
         frame = tk.Frame(popup)
         frame.pack(fill="both", expand=True)
 
@@ -68,7 +77,7 @@ class VPK:
             files (dict): A dictionary representing the folder structure.
         """
         files = {}
-
+        
         for file_path in self.vpk_file:
             
             folder_path, file_name = os.path.split(file_path)
@@ -179,7 +188,7 @@ class VPK:
                 os.startfile(primary_temp_path)
             except Exception as e:
                 print(f"Failed to open file {primary_temp_path}: {e}")
-
+    
     def create_VPK(self):
         """
         Create a VPK file from a selected directory.
@@ -207,8 +216,17 @@ class VPK:
         result = subprocess.run(command, shell=True, capture_output=True, text=True)
         print(result)
 
-# Example usage
-# Assuming you have the necessary SDK object and other classes implemented
-# sdk = sourceSDK(...)
-# vpk_explorer = VPK(sdk)
-# vpk_explorer.display_vpk_contents()
+    def search_files(self, event=None):
+        """
+        Search for files in the Treeview based on the entry text.
+        """
+        search_text = self.search_entry.get().lower()
+        if search_text:
+            for item in self.tree.get_children():
+                if search_text in self.tree.item(item, "text").lower():
+                    self.tree.selection_set(item)
+                    self.tree.focus(item)
+                    self.tree.see(item)
+        else:
+            for item in self.tree.get_children():
+                self.tree.selection_remove(item)
