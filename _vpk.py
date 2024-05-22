@@ -1,9 +1,8 @@
-
 import string
 import vpk
 import tkinter as tk
 import sourceSDK
-from tkinter import filedialog
+from tkinter import filedialog, ttk
 import os
 import subprocess
 import tempfile
@@ -11,125 +10,184 @@ from texture import Texture
 
 class VPK:
     """
-    @brief Class VPK
+    Class for handling VPK file operations.
     """
-
-    sdk : sourceSDK
-    vpk_path : string
-    text_widget : tk.Text
+    sdk: sourceSDK
+    vpk_path: string
+    tree: ttk.Treeview
 
     def __init__(self, sourceSDK) -> None:
         """
+        Initialize the VPK class with a given sourceSDK instance.
         """
         self.sdk = sourceSDK
+        self.vpk_file = None
 
     def display_vpk_contents(self, file=""):
         """
+        Display the contents of a VPK file in a Treeview.
         """
-
         if file == "":
             # Open file dialog to select a VPK file
             self.vpk_path = filedialog.askopenfilename(title="Select VPK file", filetypes=[("VPK files", "*.vpk")])
             if not self.vpk_path:
                 return  # User cancelled selection or closed dialog
         else:
-            self.vpk_path=file
-            
+            self.vpk_path = file
+
         print(self.vpk_path)
 
         # Create Tkinter window
         popup = tk.Toplevel()
-        popup.title("vpk contents")
+        popup.title("VPK Contents")
+        popup.geometry("600x400")
 
         frame = tk.Frame(popup)
         frame.pack(fill="both", expand=True)
 
-        self.text_widget = tk.Text(frame, wrap="none")
-        self.text_widget.pack(side="left", fill="both", expand=True)
+        self.tree = ttk.Treeview(frame)
+        self.tree.pack(fill="both", expand=True, side="left")
 
-        scrollbar = tk.Scrollbar(frame, orient="vertical", command=self.text_widget.yview)
+        scrollbar = tk.Scrollbar(frame, orient="vertical", command=self.tree.yview)
         scrollbar.pack(side="right", fill="y")
-        self.text_widget.config(yscrollcommand=scrollbar.set)
+        self.tree.config(yscrollcommand=scrollbar.set)
 
-        # Display VPK file contents in text widget
-        self.text_widget.insert("end", f"Contents of {os.path.basename(self.vpk_path)}:\n")
+        self.tree.heading("#0", text="Contents", anchor='w')
+
         with vpk.open(self.vpk_path) as self.vpk_file:
-            for file_path in self.vpk_file:
-                self.text_widget.insert("end", f"{file_path}\n")
+            files = self.list_vpk_files()
+            self.populate_tree(files)
 
-        self.text_widget.bind("<Double-Button-1>", self.open_file_in_vpk)
-        
-    def extract_and_open_file_in_vpk(self,fileName):
+        self.tree.bind("<Double-Button-1>", self.open_file_in_vpk)
+
+    def list_vpk_files(self):
         """
+        List all files in the VPK archive.
+
+        Returns:
+            files (dict): A dictionary representing the folder structure.
+        """
+        files = {}
+
+        for file_path in self.vpk_file:
+            folder_path, file_name = os.path.split(file_path)
+            if folder_path not in files:
+                files[folder_path] = []
+            files[folder_path].append(file_name)
+
+        return files
+
+    def populate_tree(self, files):
+        """
+        Populate the Treeview with the files and folders.
+
+        Args:
+            files (dict): A dictionary representing the folder structure.
+        """
+        for folder, file_list in files.items():
+            parent = ""
+            for subfolder in folder.split(os.sep):
+                if not parent:
+                    nodes = self.tree.get_children("")
+                    if subfolder in [self.tree.item(node, "text") for node in nodes]:
+                        parent = [node for node in nodes if self.tree.item(node, "text") == subfolder][0]
+                    else:
+                        parent = self.tree.insert("", "end", text=subfolder, open=True)
+                else:
+                    nodes = self.tree.get_children(parent)
+                    if subfolder in [self.tree.item(node, "text") for node in nodes]:
+                        parent = [node for node in nodes if self.tree.item(node, "text") == subfolder][0]
+                    else:
+                        parent = self.tree.insert(parent, "end", text=subfolder, open=True)
+            for file_name in file_list:
+                self.tree.insert(parent, "end", text=file_name, tags=(folder,))
+
+    def open_file_in_vpk(self, event):
+        """
+        Open the selected file from the Treeview.
+        """
+        selected_item = self.tree.selection()[0]
+        item_text = self.tree.item(selected_item, "text")
+        parent_item = self.tree.parent(selected_item)
+        file_path_parts = [item_text]
+
+        while parent_item:
+            item_text = self.tree.item(parent_item, "text")
+            file_path_parts.append(item_text)
+            parent_item = self.tree.parent(parent_item)
+
+        file_path_parts.reverse()
+        file_path = "/".join(file_path_parts)  # Use '/' as VPK paths use forward slashes
+        self.extract_and_open_file_in_vpk(file_path)
+
+    def extract_and_open_file_in_vpk(self, file_name):
+        """
+        Extract and open a file from the VPK archive.
         """
         if not self.vpk_file:
             print("VPK file is not loaded.")
             return
 
-        pakfile = self.vpk_file.get_file(fileName)
+        pakfile = self.vpk_file.get_file(file_name)
         if not pakfile:
-            print(f"File {fileName} not found in VPK.")
+            print(f"File {file_name} not found in VPK.")
             return
 
         # Read the file content
         file_content = pakfile.read()
 
         # Create a temporary file and write the content to it
-        with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(fileName)[1]) as temp_file:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file_name)[1]) as temp_file:
             temp_file.write(file_content)
             temp_file_path = temp_file.name
 
         # Open the file with the default associated application
         file_name, file_extension = os.path.splitext(temp_file_path)
 
-        if file_extension == ".vtf":   
+        if file_extension == ".vtf":
             texture = Texture(self.sdk)
             texture.open_VTF(temp_file_path)
         elif file_extension == ".mdl":
-            command = '"' + self.sdk.bin_folder + "/hlmv.exe" + '"'+ ' "' + temp_file_path + '"' 
+            command = f'"{self.sdk.bin_folder}/hlmv.exe" "{temp_file_path}"'
             subprocess.Popen(command)
         elif file_extension == ".vcd":
-            command = '"' + self.sdk.bin_folder + "/hlfaceposer.exe" + '"'+ ' "' + temp_file_path + '"' 
+            command = f'"{self.sdk.bin_folder}/hlfaceposer.exe" "{temp_file_path}"'
             subprocess.Popen(command)
         else:
             try:
                 os.startfile(temp_file_path)
             except Exception as e:
                 print(f"Failed to open file {temp_file_path}: {e}")
-        
-    def open_file_in_vpk(self,event):
-        """
-        """
-
-        selected_index = self.text_widget.index(tk.CURRENT)
-        line_num = int(selected_index.split('.')[0])
-        line = self.text_widget.get(f"{line_num}.0", f"{line_num}.end")
-        print(line)
-        self.extract_and_open_file_in_vpk(line)
 
     def create_VPK(self):
         """
+        Create a VPK file from a selected directory.
         """
-
         directory = filedialog.askdirectory(title="Select a Directory")
-        command = '"' + self.sdk.bin_folder + "/vpk.exe" + '" ' + '"' + directory + '"'
+        command = f'"{self.sdk.bin_folder}/vpk.exe" "{directory}"'
         result = subprocess.run(command, shell=True, capture_output=True, text=True)
         print(result)
 
     def extract_VPK(self):
         """
+        Extract the contents of a selected VPK file.
         """
-
-        filenamevpk = filedialog.askopenfile(title="Select .vpk file", filetypes=[("VPK files", "*.vpk")], initialdir=self.sdk.selected_folder)
-        command = '"' + self.sdk.bin_folder + "/vpk.exe" + '" ' + '"' + filenamevpk.name + '"'
+        filename_vpk = filedialog.askopenfile(title="Select .vpk file", filetypes=[("VPK files", "*.vpk")], initialdir=self.sdk.selected_folder)
+        command = f'"{self.sdk.bin_folder}/vpk.exe" "{filename_vpk.name}"'
         result = subprocess.run(command, shell=True, capture_output=True, text=True)
         print(result)
 
     def display_VPK(self):
         """
+        Display the contents of a selected VPK file.
         """
-        
-        filenamevpk = filedialog.askopenfile(title="Select .vpk file", filetypes=[("VPK files", "*.vpk")], initialdir=self.sdk.selected_folder)
-        command = '"' + self.sdk.bin_folder + "/vpk.exe" + '"' + " L " + '"' + filenamevpk.name + '"'
+        filename_vpk = filedialog.askopenfile(title="Select .vpk file", filetypes=[("VPK files", "*.vpk")], initialdir=self.sdk.selected_folder)
+        command = f'"{self.sdk.bin_folder}/vpk.exe" L "{filename_vpk.name}"'
         result = subprocess.run(command, shell=True, capture_output=True, text=True)
         print(result)
+
+# Example usage
+# Assuming you have the necessary SDK object and other classes implemented
+# sdk = sourceSDK(...)
+# vpk_explorer = VPK(sdk)
+# vpk_explorer.display_vpk_contents()

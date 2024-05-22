@@ -24,7 +24,7 @@ class File:
         Returns:
             files (dict): A dictionary representing the folder structure.
         """
-        target_extensions = [".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", "dir.vpk", ".tga"]
+        target_extensions = [".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", "dir.vpk", ".tga", ".wav", ".mp3"]
         files = {}
 
         # Walk through the selected folder
