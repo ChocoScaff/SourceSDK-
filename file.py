@@ -150,19 +150,34 @@ class File:
 
     def search_files(self, event=None):
         """
-        Search for files in the Treeview based on the entry text.
+        Display only files in the Treeview that contain the search text.
         """
         search_text = self.search_entry.get().lower()
         if search_text:
-            for item in self.tree.get_children():
-                self.tree.item(item, open=True)  # Expand all nodes to ensure search accuracy
-                if search_text in self.tree.item(item, "text").lower():
-                    self.tree.selection_set(item)
-                    self.tree.focus(item)
-                    self.tree.see(item)
-                else:
-                    self.tree.selection_remove(item)
+            self.clear_selections()  # Clear previous selections
+            self.search_tree(self.tree.get_children(), search_text)
         else:
-            for item in self.tree.get_children():
-                self.tree.selection_remove(item)
+            self.clear_selections()  # Clear selections if search text is empty
 
+    def search_tree(self, items, search_text):
+        """
+        Recursively search through the tree and select items containing the search text.
+
+        Args:
+            items (list): A list of items in the tree.
+            search_text (str): The text to search for.
+        """
+        for item in items:
+            item_text = self.tree.item(item, "text").lower()
+            if search_text in item_text:
+                self.tree.selection_add(item)
+                self.tree.focus(item)
+                self.tree.see(item)
+            self.search_tree(self.tree.get_children(item), search_text)  # Recursively search subitems
+    
+    def clear_selections(self):
+        """
+        Clear all selections in the Treeview.
+        """
+        for item in self.tree.selection():
+            self.tree.selection_remove(item)
