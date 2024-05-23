@@ -12,6 +12,7 @@ class File:
     """
 
     fileList : FileListApp
+    root : tk.Tk
 
     def __init__(self, sourceSDK) -> None:
         """
@@ -56,12 +57,12 @@ class File:
         Display the files in a Tkinter Treeview within a new Toplevel window.
         """
 
-        popup = tk.Toplevel(self.sdk.root)
-        popup.title("Contents")
-        popup.geometry("1250x800")
+        self.root = tk.Toplevel(self.sdk.root)
+        self.root.title("Contents")
+        self.root.geometry("1250x800")
 
         # Search Label and Entry
-        search_frame = tk.Frame(popup)
+        search_frame = tk.Frame(self.root)
         search_frame.pack(fill="x", padx=10, pady=5)
         search_label = tk.Label(search_frame, text="Search:")
         search_label.pack(side="left")
@@ -69,7 +70,7 @@ class File:
         self.search_entry.pack(fill="x", expand=True, side="left")
         self.search_entry.bind("<KeyRelease>", self.search_files)
 
-        frame = tk.Frame(popup)
+        frame = tk.Frame(self.root)
         frame.pack(fill="both", expand=True)
 
         self.tree = ttk.Treeview(frame)
@@ -81,7 +82,7 @@ class File:
 
         self.tree.heading("#0", text="Contents", anchor='w')
 
-        self.fileList = FileListApp(self.sdk, popup)
+        self.fileList = FileListApp(self.sdk, self.root)
 
         files = self.list_files()
 
