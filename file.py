@@ -1,10 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 import os
-import subprocess
-from texture import Texture
-from _vpk import VPK
 from fileListApp import FileListApp
+from open import Open
 
 class File:
     """
@@ -104,6 +102,7 @@ class File:
                 self.tree.insert(parent, "end", text=file_name, tags=(folder,))
 
         # Bind double-click event to open the selected file
+        
         self.tree.bind("<Double-Button-1>", self.open_file)
 
         self.fileList = FileListApp(self.sdk, self.root)
@@ -112,58 +111,9 @@ class File:
         """
         Open the selected file from the Treeview.
         """
-        selected_item = self.tree.selection()[0]
-        item_text = self.tree.item(selected_item, "text")
-        parent_item = self.tree.parent(selected_item)
-        file_path_parts = [item_text]
-
-        while parent_item:
-            item_text = self.tree.item(parent_item, "text")
-            file_path_parts.append(item_text)
-            parent_item = self.tree.parent(parent_item)
-
-        file_path_parts.reverse()
-        file_path = os.path.join(self.sdk.parent_folder, *file_path_parts)
-        file_name, file_extension = os.path.splitext(file_path)
-        self.open_file_source_extension(file_extension, file_path, os.path.splitext(file_path_parts[-1])[0])
-
-    def open_file_source_extension(self, file_extension, filepath, file):
-        """
-        Open a file based on its extension using appropriate methods or applications.
-
-        Args:
-            file_extension (str): The file extension to determine the opening method.
-            filepath (str): The full path of the file to be opened.
-            file (str): The relative path or name of the file for some operations.
-        """
-        if file_extension == ".vtf":
-            texture = Texture(self.sdk)
-            texture.open_VTF(filepath)
-        elif file_extension == ".mdl":
-            command = f'"{self.sdk.bin_folder}/hlmv.exe" "{filepath}"'
-            subprocess.Popen(command)
-        elif file_extension == ".vmf":
-            command = f'"{self.sdk.bin_folder}/hammer.exe" "{filepath}"'
-            subprocess.Popen(command)
-        elif file_extension == ".vcd":
-            command = f'"{self.sdk.bin_folder}/hlfaceposer.exe" "{filepath}"'
-            subprocess.Popen(command)
-        elif file_extension == ".bsp":
-            command = f'"{self.sdk.executable_game}" -game "{self.sdk.selected_folder}" -console -dev -w 1280 -h 720 -sw +sv_cheats 1 +map {file}'
-            subprocess.Popen(command)
-        elif file_extension == ".vpk":
-            vpk = VPK(self.sdk)
-            vpk.display_vpk_contents(filepath)
-        elif file_extension == ".tga":
-            texture = Texture(self.sdk)
-            texture.display_tga_file(filepath)
-        elif os.path.isdir(filepath):
-            self.fileList.load_files(filepath)
-        else:
-            try:
-                os.startfile(filepath)
-            except OSError as e:
-                print("Error: Failed to open file:", e)
+        open = Open(self.sdk)
+        open.open_file_with_tree(tree=self.tree, fileList=self.fileList)
+        
 
     def search_files(self, event=None):
         """

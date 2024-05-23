@@ -7,7 +7,6 @@ import os
 import subprocess
 import tempfile
 from texture import Texture
-
 class VPK:
     """
     Class for handling VPK file operations.
@@ -68,6 +67,8 @@ class VPK:
             self.populate_tree(files)
 
         self.tree.bind("<Double-Button-1>", self.open_file_in_vpk)
+
+        #self.fileList = FileListApp(self.sdk, self.root)
 
     def list_vpk_files(self):
         """

@@ -5,7 +5,7 @@ import os
 import subprocess
 from model import Model
 from texture import Texture
-from openSLN import OpenSLN
+from open import Open
 from download import Download
 
 class Button:
@@ -14,7 +14,7 @@ class Button:
     """
 
     sdk : sourceSDK
-    openSLN : OpenSLN
+    open : Open
     iconHpp : tk.PhotoImage
     iconHammer : tk.PhotoImage
     iconSource : tk.PhotoImage
@@ -47,7 +47,7 @@ class Button:
         self.sdk = sourceSDK
         self.model = Model(self.sdk)
         self.texture = Texture(self.sdk)
-        self.openSLN = OpenSLN(self.sdk)
+        self.open = Open(self.sdk)
 
         base_path = os.path.dirname(os.path.abspath(__file__))
         self.iconHpp = tk.PhotoImage(file=os.path.join(base_path, "icons", "hpp.png"))
@@ -120,11 +120,11 @@ class Button:
             self.btn_vtf_edit.pack(side="left")
         
         if os.path.exists(self.sdk.selected_folder + "/src/games.sln"):
-            self.btn_games = tk.Button(self.sdk.root, text="games", command=self.openSLN.open_games, image=self.iconVisualStudio, compound=tk.LEFT, background="#4c5844",fg="white")
+            self.btn_games = tk.Button(self.sdk.root, text="games", command=self.open.open_games, image=self.iconVisualStudio, compound=tk.LEFT, background="#4c5844",fg="white")
             self.btn_games.pack(side="left")
 
         if os.path.exists(self.sdk.selected_folder + "/src/everything.sln"):
-            self.btn_everything = tk.Button(self.sdk.root, text="everything", command=self.openSLN.open_everything, image=self.iconVisualStudio, compound=tk.LEFT, background="#4c5844",fg="white")
+            self.btn_everything = tk.Button(self.sdk.root, text="everything", command=self.open.open_everything, image=self.iconVisualStudio, compound=tk.LEFT, background="#4c5844",fg="white")
             self.btn_everything.pack(side="left")
 
         self.btn_particle = tk.Button(self.sdk.root, text="Particle", command=self.particle, image=self.iconSource, compound=tk.LEFT, background="#4c5844",fg="white")

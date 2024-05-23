@@ -2,12 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
 import os
-from tkinter import filedialog
-import subprocess
-
 from sourceSDK import SourceSDK
-from texture import Texture
-from _vpk import VPK
+from open import Open
 
 class FileListApp:
     sdk: SourceSDK
@@ -124,35 +120,9 @@ class FileListApp:
             self.load_files(parent_dir)
 
     def open_directory(self):
-        os.startfile(self.current_folder)
+        open = Open(self.sdk)
+        open.open_directory(self.current_folder)
 
-    def open_file(self, path):
-        file_name, file_extension = os.path.splitext(path)
-        if file_extension == ".vtf":
-            texture = Texture(self.sdk)
-            texture.open_VTF(path)
-        elif file_extension == ".mdl":
-            command = f'"{self.sdk.bin_folder}/hlmv.exe" "{path}"'
-            subprocess.Popen(command)
-        elif file_extension == ".vmf":
-            command = f'"{self.sdk.bin_folder}/hammer.exe" "{path}"'
-            subprocess.Popen(command)
-        elif file_extension == ".vcd":
-            command = f'"{self.sdk.bin_folder}/hlfaceposer.exe" "{path}"'
-            subprocess.Popen(command)
-        elif file_extension == ".bsp":
-            command = f'"{self.sdk.executable_game}" -game "{self.sdk.selected_folder}" -console -dev -w 1280 -h 720 -sw +sv_cheats 1 +map {file_name}'
-            subprocess.Popen(command)
-        elif file_extension == ".vpk":
-            vpk = VPK(self.sdk)
-            vpk.display_vpk_contents(path)
-        elif file_extension == ".tga":
-            texture = Texture(self.sdk)
-            texture.display_tga_file(path)
-        else:
-            try:
-                os.startfile(path)
-            except OSError as e:
-                print("Error: Failed to open file:", e)
-
-
+    def open_file(self, pathFile):
+        open = Open(self.sdk)
+        open.open_file(localpath=pathFile)
