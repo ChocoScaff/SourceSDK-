@@ -9,17 +9,19 @@ from sourceSDK import SourceSDK
 from texture import Texture
 from _vpk import VPK
 
-class FileListApp(tk.Tk):
+class FileListApp():
 
     sdk : SourceSDK
+    root : tk
 
     def __init__(self, sourceSDK):
-        super().__init__()
+    
+        self.root = tk.Tk()
 
         self.sdk = sourceSDK
         
-        self.title("File List with Tkinter")
-        self.geometry("800x600")
+        self.root.title("File List with Tkinter")
+        self.root.geometry("800x600")
 
         self.current_folder = self.sdk.selected_folder
         self.firstfolder = self.sdk.selected_folder
@@ -28,8 +30,8 @@ class FileListApp(tk.Tk):
         self.load_files(self.current_folder)
 
     def create_widgets(self):
-        self.canvas = tk.Canvas(self, bg='white')
-        self.scroll_y = ttk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
+        self.canvas = tk.Canvas(self.root, bg='white')
+        self.scroll_y = ttk.Scrollbar(self.root, orient="vertical", command=self.canvas.yview)
         
         self.scroll_frame = ttk.Frame(self.canvas)
         self.scroll_frame.bind(
@@ -42,7 +44,7 @@ class FileListApp(tk.Tk):
         self.canvas.create_window((0, 0), window=self.scroll_frame, anchor="nw")
         self.canvas.configure(yscrollcommand=self.scroll_y.set)
 
-        self.up_button = ttk.Button(self, text="Up", command=self.go_up)
+        self.up_button = ttk.Button(self.root, text="Up", command=self.go_up)
         self.up_button.pack(pady=5)
 
         self.canvas.pack(side="left", fill="both", expand=True)

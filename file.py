@@ -56,9 +56,9 @@ class File:
         Display the files in a Tkinter Treeview within a new Toplevel window.
         """
 
-        popup = tk.Toplevel()
+        popup = tk.Tk()
         popup.title("VPK Contents")
-        popup.geometry("800x600")
+        popup.geometry("400x600")
 
         # Search Label and Entry
         search_frame = tk.Frame(popup)
