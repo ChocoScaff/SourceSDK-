@@ -87,22 +87,24 @@ class FileListApp:
     def load_thumbnail(self, file_path):
         try:
             image = None
+            base_path = os.path.dirname(os.path.abspath(__file__))
+
             if file_path.endswith(".vtf"):
-                image = Image.open(os.path.join("icons", "VTFEdit.png"))
+                image = Image.open(os.path.join(base_path, "icons", "VTFEdit.png"))
             elif file_path.endswith(".mdl"):
-                image = Image.open(os.path.join("icons", "hlmv.png"))
+                image = Image.open(os.path.join(base_path, "icons", "hlmv.png"))
             elif file_path.endswith(".tga"):
                 image = Image.open(file_path)
             elif file_path.endswith(".vmf"):
-                image = Image.open(os.path.join("icons", "hammer.png"))
+                image = Image.open(os.path.join(base_path, "icons", "hammer.png"))
             elif file_path.endswith(".vcd"):
-                image = Image.open(os.path.join("icons", "hlposer.png"))
+                image = Image.open(os.path.join(base_path, "icons", "hlposer.png"))
             elif file_path.endswith(".bsp"):
-                image = Image.open(os.path.join("icons", "source.png"))
+                image = Image.open(os.path.join(base_path, "icons", "source.png"))
             elif os.path.isdir(file_path):
-                image = Image.open(os.path.join("icons", "fileexplorer.png"))
+                image = Image.open(os.path.join(base_path, "icons", "fileexplorer.png"))
             elif file_path.endswith(".txt") or file_path.endswith(".res") or file_path.endswith(".vmt") or file_path.endswith(".qc") or file_path.endswith(".smd"):
-                image = Image.open(os.path.join("icons", "txt.png"))
+                image = Image.open(os.path.join(base_path, "icons", "txt.png"))
 
             if image:
                 image.thumbnail((50, 50))
