@@ -7,6 +7,8 @@ import os
 import subprocess
 import tempfile
 from texture import Texture
+from fileListAppVPK import FileListAppVPK
+
 class VPK:
     """
     Class for handling VPK file operations.
@@ -37,12 +39,12 @@ class VPK:
         print(self.vpk_path)
 
         # Create Tkinter window
-        popup = tk.Toplevel()
-        popup.title("VPK Contents")
-        popup.geometry("600x400")
+        self.popup = tk.Toplevel()
+        self.popup.title("VPK Contents")
+        self.popup.geometry("600x400")
 
         # Search Label and Entry
-        search_frame = tk.Frame(popup)
+        search_frame = tk.Frame(self.popup)
         search_frame.pack(fill="x", padx=10, pady=5)
         search_label = tk.Label(search_frame, text="Search:")
         search_label.pack(side="left")
@@ -50,7 +52,7 @@ class VPK:
         self.search_entry.pack(fill="x", expand=True, side="left")
         self.search_entry.bind("<KeyRelease>", self.search_files)
 
-        frame = tk.Frame(popup)
+        frame = tk.Frame(self.popup)
         frame.pack(fill="both", expand=True)
 
         self.tree = ttk.Treeview(frame)
@@ -68,7 +70,7 @@ class VPK:
 
         self.tree.bind("<Double-Button-1>", self.open_file_in_vpk)
 
-        #self.fileList = FileListApp(self.sdk, self.root)
+        self.fileList = FileListAppVPK(self.sdk, self.popup, self.vpk_path, files)
 
     def list_vpk_files(self):
         """
