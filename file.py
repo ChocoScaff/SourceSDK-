@@ -58,7 +58,7 @@ class File:
 
         popup = tk.Toplevel()
         popup.title("VPK Contents")
-        popup.geometry("600x400")
+        popup.geometry("800x600")
 
         # Search Label and Entry
         search_frame = tk.Frame(popup)
@@ -156,6 +156,8 @@ class File:
         elif file_extension == ".tga":
             texture = Texture(self.sdk)
             texture.display_tga_file(filepath)
+        elif os.path.isdir(filepath):
+            self.fileList.load_files(filepath)
         else:
             try:
                 os.startfile(filepath)
