@@ -82,8 +82,6 @@ class File:
 
         self.tree.heading("#0", text="Contents", anchor='w')
 
-        self.fileList = FileListApp(self.sdk, self.root)
-
         files = self.list_files()
 
         # Insert folders and files into the Treeview
@@ -107,6 +105,8 @@ class File:
 
         # Bind double-click event to open the selected file
         self.tree.bind("<Double-Button-1>", self.open_file)
+
+        self.fileList = FileListApp(self.sdk, self.root)
 
     def open_file(self, event):
         """

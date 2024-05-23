@@ -9,32 +9,24 @@ from sourceSDK import SourceSDK
 from texture import Texture
 from _vpk import VPK
 
-class FileListApp():
-    """
-    """
-
-    sdk : SourceSDK
-    root : tk
+class FileListApp:
+    sdk: SourceSDK
+    root: tk.Tk
 
     def __init__(self, sourceSDK, root):
-    
         self.sdk = sourceSDK
-
         self.root = root
-
         self.current_folder = self.sdk.selected_folder
         self.firstfolder = self.sdk.selected_folder
+        self.thumbnails = {}
 
         self.create_widgets()
         self.load_files(self.current_folder)
 
     def create_widgets(self):
-        """
-        """
         self.canvas = tk.Canvas(self.root, bg='white')
         self.scroll_y = ttk.Scrollbar(self.root, orient="vertical", command=self.canvas.yview)
-        
-        # Create a frame inside the canvas for scrollable content
+
         self.scroll_frame = ttk.Frame(self.canvas)
         self.scroll_frame.bind(
             "<Configure>",
@@ -43,46 +35,46 @@ class FileListApp():
             )
         )
 
-        # Attach the frame to the canvas
         self.canvas.create_window((0, 0), window=self.scroll_frame, anchor="nw")
         self.canvas.configure(yscrollcommand=self.scroll_y.set)
 
         self.up_button = ttk.Button(self.root, text="Up", command=self.go_up)
         self.up_button.pack(pady=5)
 
+        self.up_button = ttk.Button(self.root, text="Open Directory", command=self.open_directory)
+        self.up_button.pack(pady=5)
+
         self.canvas.pack(side="left", fill="both", expand=True)
         self.scroll_y.pack(side="right", fill="y")
 
     def load_files(self, folder):
-        """
-        """
         for widget in self.scroll_frame.winfo_children():
             widget.destroy()
 
         self.current_folder = folder
-        self.files = [f for f in os.listdir(folder) if os.path.isdir(os.path.join(folder, f)) or f.endswith((".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", "dir.vpk", ".tga", ".wav", ".mp3"))]
+        self.files = [f for f in os.listdir(folder) if os.path.isdir(os.path.join(folder, f)) or f.endswith((
+            ".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", "dir.vpk", ".tga", ".wav", ".mp3"))]
 
-        columns = self.root.winfo_screenwidth() / 200
-        print(columns)
+        columns = int(self.root.winfo_width() / 150)
+        if columns < 1:
+            columns = 1
         row = 0
         col = 0
 
         for file in self.files:
             file_path = os.path.join(self.current_folder, file)
             frame = ttk.Frame(self.scroll_frame, width=140, height=140, relief="solid", borderwidth=1)
-            frame.grid_propagate(False)  # Prevent frame from resizing to fit contents
+            frame.grid_propagate(False)
             frame.grid(row=row, column=col, padx=5, pady=5)
-            
-            label = ttk.Label(frame, text=file, wraplength=130, anchor="center")
-            label.place(relx=0.5, rely=0.5, anchor='center')
 
-            target_extensions = [".vtf", ".mdl", ".vmf", ".vcd", ".bsp", ".tga"]
-            if any(file.endswith(ext) for ext in target_extensions):
-                thumbnail = self.load_thumbnail(self.current_folder + file)
-                if thumbnail:
-                    thumbnail_label = ttk.Label(frame, image=thumbnail)
-                    thumbnail_label.place(relx=0.5, rely=0.5, anchor='center')
-            
+            label = ttk.Label(frame, text=file, wraplength=130, anchor="center")
+            label.place(relx=0.5, rely=0.1, anchor='center')
+
+            thumbnail = self.load_thumbnail(file_path)
+            if thumbnail:
+                thumbnail_label = ttk.Label(frame, image=thumbnail)
+                thumbnail_label.image = thumbnail  # Keep a reference to avoid garbage collection
+                thumbnail_label.place(relx=0.5, rely=0.55, anchor='center')
 
             if os.path.isdir(file_path):
                 label.bind("<Double-Button-1>", lambda e, path=file_path: self.load_files(path))
@@ -93,23 +85,49 @@ class FileListApp():
             if col >= columns:
                 col = 0
                 row += 1
-        # Reset scrollbar position to the top
+
         self.canvas.yview_moveto(0.0)
 
-    def go_up(self):
-        """
-        """
+    def load_thumbnail(self, file_path):
+        try:
+            image = None
+            if file_path.endswith(".vtf"):
+                image = Image.open(os.path.join("icons", "VTFEdit.png"))
+            elif file_path.endswith(".mdl"):
+                image = Image.open(os.path.join("icons", "hlmv.png"))
+            elif file_path.endswith(".tga"):
+                image = Image.open(file_path)
+            elif file_path.endswith(".vmf"):
+                image = Image.open(os.path.join("icons", "hammer.png"))
+            elif file_path.endswith(".vcd"):
+                image = Image.open(os.path.join("icons", "hlposer.png"))
+            elif file_path.endswith(".bsp"):
+                image = Image.open(os.path.join("icons", "source.png"))
+            elif os.path.isdir(file_path):
+                image = Image.open(os.path.join("icons", "fileexplorer.png"))
+            elif file_path.endswith(".txt") or file_path.endswith(".res") or file_path.endswith(".vmt") or file_path.endswith(".qc") or file_path.endswith(".smd"):
+                image = Image.open(os.path.join("icons", "txt.png"))
 
+            if image:
+                image.thumbnail((50, 50))
+                thumbnail = ImageTk.PhotoImage(image)
+                self.thumbnails[file_path] = thumbnail
+                return thumbnail
+
+        except Exception as e:
+            print("Error loading thumbnail:", e)
+        return None
+
+    def go_up(self):
         parent_dir = os.path.dirname(self.current_folder)
         if parent_dir and self.current_folder != self.firstfolder:
             self.load_files(parent_dir)
 
+    def open_directory(self):
+        os.startfile(self.current_folder)
+
     def open_file(self, path):
-        """
-        """
-
         file_name, file_extension = os.path.splitext(path)
-
         if file_extension == ".vtf":
             texture = Texture(self.sdk)
             texture.open_VTF(path)
@@ -137,40 +155,4 @@ class FileListApp():
             except OSError as e:
                 print("Error: Failed to open file:", e)
 
-    def load_thumbnail(self, file_path):
-        base_path = os.path.dirname(os.path.abspath(__file__))
-        try:
-            image = None
-            if file_path.endswith(".vtf"):
-                # Load thumbnail for VTF files
-                image = Image.open(os.path.join(base_path, "icons", "VTFEdit.png"))
-            elif file_path.endswith((".mdl", ".tga")):
-                # Load thumbnail for MDL or TGA files
-                image = Image.open(file_path)
-            elif file_path.endswith(".vmf"):
-                # Load thumbnail for VMF files
-                image = Image.open(os.path.join(base_path, "icons", "hammer.png"))
-            elif file_path.endswith(".vcd"):
-                # Load thumbnail for VCD files
-                image = Image.open(os.path.join(base_path, "icons", "hlposer.png"))
-            elif file_path.endswith(".bsp"):
-                # Load thumbnail for BSP files
-                # Replace the following line with your code to load BSP thumbnails
-                pass
 
-            if image:
-                # Resize the image to fit the thumbnail size
-                image.thumbnail((50, 50))
-                return ImageTk.PhotoImage(image)
-
-        except Exception as e:
-            print("Error loading thumbnail:", e)
-            return None
-    
-    def setRoot(self, root):
-        self.root = root
-
-if __name__ == "__main__":
-    image_folder = filedialog.askdirectory(title="Select a Directory")
-    app = FileListApp(image_folder)
-    app.mainloop()
