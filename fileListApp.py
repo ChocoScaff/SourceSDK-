@@ -16,9 +16,9 @@ class FileListApp():
 
     def __init__(self, sourceSDK):
     
-        self.root = tk.Tk()
-
         self.sdk = sourceSDK
+
+        self.root = tk.Toplevel(self.sdk.root)
         
         self.root.title("File List with Tkinter")
         self.root.geometry("800x600")
