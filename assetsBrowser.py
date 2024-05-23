@@ -465,8 +465,6 @@ class AssetsBrowser():
         """
         os.startfile(self.sdk.selected_folder)
 
-
-
 test = AssetsBrowser()
 
 test.sdk = SourceSDK()
