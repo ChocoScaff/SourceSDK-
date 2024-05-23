@@ -14,14 +14,11 @@ class FileListApp():
     sdk : SourceSDK
     root : tk
 
-    def __init__(self, sourceSDK):
+    def __init__(self, sourceSDK, root):
     
         self.sdk = sourceSDK
 
-        self.root = tk.Toplevel(self.sdk.root)
-        
-        self.root.title("File List with Tkinter")
-        self.root.geometry("800x600")
+        self.root = root
 
         self.current_folder = self.sdk.selected_folder
         self.firstfolder = self.sdk.selected_folder
@@ -33,6 +30,7 @@ class FileListApp():
         self.canvas = tk.Canvas(self.root, bg='white')
         self.scroll_y = ttk.Scrollbar(self.root, orient="vertical", command=self.canvas.yview)
         
+        # Create a frame inside the canvas for scrollable content
         self.scroll_frame = ttk.Frame(self.canvas)
         self.scroll_frame.bind(
             "<Configure>",
@@ -41,6 +39,7 @@ class FileListApp():
             )
         )
 
+        # Attach the frame to the canvas
         self.canvas.create_window((0, 0), window=self.scroll_frame, anchor="nw")
         self.canvas.configure(yscrollcommand=self.scroll_y.set)
 
@@ -57,7 +56,7 @@ class FileListApp():
         self.current_folder = folder
         self.files = [f for f in os.listdir(folder) if os.path.isdir(os.path.join(folder, f)) or f.endswith((".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", "dir.vpk", ".tga", ".wav", ".mp3"))]
 
-        columns = 5  # Number of columns in the grid
+        columns = 8  # Number of columns in the grid
         row = 0
         col = 0
 

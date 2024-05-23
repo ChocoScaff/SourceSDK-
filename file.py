@@ -58,7 +58,7 @@ class File:
 
         popup = tk.Toplevel(self.sdk.root)
         popup.title("Contents")
-        popup.geometry("400x600")
+        popup.geometry("1250x800")
 
         # Search Label and Entry
         search_frame = tk.Frame(popup)
@@ -81,7 +81,7 @@ class File:
 
         self.tree.heading("#0", text="Contents", anchor='w')
 
-        self.fileList = FileListApp(self.sdk)
+        self.fileList = FileListApp(self.sdk, popup)
 
         files = self.list_files()
 
