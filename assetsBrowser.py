@@ -20,6 +20,7 @@ from terminal import Terminal
 from file import File
 from button import Button
 from caption import Caption
+from fileListApp import FileListApp
 
 class AssetsBrowser():
     """
@@ -35,6 +36,7 @@ class AssetsBrowser():
     file : File
     button : Button
     caption : Caption
+    fileList : FileListApp
 
     def parse_gameinfo_txt(self):
         """
@@ -182,6 +184,7 @@ class AssetsBrowser():
         self.file = File(self.sdk)
         self.button = Button(self.sdk)
         self.caption = Caption(self.sdk)
+        self.fileList = FileListApp(self.sdk)
 
         self.label_init()
 
