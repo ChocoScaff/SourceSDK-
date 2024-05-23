@@ -4,11 +4,14 @@ import os
 import subprocess
 from texture import Texture
 from _vpk import VPK
+from fileListApp import FileListApp
 
 class File:
     """
     A class to handle file operations within the source SDK environment.
     """
+
+    fileList : FileListApp
 
     def __init__(self, sourceSDK) -> None:
         """
@@ -77,6 +80,8 @@ class File:
         self.tree.config(yscrollcommand=scrollbar.set)
 
         self.tree.heading("#0", text="Contents", anchor='w')
+
+        self.fileList = FileListApp(self.sdk)
 
         files = self.list_files()
 

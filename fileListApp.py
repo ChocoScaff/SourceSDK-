@@ -65,7 +65,7 @@ class FileListApp(tk.Tk):
             frame.grid_propagate(False)  # Prevent frame from resizing to fit contents
             frame.grid(row=row, column=col, padx=5, pady=5)
 
-            label = ttk.Label(frame, text=file, wraplength=140, anchor="center")
+            label = ttk.Label(frame, text=file, wraplength=130, anchor="center")
             label.place(relx=0.5, rely=0.5, anchor='center')
             
             if os.path.isdir(file_path):
