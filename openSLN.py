@@ -1,8 +1,5 @@
-import tkinter as tk
 import sourceSDK
-from tkinter import filedialog
 import os
-import subprocess
 
 class OpenSLN:
     """

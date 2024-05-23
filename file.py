@@ -52,12 +52,13 @@ class File:
         """
         Display the files in a Tkinter Treeview within a new Toplevel window.
         """
-        root = tk.Toplevel()
-        root.title("File Explorer")
-        root.geometry("600x400")
+
+        popup = tk.Toplevel()
+        popup.title("VPK Contents")
+        popup.geometry("600x400")
 
         # Search Label and Entry
-        search_frame = tk.Frame(root)
+        search_frame = tk.Frame(popup)
         search_frame.pack(fill="x", padx=10, pady=5)
         search_label = tk.Label(search_frame, text="Search:")
         search_label.pack(side="left")
@@ -65,11 +66,19 @@ class File:
         self.search_entry.pack(fill="x", expand=True, side="left")
         self.search_entry.bind("<KeyRelease>", self.search_files)
 
-        files = self.list_files()
+        frame = tk.Frame(popup)
+        frame.pack(fill="both", expand=True)
 
-        # Create the Treeview widget
-        self.tree = ttk.Treeview(root)
-        self.tree.pack(fill=tk.BOTH, expand=True)
+        self.tree = ttk.Treeview(frame)
+        self.tree.pack(fill="both", expand=True, side="left")
+
+        scrollbar = tk.Scrollbar(frame, orient="vertical", command=self.tree.yview)
+        scrollbar.pack(side="right", fill="y")
+        self.tree.config(yscrollcommand=scrollbar.set)
+
+        self.tree.heading("#0", text="Contents", anchor='w')
+
+        files = self.list_files()
 
         # Insert folders and files into the Treeview
         for folder, file_list in files.items():

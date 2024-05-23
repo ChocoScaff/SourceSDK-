@@ -1,4 +1,3 @@
-import tkinter as tk
 import sourceSDK
 from tkinter import filedialog
 import os

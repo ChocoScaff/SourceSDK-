@@ -1,4 +1,3 @@
-import string
 import tkinter as tk
 import os
 import subprocess
@@ -234,7 +233,6 @@ class AssetsBrowser():
             self.sdk.other_menu.add_command(label="Download source code", command=self.downbload_source_code)
             self.sdk.other_menu.add_command(label="MsBuild", command=self.msbuild_compile)
             self.sdk.other_menu.add_command(label="Open in file explorer", command=self.open_file_explorer)
-
 
         self.sdk.first_init = 1
 
