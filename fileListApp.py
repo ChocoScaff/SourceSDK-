@@ -12,6 +12,7 @@ class FileListApp(tk.Tk):
         self.geometry("800x600")
 
         self.current_folder = folder
+        self.firstfolder = folder
 
         self.create_widgets()
         self.load_files(self.current_folder)
@@ -31,6 +32,9 @@ class FileListApp(tk.Tk):
         self.canvas.create_window((0, 0), window=self.scroll_frame, anchor="nw")
         self.canvas.configure(yscrollcommand=self.scroll_y.set)
 
+        self.up_button = ttk.Button(self, text="Up", command=self.go_up)
+        self.up_button.pack(pady=5)
+
         self.canvas.pack(side="left", fill="both", expand=True)
         self.scroll_y.pack(side="right", fill="y")
 
@@ -39,7 +43,7 @@ class FileListApp(tk.Tk):
             widget.destroy()
 
         self.current_folder = folder
-        self.files = os.listdir(folder)
+        self.files = [f for f in os.listdir(folder) if os.path.isdir(os.path.join(folder, f)) or f.endswith((".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", "dir.vpk", ".tga", ".wav", ".mp3"))]
 
         columns = 4  # Number of columns in the grid
         row = 0
@@ -63,6 +67,13 @@ class FileListApp(tk.Tk):
             if col >= columns:
                 col = 0
                 row += 1
+        # Reset scrollbar position to the top
+        self.canvas.yview_moveto(0.0)
+
+    def go_up(self):
+        parent_dir = os.path.dirname(self.current_folder)
+        if parent_dir and self.current_folder != self.firstfolder
+            self.load_files(parent_dir)
 
     def open_file(self, path):
         if os.name == 'nt':  # For Windows
