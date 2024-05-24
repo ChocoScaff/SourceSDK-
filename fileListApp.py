@@ -49,7 +49,7 @@ class FileListApp:
 
         self.current_folder = folder
         self.files = [f for f in os.listdir(folder) if os.path.isdir(os.path.join(folder, f)) or f.endswith((
-            ".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", "dir.vpk", ".tga", ".wav", ".mp3"))]
+            ".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", "dir.vpk", ".tga", ".wav", ".mp3", ".sln"))]
 
         columns = int(self.root.winfo_width() / 150)
         if columns < 1:
@@ -103,8 +103,10 @@ class FileListApp:
                 image = Image.open(os.path.join(base_path, "icons", "source.png"))
             elif os.path.isdir(file_path):
                 image = Image.open(os.path.join(base_path, "icons", "fileexplorer.png"))
-            elif file_path.endswith(".txt") or file_path.endswith(".res") or file_path.endswith(".vmt") or file_path.endswith(".qc") or file_path.endswith(".smd"):
+            elif file_path.endswith(".txt") or file_path.endswith(".res") or file_path.endswith(".vmt") or file_path.endswith(".qc") or file_path.endswith(".smd") or file_path.endswith(".cfg"):
                 image = Image.open(os.path.join(base_path, "icons", "txt.png"))
+            elif file_path.endswith(".slb"):
+                image = Image.open(os.path.join(base_path, "icons", "Visual_Studio.png"))
 
             if image:
                 image.thumbnail((50, 50))
