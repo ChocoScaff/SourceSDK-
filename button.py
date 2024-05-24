@@ -1,6 +1,5 @@
 import tkinter as tk
 import sourceSDK
-from tkinter import filedialog
 import os
 import subprocess
 from model import Model

@@ -37,8 +37,8 @@ class FileListApp:
         self.up_button = ttk.Button(self.root, text="Up", command=self.go_up)
         self.up_button.pack(pady=5)
 
-        self.up_button = ttk.Button(self.root, text="Open Directory", command=self.open_directory)
-        self.up_button.pack(pady=5)
+        self.open_dir_button = ttk.Button(self.root, text="Open Directory", command=self.open_directory)
+        self.open_dir_button.pack(pady=5)
 
         self.canvas.pack(side="left", fill="both", expand=True)
         self.scroll_y.pack(side="right", fill="y")
@@ -73,9 +73,15 @@ class FileListApp:
                 thumbnail_label.place(relx=0.5, rely=0.55, anchor='center')
 
             if os.path.isdir(file_path):
+                frame.bind("<Double-Button-1>", lambda e, path=file_path: self.load_files(path))
                 label.bind("<Double-Button-1>", lambda e, path=file_path: self.load_files(path))
+                if thumbnail:
+                    thumbnail_label.bind("<Double-Button-1>", lambda e, path=file_path: self.load_files(path))
             else:
+                frame.bind("<Double-Button-1>", lambda e, path=file_path: self.open_file(path))
                 label.bind("<Double-Button-1>", lambda e, path=file_path: self.open_file(path))
+                if thumbnail:
+                    thumbnail_label.bind("<Double-Button-1>", lambda e, path=file_path: self.open_file(path))
 
             col += 1
             if col >= columns:
@@ -105,7 +111,7 @@ class FileListApp:
                 image = Image.open(os.path.join(base_path, "icons", "fileexplorer.png"))
             elif file_path.endswith(".txt") or file_path.endswith(".res") or file_path.endswith(".vmt") or file_path.endswith(".qc") or file_path.endswith(".smd") or file_path.endswith(".cfg"):
                 image = Image.open(os.path.join(base_path, "icons", "txt.png"))
-            elif file_path.endswith(".slb"):
+            elif file_path.endswith(".sln"):
                 image = Image.open(os.path.join(base_path, "icons", "Visual_Studio.png"))
 
             if image:
@@ -124,9 +130,10 @@ class FileListApp:
             self.load_files(parent_dir)
 
     def open_directory(self):
-        open = Open(self.sdk)
-        open.open_directory(self.current_folder)
+        open_instance = Open(self.sdk)
+        open_instance.open_directory(self.current_folder)
 
     def open_file(self, pathFile):
-        open = Open(self.sdk)
-        open.open_file(localpath=pathFile)
+        open_instance = Open(self.sdk)
+        open_instance.open_file(localpath=pathFile)
+
