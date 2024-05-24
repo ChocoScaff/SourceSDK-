@@ -1,5 +1,5 @@
 import sourceSDK
-from tkinter import filedialog
+from PyQt5.QtWidgets import QFileDialog, QMessageBox
 import os
 import subprocess
 
@@ -21,7 +21,7 @@ class Caption:
         Compile caption
         """
 
-        filenameTXT = filedialog.askopenfile(title="Select .txt file", filetypes=[("TXT files", "closecaption*.txt")], initialdir=self.sdk.selected_folder + "/resource")
+        filenameTXT, _ = QFileDialog.getOpenFileName(None, "Select .txt file", self.sdk.selected_folder + "/resource", "TXT files (closecaption*.txt)")        
         captioncompiler = (self.sdk.bin_folder + "/captioncompiler.exe")
         command = ('"' + captioncompiler + '"' + " -game " + '"' + self.sdk.selected_folder + '"' + " " + '"' + filenameTXT.name + '"')
         print(command)

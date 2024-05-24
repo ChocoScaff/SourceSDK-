@@ -1,14 +1,16 @@
-import tkinter as tk
 import os
 import subprocess
-from tkinter import filedialog
+from PyQt5.QtWidgets import (
+    QApplication, QMainWindow, QTextEdit, QFileDialog, QAction, QLabel,
+    QVBoxLayout, QWidget, QMessageBox
+)
+from PyQt5.QtGui import QColor, QTextCharFormat
 import sys
 import shutil
 import git
 import urllib.request
 import json
 import webbrowser
-from tkinter import messagebox
 import re
 
 from sourceSDK import SourceSDK
@@ -16,32 +18,106 @@ from texture import Texture
 from model import Model
 from map import Map
 from _vpk import VPK
-from terminal import Terminal
 from file import File
 from button import Button
 from caption import Caption
 
-class AssetsBrowser():
+class Terminal(QTextEdit):
     """
-    @brief Class
+    Terminal on the GUI
     """
 
-    sdk : SourceSDK
-    texure : Texture
-    model : Model
-    map : Map
-    vpk : VPK
-    terminal : Terminal
-    file : File
-    button : Button
-    caption : Caption
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setReadOnly(True)
+
+    def write(self, message, message_type="stdout"):
+        format = QTextCharFormat()
+        if message_type == "stderr":
+            format.setForeground(QColor("red"))
+        else:
+            format.setForeground(QColor("black"))
+
+        self.setCurrentCharFormat(format)
+        self.append(message)
+        self.moveCursor(self.textCursor().End)
+
+    def flush(self):
+        pass
+
+class AssetsBrowser(QMainWindow):
+    """
+    Class for managing assets
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.sdk = SourceSDK()
+
+        self.sdk.selected_folder = None
+        self.sdk.game_name = None
+        self.sdk.parent_folder = None
+        self.sdk.bin_folder = None
+        self.sdk.executable_game = None
+        self.sdk.first_init = 0
+        self.sdk.game_path = []
+        self.sdk.texture_menu = None
+        self.sdk.map_menu = None
+        self.sdk.model_menu = None
+        self.sdk.other_menu = None
+
+        self.texture = None
+        self.model = None
+        self.map = None
+        self.vpk = None
+        self.file = None
+        self.button = None
+        self.caption = None
+
+        self.init_ui()
+
+    def init_ui(self):
+        self.setWindowTitle("Source SDK : assetsBrowser")
+        self.setGeometry(100, 100, 1200, 800)
+
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
+        layout = QVBoxLayout(central_widget)
+
+        self.terminal = Terminal(self)
+        layout.addWidget(self.terminal)
+
+        self.create_menu_bar()
+
+    def create_menu_bar(self):
+        menu_bar = self.menuBar()
+
+        file_menu = menu_bar.addMenu("File")
+        help_menu = menu_bar.addMenu("Help")
+
+        new_action = QAction("New", self)
+        new_action.setShortcut("Ctrl+N")
+        new_action.triggered.connect(self.new_project)
+        file_menu.addAction(new_action)
+
+        open_action = QAction("Open", self)
+        open_action.setShortcut("Ctrl+O")
+        open_action.triggered.connect(self.init_sdk)
+        file_menu.addAction(open_action)
+
+        exit_action = QAction("Exit", self)
+        exit_action.triggered.connect(self.launch_exit)
+        file_menu.addAction(exit_action)
+
+        doc_action = QAction("SDK Doc", self)
+        doc_action.triggered.connect(self.sdk_doc)
+        help_menu.addAction(doc_action)
+
+        about_action = QAction("About", self)
+        about_action.triggered.connect(self.open_about_window)
+        help_menu.addAction(about_action)
 
     def parse_gameinfo_txt(self):
-        """
-        parse game info txt
-        @param file_path The path to the gameinfo.txt
-        """
-
         gameinfo_path = os.path.join(self.sdk.selected_folder, "gameinfo.txt")
         print(gameinfo_path)
 
@@ -51,17 +127,12 @@ class AssetsBrowser():
         if os.path.isfile(gameinfo_path):
             with open(gameinfo_path, 'r') as file:
                 for line in file:
-                    
                     if re.search(r'^\s*SearchPaths', line):
                         inside_search_paths = True
                         continue
-                    
-                    # Check if the line ends the SearchPaths section
                     if inside_search_paths and re.search(r'^\s*}', line):
                         inside_search_paths = False
                         continue
-
-                    # If inside the SearchPaths block, find game paths
                     if inside_search_paths:
                         line = line.lower()
                         if '|all_source_engine_paths|' in line:
@@ -69,61 +140,34 @@ class AssetsBrowser():
                         match = game_path_pattern.match(line)
                         if match:
                             self.sdk.game_path.append(match.group(1).strip())
-
         print(self.sdk.game_path)
 
-    def bin_folder(self,folder_path):
-        """
-        fin bin folder
-        @param folder_path to the game
-        @return binFolder
-        """
-
-        binFolder = self.sdk.parent_folder + "/bin"
+    def bin_folder(self, folder_path):
+        binFolder = os.path.join(self.sdk.parent_folder, "bin")
         if os.path.exists(binFolder):
             pass
         else:
-            #with open(folder_path + "bin.txt", 'r') as file:   
-            folder = filedialog.askdirectory(title="Open bin Engine path",initialdir=self.sdk.parent_folder)
+            folder = QFileDialog.getExistingDirectory(self, "Open bin Engine path", self.sdk.parent_folder)
             binFolder = self.bin_folder(folder)
         return binFolder
 
-    def find_executable_game(self,folder_path):
-        """
-        fin exe
-        @param folder_path to the game
-        @return executable
-        """
-
+    def find_executable_game(self, folder_path):
         executables = []
         for root, dirs, files in os.walk(self.sdk.parent_folder):
             for file in files:
                 if file.endswith('.exe'):
                     executables.append(os.path.join(root, file))
-        #print(executables)
         return executables[0]
 
-    def find_game_name(self,folder_path):
-        """
-        fin game name
-        @param folder_path to the game
-        @return game name
-        """
+    def find_game_name(self, folder_path):
         game_name = os.path.basename(folder_path)
         return game_name
 
     def find_gameinfo_folder(self):
-        """
-        open folder whre gameinfo txt
-        """
-
-        # Recursively search through directories
-        selected_folder = filedialog.askdirectory()
-        
+        selected_folder = QFileDialog.getExistingDirectory(self, "Select Directory")
         gameinfo_path = os.path.join(selected_folder, "gameinfo.txt")
-
         if os.path.isfile(gameinfo_path):
-            command = "setx VProject " + '"' + selected_folder + '"'
+            command = f'setx VProject "{selected_folder}"'
             result = subprocess.run(command, shell=True)
             print(result)
             return selected_folder
@@ -131,15 +175,10 @@ class AssetsBrowser():
             print("gameinfo.txt not found in selected folder.")
             return -1
 
-    def Init(self, folder=False):
-        """
-        Init software with parameter of the game
-        @param folder=False
-        """
-
+    def init_sdk(self, folder=False):
         print("Wait...")
 
-        if folder == False:
+        if not folder:
             if self.sdk.first_init == 1:
                 self.button.destroy_button()
             self.sdk.selected_folder = self.find_gameinfo_folder()
@@ -148,32 +187,34 @@ class AssetsBrowser():
         else:
             if self.sdk.first_init == 1:
                 self.button.destroy_button()
-            self.sdk.selected_folder=folder
+            self.sdk.selected_folder = folder
 
-        print("selected directory : " + self.sdk.selected_folder)
+        print(f"selected directory : {self.sdk.selected_folder}")
 
         self.sdk.game_name = self.find_game_name(self.sdk.selected_folder)
-        print("game name : " + self.sdk.game_name)
+        print(f"game name : {self.sdk.game_name}")
 
         self.sdk.parent_folder = os.path.dirname(self.sdk.selected_folder)
 
         self.sdk.bin_folder = self.bin_folder(self.sdk.selected_folder)
-        print("bin directory : " + self.sdk.bin_folder)
+        print(f"bin directory : {self.sdk.bin_folder}")
 
         self.sdk.executable_game = self.find_executable_game(self.sdk.bin_folder)
-        print("executable game : " + self.sdk.executable_game)
+        print(f"executable game : {self.sdk.executable_game}")
 
         self.parse_gameinfo_txt()
 
         try:
-            self.sdk.root.iconbitmap(self.sdk.selected_folder + '/resource/game.ico')
-        except tk.TclError:
+            self.setWindowIcon(QIcon(os.path.join(self.sdk.selected_folder, 'resource', 'game.ico')))
+        except Exception:
             print("Error: Failed to set icon.")
-        
+
         print("Project open")
 
-        lbl_result = tk.Label(self.sdk.root, text="Tools", wraplength=400, background="#3e4637",fg='white')
-        lbl_result.pack()
+        lbl_result = QLabel("Tools")
+        lbl_result.setStyleSheet("background-color: #3e4637; color: white;")
+        layout = self.centralWidget().layout()
+        layout.addWidget(lbl_result)
 
         self.texture = Texture(self.sdk)
         self.model = Model(self.sdk)
@@ -188,344 +229,60 @@ class AssetsBrowser():
         self.file.display_files()
 
     def label_init(self):
-        """
-        Init Labet
-        """
-
         self.button.display()
 
         if self.sdk.first_init == 0:
-            self.sdk.texture_menu = tk.Menu(self.sdk.menu_bar, tearoff=0,background="#4c5844",fg="white")
-            self.sdk.menu_bar.add_cascade(label="Texture", menu=self.sdk.texture_menu)
-            self.sdk.map_menu = tk.Menu(self.sdk.menu_bar, tearoff=0,background="#4c5844",fg="white")
-            self.sdk.menu_bar.add_cascade(label="Map", menu=self.sdk.map_menu)
-            self.sdk.model_menu = tk.Menu(self.sdk.menu_bar, tearoff=0,background="#4c5844",fg="white")
-            self.sdk.menu_bar.add_cascade(label="Model", menu=self.sdk.model_menu)
-            self.sdk.other_menu = tk.Menu(self.sdk.menu_bar, tearoff=0,background="#4c5844",fg="white")
-            self.sdk.menu_bar.add_cascade(label="Other", menu=self.sdk.other_menu)
+            self.sdk.texture_menu = self.menuBar().addMenu("Texture")
+            self.sdk.map_menu = self.menuBar().addMenu("Map")
+            self.sdk.model_menu = self.menuBar().addMenu("Model")
+            self.sdk.other_menu = self.menuBar().addMenu("Other")
 
-            self.sdk.map_menu.add_command(label="Build Map", command=self.map.build_map)
-            self.sdk.map_menu.add_command(label="Build All Maps", command=self.map.build_all_map)
-            self.sdk.map_menu.add_command(label="Info Map", command=self.map.info_map)
+            self.sdk.map_menu.addAction("Build Map", self.map.build_map)
+            self.sdk.map_menu.addAction("Build All Maps", self.map.build_all_map)
+            self.sdk.map_menu.addAction("Info Map", self.map.info_map)
 
-            self.sdk.texture_menu.add_command(label="Build Texture", command=self.texture.build_texture)
-            self.sdk.texture_menu.add_command(label="Build All Textures", command=self.texture.build_all_texture)
-            self.sdk.texture_menu.add_command(label="See Texture", command=self.texture.open_vtf)
-            self.sdk.texture_menu.add_command(label="Texture To TGA", command=self.texture.texture_to_tga)
-            self.sdk.texture_menu.add_command(label="Generate vmt", command=self.texture.generate_vmt)
+            self.sdk.texture_menu.addAction("Build Texture", self.texture.build_texture)
+            self.sdk.texture_menu.addAction("Build All Textures", self.texture.build_all_texture)
+            self.sdk.texture_menu.addAction("See Texture", self.texture.open_vtf)
+            self.sdk.texture_menu.addAction("Texture To TGA", self.texture.texture_to_tga)
+            self.sdk.texture_menu.addAction("Generate vmt", self.texture.generate_vmt)
 
-            self.sdk.model_menu.add_command(label="Build Model", command=self.model.build_model)
-            self.sdk.model_menu.add_command(label="Build All Models", command=self.model.build_all_model)
-            self.sdk.model_menu.add_command(label="Generate QC File", command=self.model.generate_qc_file)
+            self.sdk.model_menu.addAction("Build Model", self.model.build_model)
+            self.sdk.model_menu.addAction("Build All Models", self.model.build_all_model)
+            self.sdk.model_menu.addAction("Generate QC File", self.model.generate_qc_file)
 
-            self.sdk.other_menu.add_command(label="Create VPK", command=self.vpk.create_VPK)
-            self.sdk.other_menu.add_command(label="Display VPK", command=self.vpk.display_VPK)
-            self.sdk.other_menu.add_command(label="Display VPK Contents", command=self.vpk.display_vpk_contents)
-            self.sdk.other_menu.add_command(label="Extract VPK", command=self.vpk.extract_VPK)
+            self.sdk.other_menu.addAction("Create VPK", self.vpk.create_VPK)
+            self.sdk.other_menu.addAction("Display VPK", self.vpk.display_VPK)
+            self.sdk.other_menu.addAction("Display VPK Contents", self.vpk.display_vpk_contents)
+            self.sdk.other_menu.addAction("Extract VPK", self.vpk.extract_VPK)
 
-            self.sdk.other_menu.add_command(label="Build Caption", command=self.caption.build_caption)
-            self.sdk.other_menu.add_command(label="Build All Captions", command=self.caption.build_all_caption)
+            self.sdk.other_menu.addAction("Build Caption", self.caption.build_caption)
+            self.sdk.other_menu.addAction("Build All Captions", self.caption.build_all_captions)
 
-            #if os.path.exists(self.sdk.selected_folder + "/src/creategameprojects.bat"):
-            self.sdk.other_menu.add_command(label="Generate games", command=self.generate_games)
-            #if os.path.exists(self.sdk.selected_folder + "/src/createallprojects.bat"):
-            self.sdk.other_menu.add_command(label="Generate everything", command=self.generate_everything)
-            self.sdk.other_menu.add_command(label="Download source code", command=self.downbload_source_code)
-            self.sdk.other_menu.add_command(label="MsBuild", command=self.msbuild_compile)
-            self.sdk.other_menu.add_command(label="Open in file explorer", command=self.open_file_explorer)
-
-        self.sdk.first_init = 1
-
+            self.sdk.first_init = 1
 
     def new_project(self):
-        """
-        Init New project
-        """
-        
-        directory = filedialog.askdirectory(title="Select a Directory")
-        game_name = self.find_game_name(directory)
-
-        print(directory)
-        print(game_name)
-        if directory:
-            files_in_dir = os.listdir(directory)
-        
-            # Check if the directory is empty
-            if not files_in_dir:
-
-                os.mkdir(directory + "/materialsrc")
-                os.mkdir(directory + "/materials")
-                os.mkdir(directory + "/models")
-                os.mkdir(directory + "/modelsrc")
-                os.mkdir(directory + "/bin")
-                os.mkdir(directory + "/cfg")
-                os.mkdir(directory + "/scripts")
-                os.mkdir(directory + "/maps")
-                os.mkdir(directory + "/mapsrc")
-                os.mkdir(directory + "/resource")
-                os.mkdir(directory + "/particles")
-                os.mkdir(directory + "/sound")
-                os.mkdir(directory + "/media")
-                os.mkdir(directory + "/expressions")
-                os.mkdir(directory + "/scenes")
-                os.mkdir(directory + "/src")
-
-                gameinfo_content = """
-"GameInfo"
-{
-    game 		"replace"
-    title 		"replace"
-    type		singleplayer_only
-    icon		"resource/game"
-
-    FileSystem
-    {
-        SteamAppId		243730		// Source test.sdk Base 2013
-        
-        SearchPaths
-        {
-            mod+mod_write+default_write_path		|gameinfo_path|.
-            game+game_write		replace
-            gamebin				replace/bin
-            Game				|gameinfo_path|.
-            Game				|all_source_engine_paths|replace
-        }
-    }
-}
-            """
-
-                # Write the content to the file
-                gameinfo_content.replace("replace", game_name)
-                gameInfo = directory + "/gameinfo.txt"
-                try:
-                    with open(gameInfo, 'w') as file:
-                        file.write(gameinfo_content.replace('replace', game_name))
-                    print(f"String saved to '{directory}' successfully.")
-                except Exception as e:
-                    print(f"Error: {e}")
-                
-                self.Init(directory)
-
-            else:
-                print("The directory must be empty")     
-            
-
-    # Function to handle keyboard shortcuts
-    def handle_shortcut(self, event):
-        """
-        @param event get event keyboard
-        """
-        key = event.keysym
-        if key == "n":
-            self.new_project()
-        elif key == "o":
-            self.Init()
+        pass  # Placeholder for new project functionality
 
     def launch_exit(self):
-        """
-        exit program
-        """
-        exit()
+        print("Exit application.")
+        QApplication.instance().quit()
+
+    def sdk_doc(self):
+        url = "https://developer.valvesoftware.com/wiki/SDK_Docs"
+        webbrowser.open(url)
 
     def open_about_window(self):
-        """
-        """
-        about_window = tk.Toplevel(self.sdk.root)
-        about_window.title("About")
+        msg_box = QMessageBox()
+        msg_box.setWindowTitle("About")
+        msg_box.setText("About Source SDK : assetsBrowser")
+        msg_box.setStandardButtons(QMessageBox.Ok)
+        msg_box.exec()
 
-        # Add text to the window
-        about_text = tk.Label(about_window, text="Software created by ChocoScaff.\nYou can find the source code here:")
-        about_text.pack()
-
-        # Add hyperlink
-        def open_link(event):
-            webbrowser.open_new("https://github.com/ChocoScaff/SourceSDK-")
-
-        hyperlink = tk.Label(about_window, text="https://github.com/ChocoScaff/SourceSDK-", fg="blue", cursor="hand2")
-        hyperlink.pack()
-        hyperlink.bind("<Button-1>", open_link)
-
-    def generate_games(self):
-        """
-        execute creategameprojects.bat'
-        """
-        command = f'cd /D "{self.sdk.selected_folder}\\src" && creategameprojects.bat'
-        print(command)
-        result = subprocess.run(command, shell=True, capture_output=True, text=True)
-        print(result)
-
-    def generate_everything(self):
-        """
-        execute createallprojects.bat'
-        """
-        command = f'cd /D "{self.sdk.selected_folder}\\src" && createallprojects.bat'
-        print(command)
-        result = subprocess.run(command, shell=True, capture_output=True, text=True)
-        print(result)
-
-    def downbload_source_code(self):
-        """
-        Download source code source sdk 2013
-        """
-
-        self.download_github_code("https://github.com/ValveSoftware/source-test.sdk-2013", self.sdk.selected_folder + "/src/")
-
-        shutil.rmtree(self.sdk.selected_folder + "/src/mp/")
-        self.move_files(self.sdk.selected_folder + "/src/sp/src/", self.sdk.selected_folder + "/src/")
-        shutil.rmtree(self.sdk.selected_folder + "/src/sp/")
-
-        self.generate_games()
-        self.generate_everything()
-
-        self.Init()
-
-    def download_github_code(self, repo_url, destination_folder):
-        """
-        """
-        git.Repo.clone_from(repo_url, destination_folder)
-
-    def move_files(self, source_folder, destination_folder):
-        """
-        """
-        # Create the destination folder if it doesn't exist
-        if not os.path.exists(destination_folder):
-            os.makedirs(destination_folder)
-
-        # Get a list of all files in the source folder
-        files = os.listdir(source_folder)
-
-        # Move each file to the destination folder
-        for file in files:
-            source_file = os.path.join(source_folder, file)
-            destination_file = os.path.join(destination_folder, file)
-            shutil.move(source_file, destination_file)
-
-
-    def get_latest_release_version(self, repo_owner, repo_name):
-        """
-        return last version
-        """
-        url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases/latest"
-        try:
-            with urllib.request.urlopen(url) as response:
-                data = json.loads(response.read())
-                latest_version = data['tag_name']
-                return latest_version
-        except Exception as e:
-            return f"Error: {e}"
-
-    def check_software_version(self, local_version, github_version):
-        """
-        check local version
-        """
-        if local_version == github_version:
-            print("You have the latest version installed.")
-        else:
-            print(f"There is a newer version ({github_version}) available on GitHub.")
-
-    def sdk_Doc(self):
-        """
-        Open SDK Docs
-        """
-        webbrowser.open("https://developer.valvesoftware.com/wiki/SDK_Docs")
-
-    def msbuild_compile(self):
-        """
-        compile SLN with msbuild
-        """
-        msbuildpath = self.find_msbuild()
-        if msbuildpath == None:
-            print("don't find msbuild")
-            return
-        
-        sln_path = filedialog.askopenfilename(title="Select sln file", filetypes=[("sln files", "*.sln")])
-        command= '"' + msbuildpath + '"' + ' ' + '"' + sln_path + '"' + " /p:Configuration=Debug"
-        print(command)
-        result = subprocess.run(command, shell=True, capture_output=True, text=True)
-        print(result)
-
-    def find_msbuild(self):
-        """
-        find msbuild
-        """
-        # Walk through all directories and subdirectories starting from the root directory
-        for dirpath, _, filenames in os.walk("C:\Program Files (x86)\MSBuild"):
-            # Check if MSBuild.exe exists in the current directory
-            if 'MSBuild.exe' in filenames:
-                return os.path.join(dirpath, 'MSBuild.exe')
-
-        # MSBuild.exe not found in any directory under the root directory
-        return None
-
-
-    def open_file_explorer(self):
-        """
-        open folder in file explorer
-        TODO open exe if same name of the folder
-        """
-        os.startfile(self.sdk.selected_folder)
-
-test = AssetsBrowser()
-
-test.sdk = SourceSDK()
-
-# Replace these with your GitHub repository owner and name
-repo_owner = "ChocoScaff"
-repo_name = "SourceSDK-"
-
-# Replace this with the version of your local software
-local_version = "0.3.0"
-
-github_version = test.get_latest_release_version(repo_owner, repo_name)
-
-if github_version:
-    test.check_software_version(local_version, github_version)
-else:
-    print("Failed to fetch the latest version from GitHub.")
-    download = messagebox.askyesno("New Version Available", f"There is a newer version ({github_version}) available on GitHub. Do you want to download it?")
-    if download:
-        webbrowser.open(f"https://github.com/{repo_owner}/{repo_name}/releases/latest")
-    else:
-        messagebox.showinfo("Version Check", "You chose not to download the new version.")
-
-# Create the main window
-test.sdk.root = tk.Tk()
-test.sdk.root.title("Source SDK : assetsBrowser " + local_version)
-
-test.sdk.root.tk_setPalette(background="#4c5844", foreground="white")
-
-test.sdk.root.configure(background="#3e4637")
-
-test.sdk.menu_bar = tk.Menu(test.sdk.root)
-test.sdk.root.config(menu=test.sdk.menu_bar,background="#3e4637")
-
-# Create a "File" menu
-file_menu = tk.Menu(test.sdk.menu_bar, tearoff=0,background="#4c5844",fg="white")
-test.sdk.menu_bar.add_cascade(label="File", menu=file_menu)
-
-# Add "Open" option to the "File" menu
-file_menu.add_command(label="New", command=test.new_project, accelerator="Ctrl+N")
-file_menu.add_command(label="Open", command=test.Init, accelerator="Ctrl+O")
-#previous_projects_menu = tk.Menu(file_menu, tearoff=0)
-#file_menu.add_cascade(label="Previous Projects", menu=previous_projects_menu)
-file_menu.add_command(label="Exit", command=test.launch_exit)
-
-help_menu = tk.Menu(test.sdk.menu_bar, tearoff=0,background="#4c5844",fg="white")
-test.sdk.menu_bar.add_cascade(label="Help", menu=help_menu)
-help_menu.add_command(label="sdk Doc", command=test.sdk_Doc)
-help_menu.add_command(label="About", command=test.open_about_window)
-
-# Create a Text widget to display terminal output
-test.terminal = Terminal(test.sdk.root, wrap=tk.WORD, height=30, width=120)
-test.terminal.pack()
-
-# Redirect sys.stdout and sys.stderr to the Terminal widget
-sys.stdout = test.terminal
-sys.stderr = test.terminal
-
-# Bind keyboard shortcuts to the root window
-test.sdk.root.bind("<Control-n>", test.handle_shortcut)
-test.sdk.root.bind("<Control-o>", test.handle_shortcut)
-
-# Start the GUI event loop
-test.sdk.root.mainloop()
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    browser = AssetsBrowser()
+    browser.show()
+    sys.stdout = browser.terminal
+    sys.stderr = browser.terminal
+    sys.exit(app.exec_())

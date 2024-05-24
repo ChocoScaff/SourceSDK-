@@ -1,26 +1,36 @@
-import tkinter as tk
+from PyQt5.QtWidgets import QTextEdit
+from PyQt5.QtGui import QTextCharFormat, QColor
 
-class Terminal(tk.Text):
+class Terminal(QTextEdit):
     """
     Terminal on the GUI
     """
 
+    def __init__(self, parent=None):
+        """
+        Initialize the Terminal widget
+        """
+        super().__init__(parent)
+        self.setReadOnly(True)
 
-    def __init__(self, master, **kwargs):
+    def write(self, message, message_type="stdout"):
         """
+        Write message to the terminal
+        :param message: str, message to display
+        :param message_type: str, type of message ("stdout" or "stderr")
         """
-        super().__init__(master, **kwargs)
-        self.tag_configure("stdout", foreground="black")
-        self.tag_configure("stderr", foreground="red")
+        format = QTextCharFormat()
+        if message_type == "stderr":
+            format.setForeground(QColor("red"))
+        else:
+            format.setForeground(QColor("black"))
 
-    def write(self, message):
-        """
-        """
-        self.insert(tk.END, message)
-        self.see(tk.END)
+        self.setCurrentCharFormat(format)
+        self.append(message)
+        self.moveCursor(self.textCursor().End)
 
     def flush(self):
         """
-        TODO delette
+        Required method to handle stdout redirection
         """
         pass

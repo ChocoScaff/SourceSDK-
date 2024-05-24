@@ -1,57 +1,61 @@
-import tkinter as tk
-from tkinter import ttk
-from PIL import Image, ImageTk
+import sys
 import os
-from sourceSDK import SourceSDK
-from open import Open
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QScrollArea, QWidget, QLabel, QPushButton, QGridLayout
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPixmap, QIcon
+from PIL import Image
 
-class FileListApp:
-    sdk: SourceSDK
-    root: tk.Tk
-
-    def __init__(self, sourceSDK, root):
+class FileListApp(QMainWindow):
+    def __init__(self, sourceSDK):
+        super().__init__()
         self.sdk = sourceSDK
-        self.root = root
         self.current_folder = self.sdk.selected_folder
         self.firstfolder = self.sdk.selected_folder
         self.thumbnails = {}
 
-        self.create_widgets()
+        self.initUI()
         self.load_files(self.current_folder)
 
-    def create_widgets(self):
-        self.canvas = tk.Canvas(self.root, bg='white')
-        self.scroll_y = ttk.Scrollbar(self.root, orient="vertical", command=self.canvas.yview)
+    def initUI(self):
+        self.setWindowTitle("File List App")
+        self.setGeometry(100, 100, 800, 600)
 
-        self.scroll_frame = ttk.Frame(self.canvas)
-        self.scroll_frame.bind(
-            "<Configure>",
-            lambda e: self.canvas.configure(
-                scrollregion=self.canvas.bbox("all")
-            )
-        )
+        main_layout = QVBoxLayout()
+        button_layout = QHBoxLayout()
 
-        self.canvas.create_window((0, 0), window=self.scroll_frame, anchor="nw")
-        self.canvas.configure(yscrollcommand=self.scroll_y.set)
+        self.up_button = QPushButton("Up")
+        self.up_button.clicked.connect(self.go_up)
+        button_layout.addWidget(self.up_button)
 
-        self.up_button = ttk.Button(self.root, text="Up", command=self.go_up)
-        self.up_button.pack(pady=5)
+        self.open_button = QPushButton("Open Directory")
+        self.open_button.clicked.connect(self.open_directory)
+        button_layout.addWidget(self.open_button)
 
-        self.up_button = ttk.Button(self.root, text="Open Directory", command=self.open_directory)
-        self.up_button.pack(pady=5)
+        main_layout.addLayout(button_layout)
 
-        self.canvas.pack(side="left", fill="both", expand=True)
-        self.scroll_y.pack(side="right", fill="y")
+        self.scroll_area = QScrollArea()
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_content = QWidget(self.scroll_area)
+        self.scroll_area.setWidget(self.scroll_content)
+        self.scroll_layout = QGridLayout(self.scroll_content)
+
+        main_layout.addWidget(self.scroll_area)
+
+        central_widget = QWidget()
+        central_widget.setLayout(main_layout)
+        self.setCentralWidget(central_widget)
 
     def load_files(self, folder):
-        for widget in self.scroll_frame.winfo_children():
-            widget.destroy()
+        for i in reversed(range(self.scroll_layout.count())):
+            widget_to_remove = self.scroll_layout.itemAt(i).widget()
+            self.scroll_layout.removeWidget(widget_to_remove)
+            widget_to_remove.setParent(None)
 
         self.current_folder = folder
         self.files = [f for f in os.listdir(folder) if os.path.isdir(os.path.join(folder, f)) or f.endswith((
             ".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", "dir.vpk", ".tga", ".wav", ".mp3", ".sln"))]
 
-        columns = int(self.root.winfo_width() / 150)
+        columns = self.width() // 150
         if columns < 1:
             columns = 1
         row = 0
@@ -59,34 +63,36 @@ class FileListApp:
 
         for file in self.files:
             file_path = os.path.join(self.current_folder, file)
-            frame = ttk.Frame(self.scroll_frame, width=140, height=140, relief="solid", borderwidth=1)
-            frame.grid_propagate(False)
-            frame.grid(row=row, column=col, padx=5, pady=5)
+            file_frame = QWidget()
+            file_layout = QVBoxLayout()
+            file_frame.setLayout(file_layout)
+            file_frame.setStyleSheet("border: 1px solid black;")
 
-            label = ttk.Label(frame, text=file, wraplength=130, anchor="center")
-            label.place(relx=0.5, rely=0.1, anchor='center')
+            file_label = QLabel(file)
+            file_label.setAlignment(Qt.AlignCenter)
+            file_label.setWordWrap(True)
+            file_layout.addWidget(file_label)
 
             thumbnail = self.load_thumbnail(file_path)
             if thumbnail:
-                thumbnail_label = ttk.Label(frame, image=thumbnail)
-                thumbnail_label.image = thumbnail  # Keep a reference to avoid garbage collection
-                thumbnail_label.place(relx=0.5, rely=0.55, anchor='center')
+                thumbnail_label = QLabel()
+                thumbnail_label.setPixmap(thumbnail)
+                thumbnail_label.setAlignment(Qt.AlignCenter)
+                file_layout.addWidget(thumbnail_label)
 
             if os.path.isdir(file_path):
-                label.bind("<Double-Button-1>", lambda e, path=file_path: self.load_files(path))
+                file_label.mouseDoubleClickEvent = lambda event, path=file_path: self.load_files(path)
             else:
-                label.bind("<Double-Button-1>", lambda e, path=file_path: self.open_file(path))
+                file_label.mouseDoubleClickEvent = lambda event, path=file_path: self.open_file(path)
 
+            self.scroll_layout.addWidget(file_frame, row, col)
             col += 1
             if col >= columns:
                 col = 0
                 row += 1
 
-        self.canvas.yview_moveto(0.0)
-
     def load_thumbnail(self, file_path):
         try:
-            image = None
             base_path = os.path.dirname(os.path.abspath(__file__))
 
             if file_path.endswith(".vtf"):
@@ -110,7 +116,7 @@ class FileListApp:
 
             if image:
                 image.thumbnail((50, 50))
-                thumbnail = ImageTk.PhotoImage(image)
+                thumbnail = QPixmap.fromImage(ImageQt(image))
                 self.thumbnails[file_path] = thumbnail
                 return thumbnail
 
@@ -124,9 +130,16 @@ class FileListApp:
             self.load_files(parent_dir)
 
     def open_directory(self):
-        open = Open(self.sdk)
-        open.open_directory(self.current_folder)
+        open_instance = Open(self.sdk)
+        open_instance.open_directory(self.current_folder)
 
     def open_file(self, pathFile):
-        open = Open(self.sdk)
-        open.open_file(localpath=pathFile)
+        open_instance = Open(self.sdk)
+        open_instance.open_file(localpath=pathFile)
+
+if __name__ == "__main__":
+    sourceSDK = SourceSDK()
+    app = QApplication(sys.argv)
+    window = FileListApp(sourceSDK)
+    window.show()
+    sys.exit(app.exec_())

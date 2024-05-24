@@ -7,6 +7,7 @@ import os
 import subprocess
 import tempfile
 from texture import Texture
+
 class VPK:
     """
     Class for handling VPK file operations.

@@ -1,6 +1,6 @@
 
 import sourceSDK
-from tkinter import filedialog
+from PyQt5.QtWidgets import QFileDialog
 import os
 import subprocess
 import srctools
@@ -26,6 +26,7 @@ class Map:
         mapsrc_directory = os.path.join(self.sdk.selected_folder, "mapsrc")
         map_directory = os.path.join(self.sdk.selected_folder, "maps")
 
+        filenameTXT, _ = QFileDialog.getOpenFileName(None, "Select .txt file", self.sdk.selected_folder + "/resource", "TXT files (closecaption*.txt)")        
         filenameVMF = filedialog.askopenfile(title="Select .vmf file", filetypes=[("VMF files", "*.vmf")], initialdir=mapsrc_directory)
 
         print("file =", filenameVMF.name)
