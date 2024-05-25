@@ -68,6 +68,8 @@ class Button:
 
         print("reload")   
 
+        self.btn_file_explorer.destroy()
+
         if os.path.isfile(self.sdk.bin_folder + "/hammer.exe"):
             self.btn_hammer.destroy()
         if os.path.isfile(self.sdk.bin_folder + "/hammerplusplus.exe"):
