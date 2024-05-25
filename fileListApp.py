@@ -2,11 +2,12 @@ import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
 import os
-from sourceSDK import SourceSDK
 from open import Open
 
 class FileListApp:
     def __init__(self, sourceSDK, root):
+        """
+        """
         self.sdk = sourceSDK
         self.root = root
         self.current_folder = self.sdk.selected_folder
@@ -17,6 +18,8 @@ class FileListApp:
         self.load_files(self.current_folder)
 
     def create_widgets(self):
+        """
+        """
         self.up_button = ttk.Button(self.root, text="Up", command=self.go_up)
         self.up_button.pack(side="top", pady=5)
 
@@ -45,15 +48,21 @@ class FileListApp:
         self.canvas.bind("<Leave>", self.unbind_mouse_wheel)
 
     def bind_mouse_wheel(self, event):
+        """
+        """
         self.canvas.bind_all("<MouseWheel>", self.on_mouse_wheel)
 
     def unbind_mouse_wheel(self, event):
         self.canvas.unbind_all("<MouseWheel>")
 
     def on_mouse_wheel(self, event):
+        """
+        """
         self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
 
     def load_files(self, folder):
+        """
+        """
         for widget in self.scroll_frame.winfo_children():
             widget.destroy()
 
@@ -97,6 +106,8 @@ class FileListApp:
         self.canvas.yview_moveto(0.0)
 
     def load_thumbnail(self, file_path):
+        """
+        """
         try:
             image = None
             base_path = os.path.dirname(os.path.abspath(__file__))
@@ -137,15 +148,21 @@ class FileListApp:
         return None
 
     def go_up(self):
+        """
+        """
         parent_dir = os.path.dirname(self.current_folder)
         if parent_dir and self.current_folder != self.first_folder:
             self.load_files(parent_dir)
 
     def open_directory(self):
+        """
+        """
         open_instance = Open(self.sdk)
         open_instance.open_directory(self.current_folder)
 
     def open_file(self, pathFile):
+        """
+        """
         open_instance = Open(self.sdk)
         open_instance.open_file(localpath=pathFile)
 

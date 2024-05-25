@@ -26,7 +26,7 @@ class File:
         Returns:
             files (dict): A dictionary representing the folder structure.
         """
-        target_extensions = [".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", "dir.vpk", ".tga", ".wav", ".mp3"]
+        target_extensions = [".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", "dir.vpk", ".tga", ".wav", ".mp3", ".sln", ".bik", ".bat"]
         files = {}
 
         # Walk through the selected folder
@@ -104,7 +104,7 @@ class File:
         # Bind double-click event to open the selected file
         
         self.tree.bind("<Double-Button-1>", self.open_file)
-
+        
         self.fileList = FileListApp(self.sdk, self.root)
 
     def open_file(self, event):
