@@ -6,6 +6,7 @@ from model import Model
 from texture import Texture
 from open import Open
 from download import Download
+from file import File
 
 class Button:
     """
@@ -22,6 +23,7 @@ class Button:
     iconHlposer : tk.PhotoImage
     iconVisualStudio : tk.PhotoImage
     iconVTFEdit : tk.PhotoImage
+    iconExplorer : tk.PhotoImage
 
     btn_hammer : tk.Button
     btn_hammer_plus_plus : tk.Button
@@ -34,6 +36,7 @@ class Button:
     btn_particle : tk.Button
     btn_Launch_dev : tk.Button
     btn_Launch : tk.Button
+    btn_file_explorer : tk.Button
 
     model : Model
     texture : Texture
@@ -49,6 +52,7 @@ class Button:
         self.open = Open(self.sdk)
 
         base_path = os.path.dirname(os.path.abspath(__file__))
+        self.iconExplorer = tk.PhotoImage(file=os.path.join(base_path, "icons", "fileexplorer.png"))
         self.iconHpp = tk.PhotoImage(file=os.path.join(base_path, "icons", "hpp.png"))
         self.iconHammer = tk.PhotoImage(file=os.path.join(base_path, "icons", "hammer.png"))
         self.iconSource = tk.PhotoImage(file=os.path.join(base_path, "icons", "source.png"))
@@ -89,6 +93,10 @@ class Button:
         """
         display button on gui
         """
+        
+        file = File(self.sdk)
+        self.btn_file_explorer = tk.Button(self.sdk.root, text="Files", command=file.display_files,image=self.iconExplorer,compound=tk.LEFT, background="#4c5844",fg="white")
+        self.btn_file_explorer.pack(side="left")
 
         if os.path.isfile(self.sdk.bin_folder + "/hammer.exe"):
             self.btn_hammer = tk.Button(self.sdk.root, text="hammer", command=self.open_hammer,image=self.iconHammer,compound=tk.LEFT, background="#4c5844",fg="white")
