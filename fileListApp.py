@@ -6,22 +6,26 @@ from sourceSDK import SourceSDK
 from open import Open
 
 class FileListApp:
-    sdk: SourceSDK
-    root: tk.Tk
-
     def __init__(self, sourceSDK, root):
         self.sdk = sourceSDK
         self.root = root
         self.current_folder = self.sdk.selected_folder
-        self.firstfolder = self.sdk.selected_folder
+        self.first_folder = self.sdk.selected_folder
         self.thumbnails = {}
 
         self.create_widgets()
         self.load_files(self.current_folder)
 
     def create_widgets(self):
+        self.up_button = ttk.Button(self.root, text="Up", command=self.go_up)
+        self.up_button.pack(side="top", pady=5)
+
+        self.open_dir_button = ttk.Button(self.root, text="Open Directory", command=self.open_directory)
+        self.open_dir_button.pack(side="top", pady=5)
+
         self.canvas = tk.Canvas(self.root, bg='white')
         self.scroll_y = ttk.Scrollbar(self.root, orient="vertical", command=self.canvas.yview)
+        self.canvas.configure(yscrollcommand=self.scroll_y.set)
 
         self.scroll_frame = ttk.Frame(self.canvas)
         self.scroll_frame.bind(
@@ -32,30 +36,33 @@ class FileListApp:
         )
 
         self.canvas.create_window((0, 0), window=self.scroll_frame, anchor="nw")
-        self.canvas.configure(yscrollcommand=self.scroll_y.set)
-
-        self.up_button = ttk.Button(self.root, text="Up", command=self.go_up)
-        self.up_button.pack(pady=5)
-
-        self.open_dir_button = ttk.Button(self.root, text="Open Directory", command=self.open_directory)
-        self.open_dir_button.pack(pady=5)
 
         self.canvas.pack(side="left", fill="both", expand=True)
         self.scroll_y.pack(side="right", fill="y")
+
+        # Bind mouse wheel events to the canvas
+        self.canvas.bind("<Enter>", self.bind_mouse_wheel)
+        self.canvas.bind("<Leave>", self.unbind_mouse_wheel)
+
+    def bind_mouse_wheel(self, event):
+        self.canvas.bind_all("<MouseWheel>", self.on_mouse_wheel)
+
+    def unbind_mouse_wheel(self, event):
+        self.canvas.unbind_all("<MouseWheel>")
+
+    def on_mouse_wheel(self, event):
+        self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
 
     def load_files(self, folder):
         for widget in self.scroll_frame.winfo_children():
             widget.destroy()
 
         self.current_folder = folder
-        self.files = [f for f in os.listdir(folder) if os.path.isdir(os.path.join(folder, f)) or f.endswith((
-            ".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", "dir.vpk", ".tga", ".wav", ".mp3", ".sln"))]
+        self.files = [f for f in os.listdir(folder) if os.path.isdir(os.path.join(folder, f)) or f.endswith(
+            (".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", "dir.vpk", ".tga", ".wav", ".mp3", ".sln"))]
 
-        columns = int(self.root.winfo_width() / 150)
-        if columns < 1:
-            columns = 1
-        row = 0
-        col = 0
+        columns = max(1, int(self.root.winfo_width() / 150))
+        row = col = 0
 
         for file in self.files:
             file_path = os.path.join(self.current_folder, file)
@@ -73,15 +80,14 @@ class FileListApp:
                 thumbnail_label.place(relx=0.5, rely=0.55, anchor='center')
 
             if os.path.isdir(file_path):
-                frame.bind("<Double-Button-1>", lambda e, path=file_path: self.load_files(path))
-                label.bind("<Double-Button-1>", lambda e, path=file_path: self.load_files(path))
-                if thumbnail:
-                    thumbnail_label.bind("<Double-Button-1>", lambda e, path=file_path: self.load_files(path))
+                bind_func = lambda e, path=file_path: self.load_files(path)
             else:
-                frame.bind("<Double-Button-1>", lambda e, path=file_path: self.open_file(path))
-                label.bind("<Double-Button-1>", lambda e, path=file_path: self.open_file(path))
-                if thumbnail:
-                    thumbnail_label.bind("<Double-Button-1>", lambda e, path=file_path: self.open_file(path))
+                bind_func = lambda e, path=file_path: self.open_file(path)
+
+            frame.bind("<Double-Button-1>", bind_func)
+            label.bind("<Double-Button-1>", bind_func)
+            if thumbnail:
+                thumbnail_label.bind("<Double-Button-1>", bind_func)
 
             col += 1
             if col >= columns:
@@ -95,24 +101,30 @@ class FileListApp:
             image = None
             base_path = os.path.dirname(os.path.abspath(__file__))
 
-            if file_path.endswith(".vtf"):
-                image = Image.open(os.path.join(base_path, "icons", "VTFEdit.png"))
-            elif file_path.endswith(".mdl"):
-                image = Image.open(os.path.join(base_path, "icons", "hlmv.png"))
-            elif file_path.endswith(".tga"):
-                image = Image.open(file_path)
-            elif file_path.endswith(".vmf"):
-                image = Image.open(os.path.join(base_path, "icons", "hammer.png"))
-            elif file_path.endswith(".vcd"):
-                image = Image.open(os.path.join(base_path, "icons", "hlposer.png"))
-            elif file_path.endswith(".bsp"):
-                image = Image.open(os.path.join(base_path, "icons", "source.png"))
+            file_icons = {
+                ".vtf": "VTFEdit.png",
+                ".mdl": "hlmv.png",
+                ".tga": None,
+                ".vmf": "hammer.png",
+                ".vcd": "hlposer.png",
+                ".bsp": "source.png",
+                ".txt": "txt.png",
+                ".res": "txt.png",
+                ".vmt": "txt.png",
+                ".qc": "txt.png",
+                ".smd": "txt.png",
+                ".cfg": "txt.png",
+                ".sln": "Visual_Studio.png"
+            }
+
+            ext = os.path.splitext(file_path)[1]
+            if ext in file_icons:
+                if file_icons[ext]:
+                    image = Image.open(os.path.join(base_path, "icons", file_icons[ext]))
+                else:
+                    image = Image.open(file_path)
             elif os.path.isdir(file_path):
                 image = Image.open(os.path.join(base_path, "icons", "fileexplorer.png"))
-            elif file_path.endswith(".txt") or file_path.endswith(".res") or file_path.endswith(".vmt") or file_path.endswith(".qc") or file_path.endswith(".smd") or file_path.endswith(".cfg"):
-                image = Image.open(os.path.join(base_path, "icons", "txt.png"))
-            elif file_path.endswith(".sln"):
-                image = Image.open(os.path.join(base_path, "icons", "Visual_Studio.png"))
 
             if image:
                 image.thumbnail((50, 50))
@@ -126,7 +138,7 @@ class FileListApp:
 
     def go_up(self):
         parent_dir = os.path.dirname(self.current_folder)
-        if parent_dir and self.current_folder != self.firstfolder:
+        if parent_dir and self.current_folder != self.first_folder:
             self.load_files(parent_dir)
 
     def open_directory(self):
