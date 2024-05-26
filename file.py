@@ -105,7 +105,7 @@ class File:
         
         self.tree.bind("<Double-Button-1>", self.open_file)
         
-        self.fileList = FileListApp(self.sdk, self.root)
+        self.fileList = FileListApp(self.sdk, self.root)   
 
     def open_file(self, event):
         """

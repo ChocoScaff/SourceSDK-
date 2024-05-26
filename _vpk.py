@@ -164,9 +164,12 @@ class VPK:
             base_name = os.path.splitext(file_name)[0]
             related_files = []
             for ext in related_extensions:
-                related_temp_path = extract_file(base_name + ext)
-                if related_temp_path:
-                    related_files.append(related_temp_path)
+                try:
+                    related_temp_path = extract_file(base_name + ext)
+                    if related_temp_path:
+                        related_files.append(related_temp_path)
+                except OSError:
+                    print("mdl error")
 
             # Ensure all required files are present
             if len(related_files) != len(related_extensions):

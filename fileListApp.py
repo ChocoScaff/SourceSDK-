@@ -17,6 +17,8 @@ class FileListApp:
         self.create_widgets()
         self.load_files(self.current_folder)
 
+        self.previous_width = None
+
     def create_widgets(self):
         """
         """
@@ -105,6 +107,12 @@ class FileListApp:
 
         self.canvas.yview_moveto(0.0)
 
+        # Bind the <Configure> event to handle resizing
+        self.root.bind("<Configure>", self.resize)
+
+        # Initialize the previous width
+        self.previous_width = self.root.winfo_width()
+
     def load_thumbnail(self, file_path):
         """
         """
@@ -165,4 +173,13 @@ class FileListApp:
         """
         open_instance = Open(self.sdk)
         open_instance.open_file(localpath=pathFile)
-
+    
+    def resize(self, event):
+        """
+        Handle the window resize event.
+        """
+        new_width = self.root.winfo_width()
+        if new_width != self.previous_width:
+            self.previous_width = new_width
+            # Add the code you want to execute when the width changes
+            self.load_files(self.current_folder)
