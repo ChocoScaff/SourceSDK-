@@ -9,7 +9,9 @@ class FileListApp:
         """
         """
         self.sdk = sourceSDK
-        self.root = root
+        self.root = tk.Frame(root, width=1000, height=600)
+        self.root.grid(row=0, column=1, padx=0, pady=0, sticky="nsew")
+
         self.current_folder = self.sdk.selected_folder
         self.first_folder = self.sdk.selected_folder
         self.thumbnails = {}
@@ -159,7 +161,7 @@ class FileListApp:
         """
         """
         parent_dir = os.path.dirname(self.current_folder)
-        if parent_dir and self.current_folder != self.first_folder:
+        if parent_dir:
             self.load_files(parent_dir)
 
     def open_directory(self):

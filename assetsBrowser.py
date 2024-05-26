@@ -185,8 +185,6 @@ class AssetsBrowser():
 
         self.label_init()
 
-        self.file.display_files()
-
     def label_init(self):
         """
         Init Labet

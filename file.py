@@ -55,9 +55,12 @@ class File:
         Display the files in a Tkinter Treeview within a new Toplevel window.
         """
 
-        self.root = tk.Toplevel(self.sdk.root)
-        self.root.title("Contents")
-        self.root.geometry("1250x800")
+        self.main_root = tk.Toplevel(self.sdk.root)
+        self.main_root.title("File Explorer")
+        self.main_root.geometry("1400x600")
+
+        self.root = tk.Frame(self.main_root, width=200, height=600)
+        self.root.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
 
         # Search Label and Entry
         search_frame = tk.Frame(self.root)
@@ -105,7 +108,12 @@ class File:
         
         self.tree.bind("<Double-Button-1>", self.open_file)
         
-        self.fileList = FileListApp(self.sdk, self.root)   
+        self.fileList = FileListApp(self.sdk, self.main_root)   
+
+        # Set the minimum size of the cells in the grid to fit the frames
+        self.main_root.grid_rowconfigure(0, weight=1)
+        self.main_root.grid_columnconfigure(0, weight=1)
+        self.main_root.grid_columnconfigure(1, weight=4)
 
     def open_file(self, event):
         """
