@@ -1,16 +1,17 @@
 import tkinter as tk
 from tkinter import ttk
 import os
-from fileListApp import FileListApp
-from open import Open
+from fileListApp import FileListApp  # Assuming this is your custom module
+from open import Open  # Assuming this is your custom module
+from PIL import Image, ImageTk
 
 class File:
     """
     A class to handle file operations within the source SDK environment.
     """
 
-    fileList : FileListApp
-    root : tk.Tk
+    fileList: FileListApp
+    root: tk.Tk
 
     def __init__(self, sourceSDK) -> None:
         """
@@ -18,6 +19,7 @@ class File:
         """
         self.sdk = sourceSDK
         self.tree = None
+        self.thumbnails = {}
 
     def list_files(self):
         """
@@ -54,7 +56,6 @@ class File:
         """
         Display the files in a Tkinter Treeview within a new Toplevel window.
         """
-
         self.main_root = tk.Toplevel(self.sdk.root)
         self.main_root.title("File Explorer")
         self.main_root.geometry("1400x600")
@@ -102,13 +103,16 @@ class File:
                     else:
                         parent = self.tree.insert(parent, "end", text=subfolder, open=True)
             for file_name in file_list:
-                self.tree.insert(parent, "end", text=file_name, tags=(folder,))
+                thumbnail = self.load_thumbnail(file_name)
+                if thumbnail:
+                    self.tree.insert(parent, "end", text=file_name,image=thumbnail, tags=(folder,))
+                else:
+                    self.tree.insert(parent, "end", text=file_name, tags=(folder,))
 
         # Bind double-click event to open the selected file
-        
         self.tree.bind("<Double-Button-1>", self.open_file)
-        
-        self.fileList = FileListApp(self.sdk, self.main_root)   
+
+        self.fileList = FileListApp(self.sdk, self.main_root)
 
         # Set the minimum size of the cells in the grid to fit the frames
         self.main_root.grid_rowconfigure(0, weight=1)
@@ -122,6 +126,9 @@ class File:
         open = Open(self.sdk)
         open.open_file_with_tree(tree=self.tree, fileList=self.fileList)
         
+        
+
+
 
     def search_files(self, event=None):
         """
@@ -149,10 +156,62 @@ class File:
                 self.tree.focus(item)
                 self.tree.see(item)
             self.search_tree(self.tree.get_children(item), search_text)  # Recursively search subitems
-    
+
     def clear_selections(self):
         """
         Clear all selections in the Treeview.
         """
         for item in self.tree.selection():
             self.tree.selection_remove(item)
+
+    def load_thumbnail(self, file_path):
+        """
+        Load the appropriate thumbnail for a given file path.
+
+        Args:
+            file_path (str): The path to the file.
+
+        Returns:
+            ImageTk.PhotoImage: The thumbnail image.
+        """
+        try:
+            image = None
+            base_path = os.path.dirname(os.path.abspath(__file__))
+
+            file_icons = {
+                ".vtf": "VTFEdit.png",
+                ".mdl": "hlmv.png",
+                ".tga": None,
+                ".vmf": "hammer.png",
+                ".vcd": "hlposer.png",
+                ".bsp": "source.png",
+                ".txt": "txt.png",
+                ".res": "txt.png",
+                ".vmt": "txt.png",
+                ".qc": "txt.png",
+                ".smd": "txt.png",
+                ".cfg": "txt.png",
+                ".sln": "Visual_Studio.png",
+                ".dir.vpk": "fileexplorer.png",
+                #".wav": "audio.png",
+                #".mp3": "audio.png",
+                #".bik": "video.png",
+                #".bat": "batch.png",
+            }
+
+            ext = os.path.splitext(file_path)[1]
+
+            if ext in file_icons and file_icons[ext]:
+                image = Image.open(os.path.join(base_path, "icons", file_icons[ext]))
+            elif os.path.isdir(file_path):
+                image = Image.open(os.path.join(base_path, "icons", "fileexplorer.png"))
+
+            if image:
+                image.thumbnail((16, 16))
+                thumbnail = ImageTk.PhotoImage(image)
+                self.thumbnails[file_path] = thumbnail
+                return thumbnail
+
+        except Exception as e:
+            print("Error loading thumbnail:", e)
+        return None
