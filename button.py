@@ -84,7 +84,7 @@ class Button:
             self.btn_hlmv.destroy()
         if os.path.isfile(self.sdk.bin_folder + "/hlfaceposer.exe"):
             self.btn_hlfaceposer.destroy()
-        if os.path.isfile(os.getcwd() + "/VTfEdit/x64/VTFEdit.exe"):
+        if os.path.isfile(os.getcwd() + "/VTfEdit/x64/VTFEdit.exe") or os.path.exists(r"C:\Program Files\Nem's Tools\VTFEdit\VTFEdit.exe"):
             self.btn_vtf_edit.destroy()
 
         self.btn_Launch.destroy()
@@ -120,7 +120,7 @@ class Button:
             self.btn_hlfaceposer = tk.Button(self.sdk.root, text="hlfaceposer", command=self.open_hlfaceposer, image=self.iconHlposer, compound=tk.LEFT, background="#4c5844",fg="white")
             self.btn_hlfaceposer.pack(side="left")
 
-        if os.path.isfile(os.getcwd() + "/VTfEdit/x64/VTFEdit.exe"):
+        if os.path.isfile(os.getcwd() + "/VTfEdit/x64/VTFEdit.exe") or os.path.exists(r"C:\Program Files\Nem's Tools\VTFEdit\VTFEdit.exe"):
             self.btn_vtf_edit = tk.Button(self.sdk.root, text="vtfEdit", command=self.texture.open_VTF, image=self.iconVTFEdit, compound=tk.LEFT, background="#4c5844",fg="white")
             self.btn_vtf_edit.pack(side="left")
         else:

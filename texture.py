@@ -11,7 +11,6 @@ class Texture:
     @Brief Class Texture
     """
 
-
     sdk : sourceSDK
 
     def __init__(self, sourceSDK) -> None:
@@ -74,8 +73,11 @@ class Texture:
     def open_VTF(self,file=""):
         """
         """
-
-        command = '"' + os.getcwd() + "/VTFEdit/x64/VTFEdit.exe" + '" ' + '"' + file + '"'
+        
+        if os.path.exists(r"C:\Program Files\Nem's Tools\VTFEdit\VTFEdit.exe"):
+            command = '"' + r"C:\Program Files\Nem's Tools\VTFEdit\VTFEdit.exe" + '" ' + '"' + file + '"'
+        else:
+            command = '"' + os.getcwd() + "/VTFEdit/x64/VTFEdit.exe" + '" ' + '"' + file + '"'
         subprocess.Popen(command)
 
     def texture_to_tga(self):
