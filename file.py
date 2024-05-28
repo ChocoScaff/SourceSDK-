@@ -105,7 +105,7 @@ class File:
             for file_name in file_list:
                 thumbnail = self.load_thumbnail(file_name)
                 if thumbnail:
-                    self.tree.insert(parent, "end", text=file_name,image=thumbnail, tags=(folder,))
+                    self.tree.insert(parent, "end", text=file_name, image=thumbnail, tags=(folder,))
                 else:
                     self.tree.insert(parent, "end", text=file_name, tags=(folder,))
 
@@ -125,10 +125,6 @@ class File:
         """
         open = Open(self.sdk)
         open.open_file_with_tree(tree=self.tree, fileList=self.fileList)
-        
-        
-
-
 
     def search_files(self, event=None):
         """
@@ -192,17 +188,18 @@ class File:
                 ".smd": "txt.png",
                 ".cfg": "txt.png",
                 ".sln": "Visual_Studio.png",
-                ".dir.vpk": "fileexplorer.png",
+                ".vpk": "fileexplorer.png",
                 #".wav": "audio.png",
                 #".mp3": "audio.png",
                 #".bik": "video.png",
                 #".bat": "batch.png",
             }
 
-            ext = os.path.splitext(file_path)[1]
+            #ext = os.path.splitext(file_path)[1]
+            file_name, file_extension = os.path.splitext(file_path)
 
-            if ext in file_icons and file_icons[ext]:
-                image = Image.open(os.path.join(base_path, "icons", file_icons[ext]))
+            if file_extension in file_icons and file_icons[file_extension]:
+                image = Image.open(os.path.join(base_path, "icons", file_icons[file_extension]))
             elif os.path.isdir(file_path):
                 image = Image.open(os.path.join(base_path, "icons", "fileexplorer.png"))
 
