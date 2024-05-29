@@ -103,7 +103,8 @@ class File:
                     else:
                         parent = self.tree.insert(parent, "end", text=subfolder, open=True)
             for file_name in file_list:
-                thumbnail = self.load_thumbnail(file_name)
+                parent_folder_path = os.path.join(self.sdk.parent_folder, folder)  # Define parentFolder
+                thumbnail = self.load_thumbnail(file_name, parent_folder_path)
                 if thumbnail:
                     self.tree.insert(parent, "end", text=file_name, image=thumbnail, tags=(folder,))
                 else:
@@ -160,7 +161,7 @@ class File:
         for item in self.tree.selection():
             self.tree.selection_remove(item)
 
-    def load_thumbnail(self, file_path):
+    def load_thumbnail(self, file_path, parent=""):
         """
         Load the appropriate thumbnail for a given file path.
 
@@ -189,19 +190,23 @@ class File:
                 ".cfg": "txt.png",
                 ".sln": "Visual_Studio.png",
                 ".vpk": "fileexplorer.png",
-                #".wav": "audio.png",
-                #".mp3": "audio.png",
-                #".bik": "video.png",
-                ".bat": "terminal.png",
+                ".wav": "audio.png",
+                ".mp3": "audio.png",
+                ".bik": "video.png",
+                ".bat": "terminal.png"
             }
 
             #ext = os.path.splitext(file_path)[1]
             file_name, file_extension = os.path.splitext(file_path)
 
-            if file_extension in file_icons and file_icons[file_extension]:
-                image = Image.open(os.path.join(base_path, "icons", file_icons[file_extension]))
+            if file_extension in file_icons:
+                if file_icons[file_extension]:
+                    image = Image.open(os.path.join(base_path, "icons", file_icons[file_extension]))
+                else:
+                    image = Image.open(parent + "/" + file_path)
             elif os.path.isdir(file_path):
                 image = Image.open(os.path.join(base_path, "icons", "fileexplorer.png"))
+            
 
             if image:
                 image.thumbnail((16, 16))

@@ -136,7 +136,10 @@ class FileListApp:
                 ".smd": "txt.png",
                 ".cfg": "txt.png",
                 ".sln": "Visual_Studio.png",
-                ".bat": "terminal.png"
+                ".bat": "terminal.png",
+                ".wav": "audio.png",
+                ".mp3": "audio.png",
+                ".bik": "video.png"
             }
 
             ext = os.path.splitext(file_path)[1]
