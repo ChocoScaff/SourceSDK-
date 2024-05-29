@@ -192,7 +192,7 @@ class File:
                 #".wav": "audio.png",
                 #".mp3": "audio.png",
                 #".bik": "video.png",
-                #".bat": "batch.png",
+                ".bat": "terminal.png",
             }
 
             #ext = os.path.splitext(file_path)[1]
