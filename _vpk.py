@@ -68,8 +68,7 @@ class VPK:
             self.populate_tree(files)
 
         self.tree.bind("<Double-Button-1>", self.open_file_in_vpk)
-
-        #self.fileList = FileListApp(self.sdk, self.root)
+        self.tree.bind("<Button-3>", self.show_context_menu)
 
     def list_vpk_files(self):
         """
@@ -193,7 +192,44 @@ class VPK:
                 os.startfile(primary_temp_path)
             except Exception as e:
                 print(f"Failed to open file {primary_temp_path}: {e}")
-    
+
+    def extract_and_save_file(self, file_name, destination_folder):
+        """
+        Extract a file from the VPK archive to a specified folder.
+        """
+        if not self.vpk_file:
+            print("VPK file is not loaded.")
+            return
+
+        related_extensions = [".dx80.vtx", ".dx90.vtx", ".sw.vtx", ".phy", ".vvd"]
+
+        def extract_file(path):
+            pakfile = self.vpk_file.get_file(path)
+            if pakfile:
+                file_content = pakfile.read()
+                temp_file_path = os.path.join(destination_folder, os.path.basename(path))
+                with open(temp_file_path, 'wb') as temp_file:
+                    temp_file.write(file_content)
+                return temp_file_path
+            return None
+
+        # Extract the primary file
+        primary_temp_path = extract_file(file_name)
+        if not primary_temp_path:
+            print(f"File {file_name} not found in VPK.")
+            return
+
+        # Extract related files for .mdl if required
+        if file_name.endswith(".mdl"):
+            base_name = os.path.splitext(file_name)[0]
+            for ext in related_extensions:
+                try:
+                    extract_file(base_name + ext)
+                except OSError:
+                    print("mdl error")
+
+        print(f"File {file_name} extracted to {destination_folder}")
+
     def create_VPK(self):
         """
         Create a VPK file from a selected directory.
@@ -255,3 +291,34 @@ class VPK:
         for item in self.tree.selection():
             self.tree.selection_remove(item)
 
+    def show_context_menu(self, event):
+        """
+        Show the context menu on right-click.
+        """
+        selected_item = self.tree.identify_row(event.y)
+        if selected_item:
+            self.tree.selection_set(selected_item)
+            self.context_menu = tk.Menu(self.tree, tearoff=0)
+            self.context_menu.add_command(label="Extract to...", command=self.extract_to)
+            self.context_menu.post(event.x_root, event.y_root)
+
+    def extract_to(self):
+        """
+        Extract the selected file to a user-selected folder.
+        """
+        selected_item = self.tree.selection()[0]
+        item_text = self.tree.item(selected_item, "text")
+        parent_item = self.tree.parent(selected_item)
+        file_path_parts = [item_text]
+
+        while parent_item:
+            item_text = self.tree.item(parent_item, "text")
+            file_path_parts.append(item_text)
+            parent_item = self.tree.parent(parent_item)
+
+        file_path_parts.reverse()
+        file_path = "/".join(file_path_parts)  # Use '/' as VPK paths use forward slashes
+
+        destination_folder = filedialog.askdirectory(title="Select Destination Folder")
+        if destination_folder:
+            self.extract_and_save_file(file_path, destination_folder)
