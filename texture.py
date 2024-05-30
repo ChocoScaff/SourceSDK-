@@ -52,13 +52,14 @@ class Texture:
                     result = subprocess.run(command, shell=True, capture_output=True, text=True)
                     print(result)
 
-    def build_texture(self):
+    def build_texture(self,file=None):
         """
         """
-
-        filenameTGA = filedialog.askopenfile(title="Select .tga file", filetypes=[("TGA files", "*.tga")], initialdir=self.sdk.selected_folder + "/materialsrc")
+        if file == None:
+            filenameTGA = filedialog.askopenfile(title="Select .tga file", filetypes=[("TGA files", "*.tga")], initialdir=self.sdk.selected_folder + "/materialsrc")
+            file = filenameTGA.name
         vtex = (self.sdk.bin_folder + "/vtex.exe")
-        command = ('"' + vtex + '"' + " -game " + '"' + self.sdk.selected_folder + '"' + " -nopause "  + '"' + filenameTGA.name + '"' )
+        command = ('"' + vtex + '"' + " -game " + '"' + self.sdk.selected_folder + '"' + " -nopause "  + '"' + file + '"' )
         print(command)
         result = subprocess.run(command, shell=True, capture_output=True, text=True)
         print(result)

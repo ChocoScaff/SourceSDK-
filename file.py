@@ -5,6 +5,7 @@ from fileListApp import FileListApp  # Assuming this is your custom module
 from open import Open  # Assuming this is your custom module
 from PIL import Image, ImageTk
 from model import Model
+from texture import Texture
 
 class File:
     """
@@ -230,12 +231,15 @@ class File:
 
             filename = self.tree.item(selected_item, 'text')
             file_extension = os.path.splitext(filename)[1]
+            fullpath = self.tree.item(selected_item, 'values')[0]
 
             self.context_menu = tk.Menu(self.tree, tearoff=0)
 
             if file_extension == ".qc":
                 model = Model(self.sdk)
-                self.context_menu.add_command(label="Compile Model", command=model.build_model(selected_item))
-
+                self.context_menu.add_command(label="Compile Model", command=model.build_model(fullpath))
+            elif file_extension == ".tga":
+                texture = Texture(self.sdk)
+                self.context_menu.add_command(label="Compile Texture", command=texture.build_texture(filename))
 
             self.context_menu.post(event.x_root, event.y_root)
