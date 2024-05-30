@@ -4,6 +4,7 @@ import os
 from fileListApp import FileListApp  # Assuming this is your custom module
 from open import Open  # Assuming this is your custom module
 from PIL import Image, ImageTk
+from model import Model
 
 class File:
     """
@@ -112,6 +113,7 @@ class File:
 
         # Bind double-click event to open the selected file
         self.tree.bind("<Double-Button-1>", self.open_file)
+        self.tree.bind("<Button-3>", self.show_context_menu)
 
         self.fileList = FileListApp(self.sdk, self.main_root)
 
@@ -189,7 +191,6 @@ class File:
                 ".smd": "txt.png",
                 ".cfg": "txt.png",
                 ".sln": "Visual_Studio.png",
-                ".vpk": "fileexplorer.png",
                 ".wav": "audio.png",
                 ".mp3": "audio.png",
                 ".bik": "video.png",
@@ -217,3 +218,24 @@ class File:
         except Exception as e:
             print("Error loading thumbnail:", e)
         return None
+    
+    def show_context_menu(self, event):
+        """
+        Show the context menu on right-click.
+        """
+        selected_item = self.tree.identify_row(event.y)
+        
+        if selected_item:
+            self.tree.selection_set(selected_item)
+
+            filename = self.tree.item(selected_item, 'text')
+            file_extension = os.path.splitext(filename)[1]
+
+            self.context_menu = tk.Menu(self.tree, tearoff=0)
+
+            if file_extension == ".qc":
+                model = Model(self.sdk)
+                self.context_menu.add_command(label="Compile Model", command=model.build_model(selected_item))
+
+
+            self.context_menu.post(event.x_root, event.y_root)

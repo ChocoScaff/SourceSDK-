@@ -3,6 +3,7 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 import os
 from open import Open
+from model import Model
 
 class FileListApp:
     def __init__(self, sourceSDK, root):
@@ -94,13 +95,21 @@ class FileListApp:
 
             if os.path.isdir(file_path):
                 bind_func = lambda e, path=file_path: self.load_files(path)
+                bind_right = lambda e, : self.show_context_menu()
             else:
                 bind_func = lambda e, path=file_path: self.open_file(path)
+                bind_right = lambda e, : self.show_context_menu()
+
 
             frame.bind("<Double-Button-1>", bind_func)
             label.bind("<Double-Button-1>", bind_func)
+            frame.bind("<Button-3>", bind_right)
+            label.bind("<Button-3>", bind_right)
+
+
             if thumbnail:
                 thumbnail_label.bind("<Double-Button-1>", bind_func)
+                thumbnail_label.bind("<Button-3>", bind_right)
 
             col += 1
             if col >= columns:
@@ -189,3 +198,19 @@ class FileListApp:
             self.previous_width = new_width
             # Add the code you want to execute when the width changes
             self.load_files(self.current_folder)
+    
+    def show_context_menu(self, event):
+        """
+        Show the context menu on right-click.
+        """
+        selected_item = self.tree.identify_row(event.y)
+        file_name, file_extension = os.path.splitext(selected_item)
+        if selected_item:
+            self.tree.selection_set(selected_item)
+            self.context_menu = tk.Menu(self.tree, tearoff=0)
+
+            if file_extension == ".qc":
+                model = Model(self.sdk)
+                self.context_menu.add_command(label="Compile Model", command=model.build_model)
+
+            self.context_menu.post(event.x_root, event.y_root)
