@@ -4,6 +4,10 @@ from PIL import Image, ImageTk
 import os
 from open import Open
 from model import Model
+from texture import Texture
+from caption import Caption
+from map import Map
+import fnmatch
 
 class FileListApp:
     def __init__(self, sourceSDK, root):
@@ -95,17 +99,15 @@ class FileListApp:
 
             if os.path.isdir(file_path):
                 bind_func = lambda e, path=file_path: self.load_files(path)
-                bind_right = lambda e, : self.show_context_menu()
+                bind_right = lambda e, path=file_path: self.show_context_menu(e, path)
             else:
                 bind_func = lambda e, path=file_path: self.open_file(path)
-                bind_right = lambda e, : self.show_context_menu()
-
+                bind_right = lambda e, path=file_path: self.show_context_menu(e, path)
 
             frame.bind("<Double-Button-1>", bind_func)
             label.bind("<Double-Button-1>", bind_func)
             frame.bind("<Button-3>", bind_right)
             label.bind("<Button-3>", bind_right)
-
 
             if thumbnail:
                 thumbnail_label.bind("<Double-Button-1>", bind_func)
@@ -199,18 +201,37 @@ class FileListApp:
             # Add the code you want to execute when the width changes
             self.load_files(self.current_folder)
     
-    def show_context_menu(self, event):
+    def show_context_menu(self, event, file_path):
         """
         Show the context menu on right-click.
         """
-        selected_item = self.tree.identify_row(event.y)
-        file_name, file_extension = os.path.splitext(selected_item)
-        if selected_item:
-            self.tree.selection_set(selected_item)
-            self.context_menu = tk.Menu(self.tree, tearoff=0)
+        file_name, file_extension = os.path.splitext(file_path)
 
-            if file_extension == ".qc":
-                model = Model(self.sdk)
-                self.context_menu.add_command(label="Compile Model", command=model.build_model)
+        self.context_menu = tk.Menu(self.root, tearoff=0)
 
-            self.context_menu.post(event.x_root, event.y_root)
+        if file_extension == ".qc":
+            model = Model(self.sdk)
+            self.context_menu.add_command(label="Compile Model", command=lambda: model.build_model(file_path))
+        elif file_extension == ".tga":
+            texture = Texture(self.sdk)
+            self.context_menu.add_command(label="Compile Texture", command=lambda: texture.build_texture(file_path))
+        elif file_extension == ".vmf":
+                map = Map(self.sdk)
+                self.context_menu.add_command(label="Compile Map", command=lambda: map.build_map(file_path))
+
+        self.context_menu.add_command(label="Delete", command=lambda: self.delete_file(file_path))
+
+
+        self.context_menu.post(event.x_root, event.y_root)
+
+    def delete_file(self, file_path):
+        """
+        Delete the specified file and update the Treeview.
+        """
+        try:
+            os.remove(file_path)
+            print(f"Deleted: {file_path}")
+        except Exception as e:
+            print(f"Error deleting file: {e}")
+        
+        self.load_files(self.current_folder)
