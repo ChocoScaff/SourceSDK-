@@ -5,9 +5,7 @@ import os
 from open import Open
 from model import Model
 from texture import Texture
-from caption import Caption
 from map import Map
-import fnmatch
 
 class FileListApp:
     def __init__(self, sourceSDK, root):

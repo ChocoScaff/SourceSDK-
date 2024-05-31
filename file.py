@@ -6,9 +6,7 @@ from open import Open  # Assuming this is your custom module
 from PIL import Image, ImageTk
 from model import Model
 from texture import Texture
-from caption import Caption
 from map import Map
-import fnmatch
 
 class File:
     """
