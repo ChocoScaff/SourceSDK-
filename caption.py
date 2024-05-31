@@ -16,14 +16,16 @@ class Caption:
 
         self.sdk = sourceSDK
     
-    def build_caption(self):
+    def build_caption(self, file=None):
         """
         Compile caption
         """
-
-        filenameTXT = filedialog.askopenfile(title="Select .txt file", filetypes=[("TXT files", "closecaption*.txt")], initialdir=self.sdk.selected_folder + "/resource")
+        if file == None:
+            filenameTXT = filedialog.askopenfile(title="Select .txt file", filetypes=[("TXT files", "closecaption*.txt")], initialdir=self.sdk.selected_folder + "/resource")
+            file = filenameTXT.name
+        
         captioncompiler = (self.sdk.bin_folder + "/captioncompiler.exe")
-        command = ('"' + captioncompiler + '"' + " -game " + '"' + self.sdk.selected_folder + '"' + " " + '"' + filenameTXT.name + '"')
+        command = ('"' + captioncompiler + '"' + " -game " + '"' + self.sdk.selected_folder + '"' + " " + '"' + file + '"')
         print(command)
         result = subprocess.run(command, shell=True, capture_output=True, text=True)
         print(result)

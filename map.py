@@ -19,19 +19,21 @@ class Map:
         """
         self.sdk = sourceSDK
 
-    def build_map(self):
+    def build_map(self, file=None):
         """
         """
 
         mapsrc_directory = os.path.join(self.sdk.selected_folder, "mapsrc")
         map_directory = os.path.join(self.sdk.selected_folder, "maps")
+        
+        if file == None:
+            filenameVMF = filedialog.askopenfile(title="Select .vmf file", filetypes=[("VMF files", "*.vmf")], initialdir=mapsrc_directory)
+            file = filenameVMF.name
 
-        filenameVMF = filedialog.askopenfile(title="Select .vmf file", filetypes=[("VMF files", "*.vmf")], initialdir=mapsrc_directory)
-
-        print("file =", filenameVMF.name)
+        print("file =", file)
         # Execute vbsp.exe
 
-        fileBSP = filenameVMF.name
+        fileBSP = file
         #file_directory = os.path.dirname(fileBSP)
         fileBSP = os.path.splitext(os.path.basename(fileBSP))[0]
 
@@ -42,7 +44,7 @@ class Map:
         print(self.sdk.bin_folder)
 
         vbsp = (self.sdk.bin_folder + "/vbsp.exe")
-        command = ('"' + vbsp + '"' + " -game " + '"' + self.sdk.selected_folder + '"' + " " + '"' + filenameVMF.name + '"')
+        command = ('"' + vbsp + '"' + " -game " + '"' + self.sdk.selected_folder + '"' + " " + '"' + file + '"')
         print(command)
         #Execute the command in cmd
         result = subprocess.run(command, shell=True, capture_output=True, text=True)

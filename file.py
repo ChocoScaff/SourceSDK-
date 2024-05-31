@@ -4,6 +4,9 @@ import os
 from fileListApp import FileListApp  # Assuming this is your custom module
 from open import Open  # Assuming this is your custom module
 from PIL import Image, ImageTk
+from model import Model
+from texture import Texture
+from map import Map
 
 class File:
     """
@@ -112,6 +115,7 @@ class File:
 
         # Bind double-click event to open the selected file
         self.tree.bind("<Double-Button-1>", self.open_file)
+        self.tree.bind("<Button-3>", self.show_context_menu)
 
         self.fileList = FileListApp(self.sdk, self.main_root)
 
@@ -189,14 +193,12 @@ class File:
                 ".smd": "txt.png",
                 ".cfg": "txt.png",
                 ".sln": "Visual_Studio.png",
-                ".vpk": "fileexplorer.png",
                 ".wav": "audio.png",
                 ".mp3": "audio.png",
                 ".bik": "video.png",
                 ".bat": "terminal.png"
             }
 
-            #ext = os.path.splitext(file_path)[1]
             file_name, file_extension = os.path.splitext(file_path)
 
             if file_extension in file_icons:
@@ -217,3 +219,58 @@ class File:
         except Exception as e:
             print("Error loading thumbnail:", e)
         return None
+    
+    def show_context_menu(self, event):
+        """
+        Show the context menu on right-click.
+        """
+        selected_item = self.tree.identify_row(event.y)
+               
+        if selected_item:
+            self.tree.selection_set(selected_item)
+
+            filename = self.tree.item(selected_item, 'text')
+            print(filename)
+
+            parent_item = self.tree.parent(selected_item)
+            
+            file_path_parts = [filename]
+
+            while parent_item:
+                item_text = self.tree.item(parent_item, "text")
+                file_path_parts.append(item_text)
+                parent_item = self.tree.parent(parent_item)
+
+            file_path_parts.reverse()
+            file_path = os.path.join(self.sdk.parent_folder, *file_path_parts)
+
+            print(file_path)
+
+            self.context_menu = tk.Menu(self.tree, tearoff=0)
+
+            file_extension = os.path.splitext(filename)[1]
+
+            if file_extension == ".qc":
+                model = Model(self.sdk)
+                self.context_menu.add_command(label="Compile Model", command=lambda: model.build_model(file_path))
+            elif file_extension == ".tga":
+                texture = Texture(self.sdk)
+                self.context_menu.add_command(label="Compile Texture", command=lambda: texture.build_texture(file_path))
+            elif file_extension == ".vmf":
+                map = Map(self.sdk)
+                self.context_menu.add_command(label="Compile Map", command=lambda: map.build_map(file_path))
+               
+            self.context_menu.add_command(label="Delete", command=lambda: self.delete_file(file_path, selected_item))
+
+            self.context_menu.post(event.x_root, event.y_root)
+
+    def delete_file(self, file_path, tree_item):
+        """
+        Delete the specified file and update the Treeview.
+        """
+        try:
+            os.remove(file_path)
+            self.tree.delete(tree_item)
+            print(f"Deleted: {file_path}")
+        except Exception as e:
+            print(f"Error deleting file: {e}")

@@ -24,13 +24,16 @@ class Model:
 
         subprocess.Popen([self.sdk.bin_folder + "/hlmv.exe"])
 
-    def build_model(self):
+    def build_model(self, file=None):
         """
         """
-
-        filenameQC = filedialog.askopenfile(title="Select .qc file", filetypes=[("QC files", "*.qc")], initialdir=self.sdk.selected_folder + "/modelsrc")
+        if file == None:
+            filenameQC = filedialog.askopenfile(title="Select .qc file", filetypes=[("QC files", "*.qc")], initialdir=self.sdk.selected_folder + "/modelsrc")
+            file= filenameQC.name
+        
+            
         mdl = (self.sdk.bin_folder + "/studiomdl.exe")
-        command = ('"' + mdl + '"' + " -game " + '"' + self.sdk.selected_folder + '"' + " " + '"' + filenameQC.name + '"')
+        command = ('"' + mdl + '"' + " -game " + '"' + self.sdk.selected_folder + '"' + " " + '"' + file + '"')
         print(command)
         result = subprocess.run(command, shell=True, capture_output=True, text=True)
         print(result)

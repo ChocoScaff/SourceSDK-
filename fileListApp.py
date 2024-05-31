@@ -3,6 +3,9 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 import os
 from open import Open
+from model import Model
+from texture import Texture
+from map import Map
 
 class FileListApp:
     def __init__(self, sourceSDK, root):
@@ -94,13 +97,19 @@ class FileListApp:
 
             if os.path.isdir(file_path):
                 bind_func = lambda e, path=file_path: self.load_files(path)
+                bind_right = lambda e, path=file_path: self.show_context_menu(e, path)
             else:
                 bind_func = lambda e, path=file_path: self.open_file(path)
+                bind_right = lambda e, path=file_path: self.show_context_menu(e, path)
 
             frame.bind("<Double-Button-1>", bind_func)
             label.bind("<Double-Button-1>", bind_func)
+            frame.bind("<Button-3>", bind_right)
+            label.bind("<Button-3>", bind_right)
+
             if thumbnail:
                 thumbnail_label.bind("<Double-Button-1>", bind_func)
+                thumbnail_label.bind("<Button-3>", bind_right)
 
             col += 1
             if col >= columns:
@@ -189,3 +198,38 @@ class FileListApp:
             self.previous_width = new_width
             # Add the code you want to execute when the width changes
             self.load_files(self.current_folder)
+    
+    def show_context_menu(self, event, file_path):
+        """
+        Show the context menu on right-click.
+        """
+        file_name, file_extension = os.path.splitext(file_path)
+
+        self.context_menu = tk.Menu(self.root, tearoff=0)
+
+        if file_extension == ".qc":
+            model = Model(self.sdk)
+            self.context_menu.add_command(label="Compile Model", command=lambda: model.build_model(file_path))
+        elif file_extension == ".tga":
+            texture = Texture(self.sdk)
+            self.context_menu.add_command(label="Compile Texture", command=lambda: texture.build_texture(file_path))
+        elif file_extension == ".vmf":
+                map = Map(self.sdk)
+                self.context_menu.add_command(label="Compile Map", command=lambda: map.build_map(file_path))
+
+        self.context_menu.add_command(label="Delete", command=lambda: self.delete_file(file_path))
+
+
+        self.context_menu.post(event.x_root, event.y_root)
+
+    def delete_file(self, file_path):
+        """
+        Delete the specified file and update the Treeview.
+        """
+        try:
+            os.remove(file_path)
+            print(f"Deleted: {file_path}")
+        except Exception as e:
+            print(f"Error deleting file: {e}")
+        
+        self.load_files(self.current_folder)
