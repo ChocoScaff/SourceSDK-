@@ -85,7 +85,7 @@ class AssetsBrowser():
         else:
             #with open(folder_path + "bin.txt", 'r') as file:   
             folder = filedialog.askdirectory(title="Open bin Engine path",initialdir=self.sdk.parent_folder)
-            binFolder = self.bin_folder(folder)
+            binFolder = folder
         return binFolder
 
     def find_executable_game(self,folder_path):
