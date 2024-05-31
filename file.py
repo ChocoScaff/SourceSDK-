@@ -105,6 +105,7 @@ class File:
                         parent = [node for node in nodes if self.tree.item(node, "text") == subfolder][0]
                     else:
                         parent = self.tree.insert(parent, "end", text=subfolder, open=True)
+            """
             for file_name in file_list:
                 parent_folder_path = os.path.join(self.sdk.parent_folder, folder)  # Define parentFolder
                 thumbnail = self.load_thumbnail(file_name, parent_folder_path)
@@ -112,7 +113,7 @@ class File:
                     self.tree.insert(parent, "end", text=file_name, image=thumbnail, tags=(folder,))
                 else:
                     self.tree.insert(parent, "end", text=file_name, tags=(folder,))
-
+            """
         # Bind double-click event to open the selected file
         self.tree.bind("<Double-Button-1>", self.open_file)
         self.tree.bind("<Button-3>", self.show_context_menu)
