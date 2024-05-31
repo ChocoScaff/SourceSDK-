@@ -6,6 +6,8 @@ from open import Open  # Assuming this is your custom module
 from PIL import Image, ImageTk
 from model import Model
 from texture import Texture
+from caption import Caption
+from map import Map
 
 class File:
     """
@@ -225,21 +227,47 @@ class File:
         Show the context menu on right-click.
         """
         selected_item = self.tree.identify_row(event.y)
-        
+               
         if selected_item:
             self.tree.selection_set(selected_item)
 
             filename = self.tree.item(selected_item, 'text')
+            print(filename)
+
+            parent_item = self.tree.parent(selected_item)
+            
+            file_path_parts = [filename]
+
+            while parent_item:
+                item_text = self.tree.item(parent_item, "text")
+                file_path_parts.append(item_text)
+                parent_item = self.tree.parent(parent_item)
+
+            
             file_extension = os.path.splitext(filename)[1]
-            fullpath = self.tree.item(selected_item, 'values')[0]
+            file_path_parts.reverse()
+            file_path = os.path.join(self.sdk.parent_folder, parent_item, *file_path_parts)
+
+            print(file_path)
 
             self.context_menu = tk.Menu(self.tree, tearoff=0)
 
             if file_extension == ".qc":
                 model = Model(self.sdk)
-                self.context_menu.add_command(label="Compile Model", command=model.build_model(fullpath))
+                self.context_menu.add_command(label="Compile Model", command=model.build_model(file_path))
             elif file_extension == ".tga":
                 texture = Texture(self.sdk)
-                self.context_menu.add_command(label="Compile Texture", command=texture.build_texture(filename))
+                self.context_menu.add_command(label="Compile Texture", command=texture.build_texture(file_path))
+            elif file_extension == ".vmf":
+                map = Map(self.sdk)
+                self.context_menu.add_command(label="Compile Map", command=map.build_map(file_path))
+            elif filename == "closecaption*.txt":
+                caption = Caption(self.sdk)
+                self.context_menu.add_command(label="Compile Caption", command=caption.build_caption(file_path))
+               
+            self.context_menu.add_command(label="delette", command=self.delette(file_path))
 
             self.context_menu.post(event.x_root, event.y_root)
+
+    def delette(self,file_path):
+        os.remove(file_path)
