@@ -172,9 +172,6 @@ class AssetsBrowser():
         
         print("Project open")
 
-        lbl_result = tk.Label(self.sdk.root, text="Tools", wraplength=400, background="#3e4637",fg='white')
-        lbl_result.pack()
-
         self.texture = Texture(self.sdk)
         self.model = Model(self.sdk)
         self.map = Map(self.sdk)
@@ -472,7 +469,7 @@ repo_owner = "ChocoScaff"
 repo_name = "SourceSDK-"
 
 # Replace this with the version of your local software
-local_version = "0.5.1"
+local_version = "0.5.2"
 
 github_version = test.get_latest_release_version(repo_owner, repo_name)
 
@@ -524,6 +521,9 @@ sys.stderr = test.terminal
 # Bind keyboard shortcuts to the root window
 test.sdk.root.bind("<Control-n>", test.handle_shortcut)
 test.sdk.root.bind("<Control-o>", test.handle_shortcut)
+
+lbl_result = tk.Label(test.sdk.root, text="Tools", wraplength=400, background="#3e4637",fg='white')
+lbl_result.pack()
 
 # Start the GUI event loop
 test.sdk.root.mainloop()
