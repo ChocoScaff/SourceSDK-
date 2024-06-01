@@ -143,14 +143,20 @@ class VPK:
         temp_dir = tempfile.mkdtemp()
 
         def extract_file(path):
-            pakfile = self.vpk_file.get_file(path)
-            if pakfile:
-                file_content = pakfile.read()
-                temp_file_path = os.path.join(temp_dir, os.path.basename(path))
-                with open(temp_file_path, 'wb') as temp_file:
-                    temp_file.write(file_content)
-                return temp_file_path
-            return None
+            try:
+                pakfile = self.vpk_file.get_file(path)
+                if pakfile:
+                    file_content = pakfile.read()
+                    temp_file_path = os.path.join(temp_dir, os.path.basename(path))
+                    with open(temp_file_path, 'wb') as temp_file:
+                        temp_file.write(file_content)
+                    return temp_file_path
+                else:
+                    print(f"File {path} not found in VPK.")
+                    return None
+            except KeyError:
+                print(f"KeyError: {path} does not exist in the VPK archive.")
+                return None
 
         # Extract the primary file
         primary_temp_path = extract_file(file_name)
@@ -163,18 +169,17 @@ class VPK:
             base_name = os.path.splitext(file_name)[0]
             related_files = []
             for ext in related_extensions:
-                try:
-                    related_temp_path = extract_file(base_name + ext)
-                    if related_temp_path:
-                        related_files.append(related_temp_path)
-                except OSError:
-                    print("mdl error")
+                related_temp_path = extract_file(base_name + ext)
+                if related_temp_path:
+                    related_files.append(related_temp_path)
 
-            # Ensure all required files are present
-            if len(related_files) != len(related_extensions):
-                print(f"Missing related files for {file_name}.")
-                return
-
+        """"
+        # Ensure all required files are present
+        if len(related_files) != len(related_extensions):
+            print(f"Missing related files for {file_name}.")
+            return
+        """
+            
         # Open the file with the appropriate application
         file_name, file_extension = os.path.splitext(primary_temp_path)
 
