@@ -3,6 +3,7 @@ import os
 from texture import Texture
 import subprocess
 from _vpk import VPK
+from pathlib import Path
 
 class Open:
     """
@@ -51,8 +52,11 @@ class Open:
         elif file_extension == ".vcd":
             command = f'"{self.sdk.bin_folder}/hlfaceposer.exe" "{localpath}"'
             subprocess.Popen(command)
-        elif file_extension == ".bsp":
+        elif file_extension == ".bsp":        
+            path = Path(localpath)
+            file_name = path.name
             command = f'"{self.sdk.executable_game}" -game "{self.sdk.selected_folder}" -console -dev -w 1280 -h 720 -sw +sv_cheats 1 +map {file_name}'
+            print(command)
             subprocess.Popen(command)
         elif file_extension == ".vpk":
             vpk = VPK(self.sdk)
