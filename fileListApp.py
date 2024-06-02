@@ -6,6 +6,7 @@ from open import Open
 from model import Model
 from texture import Texture
 from map import Map
+from decompiler import Decompiler
 
 class FileListApp:
     def __init__(self, sourceSDK, root):
@@ -214,8 +215,11 @@ class FileListApp:
             texture = Texture(self.sdk)
             self.context_menu.add_command(label="Compile Texture", command=lambda: texture.build_texture(file_path))
         elif file_extension == ".vmf":
-                map = Map(self.sdk)
-                self.context_menu.add_command(label="Compile Map", command=lambda: map.build_map(file_path))
+            map = Map(self.sdk)
+            self.context_menu.add_command(label="Compile Map", command=lambda: map.build_map(file_path))
+        elif file_extension == ".mdl":
+            decompiler = Decompiler(self.sdk)
+            self.context_menu.add_command(label="Decompile Model", command=lambda: decompiler.decompiler_file(file=file_path))
 
         self.context_menu.add_command(label="Delete", command=lambda: self.delete_file(file_path))
 

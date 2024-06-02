@@ -20,6 +20,8 @@ from terminal import Terminal
 from file import File
 from button import Button
 from caption import Caption
+from download import Download
+from decompiler import Decompiler
 
 class AssetsBrowser():
     """
@@ -182,6 +184,11 @@ class AssetsBrowser():
 
         self.label_init()
 
+        if os.path.exists(os.getcwd() + "/CrowbarDecompiler.1.1"):
+            pass
+        else:
+            Download.download_crowbar_decompile()
+
     def label_init(self):
         """
         Init Labet
@@ -212,6 +219,8 @@ class AssetsBrowser():
             self.sdk.model_menu.add_command(label="Build Model", command=self.model.build_model)
             self.sdk.model_menu.add_command(label="Build All Models", command=self.model.build_all_model)
             self.sdk.model_menu.add_command(label="Generate QC File", command=self.model.generate_qc_file)
+            decompiler = Decompiler(self.sdk)
+            self.sdk.model_menu.add_command(label="Decompile Model", command=decompiler.decompiler_file)
 
             self.sdk.other_menu.add_command(label="Create VPK", command=self.vpk.create_VPK)
             self.sdk.other_menu.add_command(label="Display VPK", command=self.vpk.display_VPK)
