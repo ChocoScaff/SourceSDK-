@@ -99,13 +99,13 @@ class File:
                     if subfolder in [self.tree.item(node, "text") for node in nodes]:
                         parent = [node for node in nodes if self.tree.item(node, "text") == subfolder][0]
                     else:
-                        parent = self.tree.insert("", "end", text=subfolder, open=True)
+                        parent = self.tree.insert("", "end", text=subfolder, open=False)
                 else:
                     nodes = self.tree.get_children(parent)
                     if subfolder in [self.tree.item(node, "text") for node in nodes]:
                         parent = [node for node in nodes if self.tree.item(node, "text") == subfolder][0]
                     else:
-                        parent = self.tree.insert(parent, "end", text=subfolder, open=True)
+                        parent = self.tree.insert(parent, "end", text=subfolder, open=False)
             
             for file_name in file_list:
                 parent_folder_path = os.path.join(self.sdk.parent_folder, folder)  # Define parentFolder

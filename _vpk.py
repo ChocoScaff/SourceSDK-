@@ -7,6 +7,7 @@ import os
 import subprocess
 import tempfile
 from texture import Texture
+from PIL import Image, ImageTk
 
 class VPK:
     """
@@ -22,6 +23,7 @@ class VPK:
         """
         self.sdk = sourceSDK
         self.vpk_file = None
+        self.thumbnails = {}
 
     def display_vpk_contents(self, file=""):
         """
@@ -103,15 +105,24 @@ class VPK:
                     if subfolder in [self.tree.item(node, "text") for node in nodes]:
                         parent = [node for node in nodes if self.tree.item(node, "text") == subfolder][0]
                     else:
-                        parent = self.tree.insert("", "end", text=subfolder, open=True)
+                        parent = self.tree.insert("", "end", text=subfolder, open=False)
                 else:
                     nodes = self.tree.get_children(parent)
                     if subfolder in [self.tree.item(node, "text") for node in nodes]:
                         parent = [node for node in nodes if self.tree.item(node, "text") == subfolder][0]
                     else:
-                        parent = self.tree.insert(parent, "end", text=subfolder, open=True)
+                        parent = self.tree.insert(parent, "end", text=subfolder, open=False)
             for file_name in file_list:
+                parent_folder_path = os.path.join(self.sdk.parent_folder, folder)  # Define parentFolder
+                
                 self.tree.insert(parent, "end", text=file_name, tags=(folder,))
+                """
+                thumbnail = self.load_thumbnail(file_name, parent_folder_path)
+                if thumbnail:
+                    self.tree.insert(parent, "end", text=file_name, image=thumbnail, tags=(folder,))
+                else:
+                    self.tree.insert(parent, "end", text=file_name, tags=(folder,))
+                """
 
     def open_file_in_vpk(self, event):
         """
@@ -327,3 +338,59 @@ class VPK:
         destination_folder = filedialog.askdirectory(title="Select Destination Folder")
         if destination_folder:
             self.extract_and_save_file(file_path, destination_folder)
+    
+    def load_thumbnail(self, file_path, parent=""):
+        """
+        Load the appropriate thumbnail for a given file path.
+
+        Args:
+            file_path (str): The path to the file.
+
+        Returns:
+            ImageTk.PhotoImage: The thumbnail image.
+        """
+        try:
+            image = None
+            base_path = os.path.dirname(os.path.abspath(__file__))
+
+            file_icons = {
+                ".vtf": "VTFEdit.png",
+                ".mdl": "hlmv.png",
+                ".tga": None,
+                ".vmf": "hammer.png",
+                ".vcd": "hlposer.png",
+                ".bsp": "source.png",
+                ".txt": "txt.png",
+                ".res": "txt.png",
+                ".vmt": "txt.png",
+                ".qc": "txt.png",
+                ".smd": "txt.png",
+                ".cfg": "txt.png",
+                ".sln": "Visual_Studio.png",
+                ".wav": "audio.png",
+                ".mp3": "audio.png",
+                ".bik": "video.png",
+                ".bat": "terminal.png"
+            }
+
+            file_name, file_extension = os.path.splitext(file_path)
+
+            if file_extension in file_icons:
+                if file_icons[file_extension]:
+                    image = Image.open(os.path.join(base_path, "icons", file_icons[file_extension]))
+                else:
+                    image = Image.open(parent + "/" + file_path)
+            elif os.path.isdir(file_path):
+                image = Image.open(os.path.join(base_path, "icons", "fileexplorer.png"))
+            
+
+            if image:
+                image.thumbnail((16, 16), Image.Resampling.LANCZOS)
+                thumbnail = ImageTk.PhotoImage(image)
+                self.thumbnails[file_path] = thumbnail
+                return thumbnail
+        except MemoryError:
+            print("MemoryError: Failed to allocate bitmap for", file_path)
+        except Exception as e:
+            print("Error loading thumbnail:", e)
+        return None
