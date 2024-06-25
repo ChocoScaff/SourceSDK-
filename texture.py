@@ -81,12 +81,28 @@ class Texture:
             command = '"' + os.getcwd() + "/VTFEdit/x64/VTFEdit.exe" + '" ' + '"' + file + '"'
         subprocess.Popen(command)
 
-    def texture_to_tga(self):
+    def texture_to_tga(self, file=None, output=None):
         """
+        Converts a .vtf file to a .tga file using vtf2tga.exe.
+        
+        Parameters:
+            file (str): Path to the input .vtf file. If not provided, a file dialog will prompt the user to select a file.
+            output (str): Directory where the output .tga file will be saved. If not provided, a directory dialog will prompt the user to select a directory.
+        
+        Returns:
+            None
         """
+        if file == None:
+            filenameVTF = filedialog.askopenfile(title="Select .vtf file", filetypes=[("VTF file", "*.vtf")], initialdir=self.sdk.selected_folder + "/materials")
+            file = filenameVTF.name
 
-        filenameVTF = filedialog.askopenfile(title="Select .vtf file", filetypes=[("VTF file", "*.vtf")], initialdir=self.sdk.selected_folder + "/materials")
-        command = '"' + self.sdk.bin_folder + "/vtf2tga.exe" + '"'+ " -i " + '"' + filenameVTF.name + '"' 
+        if output == None:
+            outputDir = filedialog.askdirectory(title="Select a Directory",initialdir=self.sdk.selected_folder + "/materialsrc")
+
+        base_name = os.path.splitext(os.path.basename(file))[0]
+        output_file = os.path.join(outputDir, base_name + ".tga")
+
+        command = f'"{self.sdk.bin_folder}/vtf2tga.exe" -i "{file}" -o "{output_file}"'        
         result = subprocess.run(command, shell=True, capture_output=True, text=True)
         print(result)
     

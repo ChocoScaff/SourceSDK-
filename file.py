@@ -268,7 +268,10 @@ class File:
             elif file_extension == ".mdl":
                 decompiler = Decompiler(self.sdk)
                 self.context_menu.add_command(label="Decompile Model", command=lambda: decompiler.decompiler_file(file=file_path))
-               
+            elif file_extension == ".vtf":
+                texture = Texture(self.sdk)
+                self.context_menu.add_command(label="Compile to tga", command=lambda: texture.texture_to_tga(file_path)) 
+
             self.context_menu.add_command(label="Delete", command=lambda: self.delete_file(file_path, selected_item))
 
             self.context_menu.post(event.x_root, event.y_root)
