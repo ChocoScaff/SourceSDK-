@@ -7,3 +7,5 @@ files
 Open file in VPK
 ![](112542.png)
 
+Compile tga to vtf, qc to mdl
+![](113621.png)
