@@ -97,7 +97,7 @@ class Button:
         """
         
         file = File(self.sdk)
-        self.btn_file_explorer = tk.Button(self.sdk.root, text="Files", command=file.display_files,image=self.iconExplorer,compound=tk.LEFT, background="#4c5844",fg="white")
+        self.btn_file_explorer = tk.Button(self.sdk.root, text="Files", command=file.display_files_tree,image=self.iconExplorer,compound=tk.LEFT, background="#4c5844",fg="white")
         self.btn_file_explorer.pack(side="left")
 
         if os.path.isfile(self.sdk.bin_folder + "/hammer.exe"):
