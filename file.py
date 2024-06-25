@@ -231,55 +231,57 @@ class File:
             print("Error loading thumbnail:", e)
         return None
     
-    def show_context_menu(self, event):
+    def show_context_menu(self, event, file_path=None):
         """
         Show the context menu on right-click.
         """
-        selected_item = self.tree.identify_row(event.y)
-               
-        if selected_item:
-            self.tree.selection_set(selected_item)
 
-            filename = self.tree.item(selected_item, 'text')
-            print(filename)
+        if file_path == None:
+            selected_item = self.tree.identify_row(event.y)
+                
+            if selected_item:
+                self.tree.selection_set(selected_item)
 
-            parent_item = self.tree.parent(selected_item)
-            
-            file_path_parts = [filename]
+                filename = self.tree.item(selected_item, 'text')
+                print(filename)
 
-            while parent_item:
-                item_text = self.tree.item(parent_item, "text")
-                file_path_parts.append(item_text)
-                parent_item = self.tree.parent(parent_item)
+                parent_item = self.tree.parent(selected_item)
+                
+                file_path_parts = [filename]
 
-            file_path_parts.reverse()
-            file_path = os.path.join(self.sdk.parent_folder, *file_path_parts)
+                while parent_item:
+                    item_text = self.tree.item(parent_item, "text")
+                    file_path_parts.append(item_text)
+                    parent_item = self.tree.parent(parent_item)
 
-            print(file_path)
+                file_path_parts.reverse()
+                file_path = os.path.join(self.sdk.parent_folder, *file_path_parts)
 
-            self.context_menu = tk.Menu(self.tree, tearoff=0)
+        else:
+            file_name, file_extension = os.path.splitext(file_path)
 
-            file_extension = os.path.splitext(filename)[1]
+        self.context_menu = tk.Menu(self.root, tearoff=0)
 
-            if file_extension == ".qc":
-                model = Model(self.sdk)
-                self.context_menu.add_command(label="Compile Model", command=lambda: model.build_model(file_path))
-            elif file_extension == ".tga":
-                texture = Texture(self.sdk)
-                self.context_menu.add_command(label="Compile Texture", command=lambda: texture.build_texture(file_path))
-            elif file_extension == ".vmf":
-                map = Map(self.sdk)
-                self.context_menu.add_command(label="Compile Map", command=lambda: map.build_map(file_path))
-            elif file_extension == ".mdl":
-                decompiler = Decompiler(self.sdk)
-                self.context_menu.add_command(label="Decompile Model", command=lambda: decompiler.decompiler_file(file=file_path))
-            elif file_extension == ".vtf":
-                texture = Texture(self.sdk)
-                self.context_menu.add_command(label="Compile to tga", command=lambda: texture.texture_to_tga(file_path)) 
+        if file_extension == ".qc":
+            model = Model(self.sdk)
+            self.context_menu.add_command(label="Compile Model", command=lambda: model.build_model(file_path))
+        elif file_extension == ".tga":
+            texture = Texture(self.sdk)
+            self.context_menu.add_command(label="Compile Texture", command=lambda: texture.build_texture(file_path))
+        elif file_extension == ".vmf":
+            map = Map(self.sdk)
+            self.context_menu.add_command(label="Compile Map", command=lambda: map.build_map(file_path))
+        elif file_extension == ".mdl":
+            decompiler = Decompiler(self.sdk)
+            self.context_menu.add_command(label="Decompile Model", command=lambda: decompiler.decompiler_file(file=file_path))
+        elif file_extension == ".vtf":
+            texture = Texture(self.sdk)
+            self.context_menu.add_command(label="Compile to tga", command=lambda: texture.texture_to_tga(file_path)) 
 
-            self.context_menu.add_command(label="Delete", command=lambda: self.delete_file(file_path, selected_item))
+        self.context_menu.add_command(label="Delete", command=lambda: self.delete_file(file_path))
 
-            self.context_menu.post(event.x_root, event.y_root)
+
+        self.context_menu.post(event.x_root, event.y_root)
 
     def delete_file(self, file_path, tree_item):
         """
