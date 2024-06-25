@@ -24,7 +24,6 @@ class File:
         self.thumbnails = {}            
         self.init_grid = False
 
-
     def list_files(self):
         """
         List all files in the selected folder and game paths with specified extensions.
@@ -130,14 +129,14 @@ class File:
         self.main_root.grid_columnconfigure(0, weight=1)
         self.main_root.grid_columnconfigure(1, weight=4)
 
-    def open_file(self,event=None, pathFile=None):
+    def open_file(self, event=None, pathFile=None):
         """
         Open the selected file from the Treeview.
         """
         open = Open(self.sdk)
-        if pathFile == None:
+        if pathFile is None:
             value = open.open_file_with_tree(tree=self.tree)
-            if value != None:
+            if value is not None:
                 self.load_files_grid_tree(value)
         else:
             open.open_file(localpath=pathFile)
@@ -230,13 +229,12 @@ class File:
         except Exception as e:
             print("Error loading thumbnail:", e)
         return None
-    
+
     def show_context_menu(self, event, file_path=None):
         """
         Show the context menu on right-click.
         """
-
-        if file_path == None:
+        if file_path is None:
             selected_item = self.tree.identify_row(event.y)
                 
             if selected_item:
@@ -280,7 +278,6 @@ class File:
 
         self.context_menu.add_command(label="Delete", command=lambda: self.delete_file(file_path))
 
-
         self.context_menu.post(event.x_root, event.y_root)
 
     def delete_file(self, file_path, tree_item):
@@ -295,11 +292,11 @@ class File:
             print(f"Error deleting file: {e}")
         
         self.load_files_grid_tree(self.current_folder)
-    
-    def load_files_grid_tree(self,folder):
-        """
-        """
 
+    def load_files_grid_tree(self, folder):
+        """
+        Load the files in the grid view within the selected folder.
+        """
         if self.init_grid == False:
             self.root = tk.Frame(self.main_root, width=1000, height=600)
             self.root.grid(row=0, column=1, padx=0, pady=0, sticky="nsew")
@@ -313,10 +310,9 @@ class File:
 
             self.init_grid = True
 
-
         for widget in self.scroll_frame.winfo_children():
-                widget.destroy()
-        
+            widget.destroy()
+
         self.current_folder = folder
         self.files = [f for f in os.listdir(self.current_folder) if os.path.isdir(os.path.join(self.current_folder, f)) or f.endswith(
             (".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", "dir.vpk", ".tga", ".wav", ".mp3", ".sln", ".bik", ".bat"))]
@@ -334,7 +330,7 @@ class File:
             label.place(relx=0.5, rely=0.1, anchor='center')
 
             thumbnail = self.load_thumbnail(file_path)
-            if thumbnail:
+            if (thumbnail):
                 thumbnail_label = ttk.Label(frame, image=thumbnail)
                 thumbnail_label.image = thumbnail  # Keep a reference to avoid garbage collection
                 thumbnail_label.place(relx=0.5, rely=0.55, anchor='center')
@@ -367,9 +363,10 @@ class File:
 
         # Initialize the previous width
         self.previous_width = self.root.winfo_width()
-    
+
     def create_widgets(self):
         """
+        Create the widgets for the grid view.
         """
         self.up_button = ttk.Button(self.root, text="Up", command=self.go_up)
         self.up_button.pack(side="top", pady=5)
@@ -397,22 +394,25 @@ class File:
         # Bind mouse wheel events to the canvas
         self.canvas.bind("<Enter>", self.bind_mouse_wheel)
         self.canvas.bind("<Leave>", self.unbind_mouse_wheel)
-    
+
     def bind_mouse_wheel(self, event):
         """
+        Bind mouse wheel event for scrolling.
         """
         self.canvas.bind_all("<MouseWheel>", self.on_mouse_wheel)
 
     def unbind_mouse_wheel(self, event):
         """
+        Unbind mouse wheel event.
         """
         self.canvas.unbind_all("<MouseWheel>")
 
     def on_mouse_wheel(self, event):
         """
+        Scroll the canvas with the mouse wheel.
         """
         self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
-    
+
     def resize(self, event):
         """
         Handle the window resize event.
@@ -420,11 +420,11 @@ class File:
         new_width = self.root.winfo_width()
         if new_width + 140 < self.previous_width or new_width - 140 > self.previous_width:
             self.previous_width = new_width
-            # Add the code you want to execute when the width changes
             self.load_files_grid_tree(self.current_folder)
-    
+
     def go_up(self):
         """
+        Go up one directory level.
         """
         parent_dir = os.path.dirname(self.current_folder)
         if parent_dir:
@@ -432,6 +432,7 @@ class File:
 
     def open_directory(self):
         """
+        Open the selected directory.
         """
         open_instance = Open(self.sdk)
         open_instance.open_directory(self.current_folder)
