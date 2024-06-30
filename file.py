@@ -24,7 +24,7 @@ class File:
         self.tree = None
         self.thumbnails = {}            
         self.init_grid = False
-        self.enableTree = True
+        self.enableTree = False
         self.files = []
 
     def list_files(self):
@@ -324,10 +324,11 @@ class File:
                 (".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", "dir.vpk", ".tga", ".wav", ".mp3", ".sln", ".bik", ".bat"))]
         else:
             extensions = (".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", "dir.vpk", ".tga", ".wav", ".mp3", ".sln", ".bik", ".bat")
-            for root, dirs, filenames in os.walk(folder):
-                for filename in filenames:
-                    if filename.endswith(extensions):
-                        self.files.append(os.path.join(root, filename))
+            for game in self.sdk.game_path:
+                for root, dirs, filenames in os.walk(self.sdk.parent_folder + "/" + game):
+                    for filename in filenames:
+                        if filename.endswith(extensions):
+                            self.files.append(os.path.join(root, filename))
 
 
         columns = max(1, int(self.root.winfo_width() / 150))
@@ -342,8 +343,8 @@ class File:
             if self.enableTree == True:
                 label = ttk.Label(frame, text=file, wraplength=130, anchor="center")
             else:
-                processed_paths = [os.path.basename(path) for path in file_path]
-                label = ttk.Label(frame, text=processed_paths, wraplength=130, anchor="center")
+                label_text = os.path.basename(file_path)
+                label = ttk.Label(frame, text=label_text, wraplength=130, anchor="center")
             label.place(relx=0.5, rely=0.1, anchor='center')
 
             thumbnail = self.load_thumbnail(file_path)
