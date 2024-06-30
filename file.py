@@ -16,7 +16,7 @@ class File:
     root: tk.Tk
     enableTree : bool
 
-    def __init__(self, sourceSDK) -> None:
+    def __init__(self, sourceSDK, enableTree=True) -> None:
         """
         Initialize the File class with a given sourceSDK instance.
         """
@@ -24,7 +24,7 @@ class File:
         self.tree = None
         self.thumbnails = {}            
         self.init_grid = False
-        self.enableTree = False
+        self.enableTree = enableTree
         self.files = []
 
     def list_files(self):
@@ -392,6 +392,9 @@ class File:
         self.open_dir_button = ttk.Button(self.root, text="Open Directory", command=self.open_directory)
         self.open_dir_button.pack(side="top", pady=5)
 
+        self.open_dir_button = ttk.Button(self.root, text="Change View", command=self.change_view)
+        self.open_dir_button.pack(side="top", pady=5)
+
         self.canvas = tk.Canvas(self.root, bg='white')
         self.scroll_y = ttk.Scrollbar(self.root, orient="vertical", command=self.canvas.yview)
         self.canvas.configure(yscrollcommand=self.scroll_y.set)
@@ -454,3 +457,23 @@ class File:
         """
         open_instance = Open(self.sdk)
         open_instance.open_directory(self.current_folder)
+
+    def change_view(self):
+
+        self.enableTree = not self.enableTree
+
+        self.clean()
+        
+        self.display_files_tree()
+    
+    def clean(self):
+        self.tree = None
+        self.thumbnails = {}            
+        self.init_grid = False
+        self.files = []
+        self.root.destroy()
+        self.main_root.destroy()
+
+    def __del__(self):
+        self.clean()
+        
