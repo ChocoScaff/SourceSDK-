@@ -151,11 +151,9 @@ class File:
         Display only files in the Treeview that contain the search text.
         """
         search_text = self.search_entry.get().lower()
+        self.clear_selections()  # Clear previous selections
         if search_text:
-            self.clear_selections()  # Clear previous selections
             self.search_tree(self.tree.get_children(), search_text)
-        else:
-            self.clear_selections()  # Clear selections if search text is empty
 
     def search_tree(self, items, search_text):
         """
@@ -302,6 +300,8 @@ class File:
         """
         Load the files in the grid view within the selected folder.
         """
+        print("bite")
+
         if self.init_grid == False:
             self.root = tk.Frame(self.main_root, width=1000, height=600)
             self.root.grid(row=0, column=1, padx=0, pady=0, sticky="nsew")
@@ -335,6 +335,17 @@ class File:
         row = col = 0
 
         for file in self.files:
+            
+            """
+            if row < (self.canvas.yview()[0] / 150) or row > ((self.root.winfo_height() /150) + self.canvas.yview()[0]/150):
+                None
+            else:
+            """
+            file_path = os.path.join(self.current_folder, file)
+            frame = ttk.Frame(self.scroll_frame, width=140, height=140, relief="solid", borderwidth=1)
+            frame.grid_propagate(False)
+            frame.grid(row=row, column=col, padx=5, pady=5)
+
             file_path = os.path.join(self.current_folder, file)
             frame = ttk.Frame(self.scroll_frame, width=140, height=140, relief="solid", borderwidth=1)
             frame.grid_propagate(False)
@@ -459,6 +470,8 @@ class File:
         open_instance.open_directory(self.current_folder)
 
     def change_view(self):
+        """
+        """
 
         self.enableTree = not self.enableTree
 
@@ -467,13 +480,11 @@ class File:
         self.display_files_tree()
     
     def clean(self):
+        """
+        """
         self.tree = None
         self.thumbnails = {}            
         self.init_grid = False
         self.files = []
         self.root.destroy()
         self.main_root.destroy()
-
-    def __del__(self):
-        self.clean()
-        
