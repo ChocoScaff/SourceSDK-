@@ -73,11 +73,10 @@ class Open:
 
 
 
-    def open_file_with_tree(self, tree, fileList):
+    def open_file_with_tree(self, tree):
         """
         Open the selected file from the Treeview.
         """
-        self.fileList = fileList
 
         self.tree = tree
 
@@ -94,7 +93,12 @@ class Open:
         file_path_parts.reverse()
         file_path = os.path.join(self.sdk.parent_folder, *file_path_parts)
         file_name, file_extension = os.path.splitext(file_path)
-        self.open_file_source_extension(file_extension, file_path, os.path.splitext(file_path_parts[-1])[0])
+
+        if os.path.isdir(file_path):
+            return file_path
+        else:
+            self.open_file_source_extension(file_extension, file_path, os.path.splitext(file_path_parts[-1])[0])
+            return None
 
     def open_file_source_extension(self, file_extension, filepath, file):
         """
@@ -127,7 +131,8 @@ class Open:
             texture = Texture(self.sdk)
             texture.display_tga_file(filepath)
         elif os.path.isdir(filepath):
-            self.fileList.load_files(filepath)
+            None
+            #self.load_files_grid_tree(filepath)
         else:
             try:
                 os.startfile(filepath)

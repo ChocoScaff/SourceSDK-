@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
 import os
-from fileListApp import FileListApp  # Assuming this is your custom module
 from open import Open  # Assuming this is your custom module
 from PIL import Image, ImageTk
 from model import Model
@@ -14,16 +13,19 @@ class File:
     A class to handle file operations within the source SDK environment.
     """
 
-    fileList: FileListApp
     root: tk.Tk
+    enableTree : bool
 
-    def __init__(self, sourceSDK) -> None:
+    def __init__(self, sourceSDK, enableTree=True) -> None:
         """
         Initialize the File class with a given sourceSDK instance.
         """
         self.sdk = sourceSDK
         self.tree = None
-        self.thumbnails = {}
+        self.thumbnails = {}            
+        self.init_grid = False
+        self.enableTree = enableTree
+        self.files = []
 
     def list_files(self):
         """
@@ -56,7 +58,7 @@ class File:
 
         return files
 
-    def display_files(self):
+    def display_files_tree(self):
         """
         Display the files in a Tkinter Treeview within a new Toplevel window.
         """
@@ -93,20 +95,22 @@ class File:
         # Insert folders and files into the Treeview
         for folder, file_list in files.items():
             parent = ""
-            for subfolder in folder.split(os.sep):
-                if not parent:
-                    nodes = self.tree.get_children("")
-                    if subfolder in [self.tree.item(node, "text") for node in nodes]:
-                        parent = [node for node in nodes if self.tree.item(node, "text") == subfolder][0]
-                    else:
-                        parent = self.tree.insert("", "end", text=subfolder, open=False)
-                else:
-                    nodes = self.tree.get_children(parent)
-                    if subfolder in [self.tree.item(node, "text") for node in nodes]:
-                        parent = [node for node in nodes if self.tree.item(node, "text") == subfolder][0]
-                    else:
-                        parent = self.tree.insert(parent, "end", text=subfolder, open=False)
-            
+            if self.enableTree == True:
+                for subfolder in folder.split(os.sep):
+                    
+                        if not parent:
+                            nodes = self.tree.get_children("")
+                            if subfolder in [self.tree.item(node, "text") for node in nodes]:
+                                parent = [node for node in nodes if self.tree.item(node, "text") == subfolder][0]
+                            else:
+                                parent = self.tree.insert("", "end", text=subfolder, open=False)
+                        else:
+                            nodes = self.tree.get_children(parent)
+                            if subfolder in [self.tree.item(node, "text") for node in nodes]:
+                                parent = [node for node in nodes if self.tree.item(node, "text") == subfolder][0]
+                            else:
+                                parent = self.tree.insert(parent, "end", text=subfolder, open=False)
+
             for file_name in file_list:
                 parent_folder_path = os.path.join(self.sdk.parent_folder, folder)  # Define parentFolder
                 
@@ -123,30 +127,33 @@ class File:
         self.tree.bind("<Double-Button-1>", self.open_file)
         self.tree.bind("<Button-3>", self.show_context_menu)
 
-        self.fileList = FileListApp(self.sdk, self.main_root)
+        self.load_files_grid_tree(self.sdk.selected_folder)
 
         # Set the minimum size of the cells in the grid to fit the frames
         self.main_root.grid_rowconfigure(0, weight=1)
         self.main_root.grid_columnconfigure(0, weight=1)
         self.main_root.grid_columnconfigure(1, weight=4)
 
-    def open_file(self, event):
+    def open_file(self, event=None, pathFile=None):
         """
         Open the selected file from the Treeview.
         """
         open = Open(self.sdk)
-        open.open_file_with_tree(tree=self.tree, fileList=self.fileList)
+        if pathFile is None:
+            value = open.open_file_with_tree(tree=self.tree)
+            if value is not None:
+                self.load_files_grid_tree(value)
+        else:
+            open.open_file(localpath=pathFile)
 
     def search_files(self, event=None):
         """
         Display only files in the Treeview that contain the search text.
         """
         search_text = self.search_entry.get().lower()
+        self.clear_selections()  # Clear previous selections
         if search_text:
-            self.clear_selections()  # Clear previous selections
             self.search_tree(self.tree.get_children(), search_text)
-        else:
-            self.clear_selections()  # Clear selections if search text is empty
 
     def search_tree(self, items, search_text):
         """
@@ -217,7 +224,7 @@ class File:
             
 
             if image:
-                image.thumbnail((16, 16))
+                image.thumbnail((100, 100))
                 thumbnail = ImageTk.PhotoImage(image)
                 self.thumbnails[file_path] = thumbnail
                 return thumbnail
@@ -225,56 +232,56 @@ class File:
         except Exception as e:
             print("Error loading thumbnail:", e)
         return None
-    
-    def show_context_menu(self, event):
+
+    def show_context_menu(self, event, file_path=None):
         """
         Show the context menu on right-click.
         """
-        selected_item = self.tree.identify_row(event.y)
-               
-        if selected_item:
-            self.tree.selection_set(selected_item)
+        if file_path is None:
+            selected_item = self.tree.identify_row(event.y)
+                
+            if selected_item:
+                self.tree.selection_set(selected_item)
 
-            filename = self.tree.item(selected_item, 'text')
-            print(filename)
+                filename = self.tree.item(selected_item, 'text')
+                print(filename)
 
-            parent_item = self.tree.parent(selected_item)
-            
-            file_path_parts = [filename]
+                parent_item = self.tree.parent(selected_item)
+                
+                file_path_parts = [filename]
 
-            while parent_item:
-                item_text = self.tree.item(parent_item, "text")
-                file_path_parts.append(item_text)
-                parent_item = self.tree.parent(parent_item)
+                while parent_item:
+                    item_text = self.tree.item(parent_item, "text")
+                    file_path_parts.append(item_text)
+                    parent_item = self.tree.parent(parent_item)
 
-            file_path_parts.reverse()
-            file_path = os.path.join(self.sdk.parent_folder, *file_path_parts)
+                file_path_parts.reverse()
+                file_path = os.path.join(self.sdk.parent_folder, *file_path_parts)
 
-            print(file_path)
+        else:
+            file_name, file_extension = os.path.splitext(file_path)
 
-            self.context_menu = tk.Menu(self.tree, tearoff=0)
+        self.context_menu = tk.Menu(self.root, tearoff=0)
 
-            file_extension = os.path.splitext(filename)[1]
+        if file_extension == ".qc":
+            model = Model(self.sdk)
+            self.context_menu.add_command(label="Compile Model", command=lambda: model.build_model(file_path))
+        elif file_extension == ".tga":
+            texture = Texture(self.sdk)
+            self.context_menu.add_command(label="Compile Texture", command=lambda: texture.build_texture(file_path))
+        elif file_extension == ".vmf":
+            map = Map(self.sdk)
+            self.context_menu.add_command(label="Compile Map", command=lambda: map.build_map(file_path))
+        elif file_extension == ".mdl":
+            decompiler = Decompiler(self.sdk)
+            self.context_menu.add_command(label="Decompile Model", command=lambda: decompiler.decompiler_file(file=file_path))
+        elif file_extension == ".vtf":
+            texture = Texture(self.sdk)
+            self.context_menu.add_command(label="Compile to tga", command=lambda: texture.texture_to_tga(file_path)) 
 
-            if file_extension == ".qc":
-                model = Model(self.sdk)
-                self.context_menu.add_command(label="Compile Model", command=lambda: model.build_model(file_path))
-            elif file_extension == ".tga":
-                texture = Texture(self.sdk)
-                self.context_menu.add_command(label="Compile Texture", command=lambda: texture.build_texture(file_path))
-            elif file_extension == ".vmf":
-                map = Map(self.sdk)
-                self.context_menu.add_command(label="Compile Map", command=lambda: map.build_map(file_path))
-            elif file_extension == ".mdl":
-                decompiler = Decompiler(self.sdk)
-                self.context_menu.add_command(label="Decompile Model", command=lambda: decompiler.decompiler_file(file=file_path))
-            elif file_extension == ".vtf":
-                texture = Texture(self.sdk)
-                self.context_menu.add_command(label="Compile to tga", command=lambda: texture.texture_to_tga(file_path)) 
+        self.context_menu.add_command(label="Delete", command=lambda: self.delete_file(file_path))
 
-            self.context_menu.add_command(label="Delete", command=lambda: self.delete_file(file_path, selected_item))
-
-            self.context_menu.post(event.x_root, event.y_root)
+        self.context_menu.post(event.x_root, event.y_root)
 
     def delete_file(self, file_path, tree_item):
         """
@@ -286,3 +293,198 @@ class File:
             print(f"Deleted: {file_path}")
         except Exception as e:
             print(f"Error deleting file: {e}")
+        
+        self.load_files_grid_tree(self.current_folder)
+
+    def load_files_grid_tree(self, folder):
+        """
+        Load the files in the grid view within the selected folder.
+        """
+        print("bite")
+
+        if self.init_grid == False:
+            self.root = tk.Frame(self.main_root, width=1000, height=600)
+            self.root.grid(row=0, column=1, padx=0, pady=0, sticky="nsew")
+
+            self.current_folder = self.sdk.selected_folder
+            self.thumbnails = {}
+
+            self.create_widgets()
+
+            self.previous_width = None
+
+            self.init_grid = True
+
+        for widget in self.scroll_frame.winfo_children():
+            widget.destroy()
+
+        if self.enableTree == True:
+            self.current_folder = folder
+            self.files = [f for f in os.listdir(self.current_folder) if os.path.isdir(os.path.join(self.current_folder, f)) or f.endswith(
+                (".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", "dir.vpk", ".tga", ".wav", ".mp3", ".sln", ".bik", ".bat"))]
+        else:
+            extensions = (".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", "dir.vpk", ".tga", ".wav", ".mp3", ".sln", ".bik", ".bat")
+            for game in self.sdk.game_path:
+                for root, dirs, filenames in os.walk(self.sdk.parent_folder + "/" + game):
+                    for filename in filenames:
+                        if filename.endswith(extensions):
+                            self.files.append(os.path.join(root, filename))
+
+
+        columns = max(1, int(self.root.winfo_width() / 150))
+        row = col = 0
+
+        for file in self.files:
+            
+            """
+            if row < (self.canvas.yview()[0] / 150) or row > ((self.root.winfo_height() /150) + self.canvas.yview()[0]/150):
+                None
+            else:
+            """
+            file_path = os.path.join(self.current_folder, file)
+            frame = ttk.Frame(self.scroll_frame, width=140, height=140, relief="solid", borderwidth=1)
+            frame.grid_propagate(False)
+            frame.grid(row=row, column=col, padx=5, pady=5)
+
+            file_path = os.path.join(self.current_folder, file)
+            frame = ttk.Frame(self.scroll_frame, width=140, height=140, relief="solid", borderwidth=1)
+            frame.grid_propagate(False)
+            frame.grid(row=row, column=col, padx=5, pady=5)
+
+            if self.enableTree == True:
+                label = ttk.Label(frame, text=file, wraplength=130, anchor="center")
+            else:
+                label_text = os.path.basename(file_path)
+                label = ttk.Label(frame, text=label_text, wraplength=130, anchor="center")
+            label.place(relx=0.5, rely=0.1, anchor='center')
+
+            thumbnail = self.load_thumbnail(file_path)
+            if (thumbnail):
+                thumbnail_label = ttk.Label(frame, image=thumbnail)
+                thumbnail_label.image = thumbnail  # Keep a reference to avoid garbage collection
+                thumbnail_label.place(relx=0.5, rely=0.55, anchor='center')
+
+            if os.path.isdir(file_path):
+                bind_func = lambda e, path=file_path: self.load_files_grid_tree(path)
+                bind_right = lambda e, path=file_path: self.show_context_menu(e, path)
+            else:
+                bind_func = lambda e, path=file_path: self.open_file(pathFile=path)
+                bind_right = lambda e, path=file_path: self.show_context_menu(e, path)
+
+            frame.bind("<Double-Button-1>", bind_func)
+            label.bind("<Double-Button-1>", bind_func)
+            frame.bind("<Button-3>", bind_right)
+            label.bind("<Button-3>", bind_right)
+
+            if thumbnail:
+                thumbnail_label.bind("<Double-Button-1>", bind_func)
+                thumbnail_label.bind("<Button-3>", bind_right)
+
+            col += 1
+            if col >= columns:
+                col = 0
+                row += 1
+
+        self.canvas.yview_moveto(0.0)
+
+        # Bind the <Configure> event to handle resizing
+        self.root.bind("<Configure>", self.resize)
+
+        # Initialize the previous width
+        self.previous_width = self.root.winfo_width()
+
+    def create_widgets(self):
+        """
+        Create the widgets for the grid view.
+        """
+        self.up_button = ttk.Button(self.root, text="Up", command=self.go_up)
+        self.up_button.pack(side="top", pady=5)
+
+        self.open_dir_button = ttk.Button(self.root, text="Open Directory", command=self.open_directory)
+        self.open_dir_button.pack(side="top", pady=5)
+
+        self.open_dir_button = ttk.Button(self.root, text="Change View", command=self.change_view)
+        self.open_dir_button.pack(side="top", pady=5)
+
+        self.canvas = tk.Canvas(self.root, bg='white')
+        self.scroll_y = ttk.Scrollbar(self.root, orient="vertical", command=self.canvas.yview)
+        self.canvas.configure(yscrollcommand=self.scroll_y.set)
+
+        self.scroll_frame = ttk.Frame(self.canvas)
+        self.scroll_frame.bind(
+            "<Configure>",
+            lambda e: self.canvas.configure(
+                scrollregion=self.canvas.bbox("all")
+            )
+        )
+
+        self.canvas.create_window((0, 0), window=self.scroll_frame, anchor="nw")
+
+        self.canvas.pack(side="left", fill="both", expand=True)
+        self.scroll_y.pack(side="right", fill="y")
+
+        # Bind mouse wheel events to the canvas
+        self.canvas.bind("<Enter>", self.bind_mouse_wheel)
+        self.canvas.bind("<Leave>", self.unbind_mouse_wheel)
+
+    def bind_mouse_wheel(self, event):
+        """
+        Bind mouse wheel event for scrolling.
+        """
+        self.canvas.bind_all("<MouseWheel>", self.on_mouse_wheel)
+
+    def unbind_mouse_wheel(self, event):
+        """
+        Unbind mouse wheel event.
+        """
+        self.canvas.unbind_all("<MouseWheel>")
+
+    def on_mouse_wheel(self, event):
+        """
+        Scroll the canvas with the mouse wheel.
+        """
+        self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+    def resize(self, event):
+        """
+        Handle the window resize event.
+        """
+        new_width = self.root.winfo_width()
+        if new_width + 140 < self.previous_width or new_width - 140 > self.previous_width:
+            self.previous_width = new_width
+            self.load_files_grid_tree(self.current_folder)
+
+    def go_up(self):
+        """
+        Go up one directory level.
+        """
+        parent_dir = os.path.dirname(self.current_folder)
+        if parent_dir:
+            self.load_files_grid_tree(parent_dir)
+
+    def open_directory(self):
+        """
+        Open the selected directory.
+        """
+        open_instance = Open(self.sdk)
+        open_instance.open_directory(self.current_folder)
+
+    def change_view(self):
+        """
+        """
+
+        self.enableTree = not self.enableTree
+
+        self.clean()
+        
+        self.display_files_tree()
+    
+    def clean(self):
+        """
+        """
+        self.tree = None
+        self.thumbnails = {}            
+        self.init_grid = False
+        self.files = []
+        self.root.destroy()
+        self.main_root.destroy()
