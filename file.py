@@ -14,6 +14,7 @@ class File:
     """
 
     root: tk.Tk
+    enableTree : bool
 
     def __init__(self, sourceSDK) -> None:
         """
@@ -23,6 +24,8 @@ class File:
         self.tree = None
         self.thumbnails = {}            
         self.init_grid = False
+        self.enableTree = True
+        self.files = []
 
     def list_files(self):
         """
@@ -92,20 +95,22 @@ class File:
         # Insert folders and files into the Treeview
         for folder, file_list in files.items():
             parent = ""
-            for subfolder in folder.split(os.sep):
-                if not parent:
-                    nodes = self.tree.get_children("")
-                    if subfolder in [self.tree.item(node, "text") for node in nodes]:
-                        parent = [node for node in nodes if self.tree.item(node, "text") == subfolder][0]
-                    else:
-                        parent = self.tree.insert("", "end", text=subfolder, open=False)
-                else:
-                    nodes = self.tree.get_children(parent)
-                    if subfolder in [self.tree.item(node, "text") for node in nodes]:
-                        parent = [node for node in nodes if self.tree.item(node, "text") == subfolder][0]
-                    else:
-                        parent = self.tree.insert(parent, "end", text=subfolder, open=False)
-            
+            if self.enableTree == True:
+                for subfolder in folder.split(os.sep):
+                    
+                        if not parent:
+                            nodes = self.tree.get_children("")
+                            if subfolder in [self.tree.item(node, "text") for node in nodes]:
+                                parent = [node for node in nodes if self.tree.item(node, "text") == subfolder][0]
+                            else:
+                                parent = self.tree.insert("", "end", text=subfolder, open=False)
+                        else:
+                            nodes = self.tree.get_children(parent)
+                            if subfolder in [self.tree.item(node, "text") for node in nodes]:
+                                parent = [node for node in nodes if self.tree.item(node, "text") == subfolder][0]
+                            else:
+                                parent = self.tree.insert(parent, "end", text=subfolder, open=False)
+
             for file_name in file_list:
                 parent_folder_path = os.path.join(self.sdk.parent_folder, folder)  # Define parentFolder
                 
@@ -313,9 +318,17 @@ class File:
         for widget in self.scroll_frame.winfo_children():
             widget.destroy()
 
-        self.current_folder = folder
-        self.files = [f for f in os.listdir(self.current_folder) if os.path.isdir(os.path.join(self.current_folder, f)) or f.endswith(
-            (".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", "dir.vpk", ".tga", ".wav", ".mp3", ".sln", ".bik", ".bat"))]
+        if self.enableTree == True:
+            self.current_folder = folder
+            self.files = [f for f in os.listdir(self.current_folder) if os.path.isdir(os.path.join(self.current_folder, f)) or f.endswith(
+                (".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", "dir.vpk", ".tga", ".wav", ".mp3", ".sln", ".bik", ".bat"))]
+        else:
+            extensions = (".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", "dir.vpk", ".tga", ".wav", ".mp3", ".sln", ".bik", ".bat")
+            for root, dirs, filenames in os.walk(folder):
+                for filename in filenames:
+                    if filename.endswith(extensions):
+                        self.files.append(os.path.join(root, filename))
+
 
         columns = max(1, int(self.root.winfo_width() / 150))
         row = col = 0
@@ -326,7 +339,11 @@ class File:
             frame.grid_propagate(False)
             frame.grid(row=row, column=col, padx=5, pady=5)
 
-            label = ttk.Label(frame, text=file, wraplength=130, anchor="center")
+            if self.enableTree == True:
+                label = ttk.Label(frame, text=file, wraplength=130, anchor="center")
+            else:
+                processed_paths = [os.path.basename(path) for path in file_path]
+                label = ttk.Label(frame, text=processed_paths, wraplength=130, anchor="center")
             label.place(relx=0.5, rely=0.1, anchor='center')
 
             thumbnail = self.load_thumbnail(file_path)
