@@ -300,7 +300,6 @@ class File:
         """
         Load the files in the grid view within the selected folder.
         """
-        print("bite")
 
         if self.init_grid == False:
             self.root = tk.Frame(self.main_root, width=1000, height=600)
