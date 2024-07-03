@@ -218,7 +218,7 @@ class File:
                 if file_icons[file_extension]:
                     image = Image.open(os.path.join(base_path, "icons", file_icons[file_extension]))
                 else:
-                    image = Image.open(parent + "/" + file_path)
+                    image = Image.open(os.path.join(parent,file_path))
             elif os.path.isdir(file_path):
                 image = Image.open(os.path.join(base_path, "icons", "fileexplorer.png"))
             
@@ -300,7 +300,6 @@ class File:
         """
         Load the files in the grid view within the selected folder.
         """
-        print("bite")
 
         if self.init_grid == False:
             self.root = tk.Frame(self.main_root, width=1000, height=600)
@@ -341,11 +340,6 @@ class File:
                 None
             else:
             """
-            file_path = os.path.join(self.current_folder, file)
-            frame = ttk.Frame(self.scroll_frame, width=140, height=140, relief="solid", borderwidth=1)
-            frame.grid_propagate(False)
-            frame.grid(row=row, column=col, padx=5, pady=5)
-
             file_path = os.path.join(self.current_folder, file)
             frame = ttk.Frame(self.scroll_frame, width=140, height=140, relief="solid", borderwidth=1)
             frame.grid_propagate(False)
