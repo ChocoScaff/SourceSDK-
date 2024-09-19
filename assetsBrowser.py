@@ -189,6 +189,11 @@ class AssetsBrowser():
         else:
             Download.download_crowbar_decompile()
 
+        if os.path.exists(os.getcwd() + "/VPKEdit-Windows-Standalone-GUI-msvc-Release"):
+            pass
+        else:
+            Download.download_VPKEdit()
+
     def label_init(self):
         """
         Init Labet

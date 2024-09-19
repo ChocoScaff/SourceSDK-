@@ -31,6 +31,7 @@ class Button:
     btn_qc_eyes : tk.Button
     btn_hlfaceposer : tk.Button
     btn_vtf_edit : tk.Button
+    btn_vpk_edit : tk.Button
     btn_games : tk.Button
     btn_everything : tk.Button
     btn_particle : tk.Button
@@ -61,6 +62,7 @@ class Button:
         self.iconHlposer = tk.PhotoImage(file=os.path.join(base_path, "icons", "hlposer.png"))
         self.iconVisualStudio = tk.PhotoImage(file=os.path.join(base_path, "icons", "Visual_Studio.png"))
         self.iconVTFEdit = tk.PhotoImage(file=os.path.join(base_path, "icons", "VTFEdit.png"))
+        self.iconVPKEdit = tk.PhotoImage(file=os.path.join(base_path, "icons", "VPKEdit.png"))
 
     def destroy_button(self):
         """
@@ -128,6 +130,10 @@ class Button:
             self.btn_vtf_edit = tk.Button(self.sdk.root, text="vtfEdit", command=self.texture.open_VTF, image=self.iconVTFEdit, compound=tk.LEFT, background="#4c5844",fg="white")
             self.btn_vtf_edit.pack(side="left")
         
+        if os.path.isfile(os.getcwd() +"/VPKEdit-Windows-Standalone-GUI-msvc-Release/vpkedit.exe"):
+            self.btn_vpk_edit = tk.Button(self.sdk.root, text="vtfEdit", command=self.LaunchVPKEdit, image=self.iconVPKEdit, compound=tk.LEFT, background="#4c5844",fg="white")
+            self.btn_vpk_edit.pack(side="left")
+        
         if os.path.exists(self.sdk.selected_folder + "/src/games.sln"):
             self.btn_games = tk.Button(self.sdk.root, text="games", command=self.open.open_games, image=self.iconVisualStudio, compound=tk.LEFT, background="#4c5844",fg="white")
             self.btn_games.pack(side="left")
@@ -185,3 +191,8 @@ class Button:
         command = ('"' + self.sdk.executable_game + '"' + " -game " + '"' + self.sdk.selected_folder + '"')
         print(command)
         subprocess.Popen(command)
+
+    def LaunchVPKEdit(self):
+        """
+        """
+        subprocess.Popen(os.getcwd() + "/VPKEdit-Windows-Standalone-GUI-msvc-Release/vpkedit.exe")
