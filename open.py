@@ -61,6 +61,9 @@ class Open:
         elif file_extension == ".vpk":
             vpk = VPK(self.sdk)
             vpk.display_vpk_contents(localpath)
+            command = f'"{os.getcwd()}/VPKEdit-Windows-Standalone-GUI-msvc-Release/vpkedit.exe" "{localpath}"'
+            print(command)
+            subprocess.Popen(command)
         elif file_extension == ".tga":
             texture = Texture(self.sdk)
             texture.display_tga_file(localpath)

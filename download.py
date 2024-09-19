@@ -63,4 +63,31 @@ class Download:
             print("Download and extraction completed successfully.")
         else:
             print(f"Failed to download zip file. Status code: {response.status_code}")
-        
+
+    def download_VPKEdit():
+        """
+        """
+        url = "https://github.com/craftablescience/VPKEdit/releases/download/v4.2.3/VPKEdit-Windows-Standalone-GUI-msvc-Release.zip"
+        response = requests.get(url)
+
+        if response.status_code == 200:
+            # Create a temporary file to save the zip content
+            temp_zip_file = os.path.join(os.getcwd(), "VPKEdit-Windows-Standalone-GUI-msvc-Release.zip")
+            
+            # Write the zip content to the temporary file
+            with open(temp_zip_file, "wb") as f:
+                f.write(response.content)
+            
+            os.makedirs(os.getcwd() + "/VPKEdit-Windows-Standalone-GUI-msvc-Release/")
+
+            # Extract the contents of the zip file
+            with zipfile.ZipFile(temp_zip_file, "r") as zip_ref:
+                zip_ref.extractall(os.getcwd() + "/VPKEdit-Windows-Standalone-GUI-msvc-Release/")
+
+            # Remove the temporary zip file
+            os.remove(temp_zip_file)
+            
+            print("Download and extraction completed successfully.")
+        else:
+            print(f"Failed to download zip file. Status code: {response.status_code}")
+     

@@ -5,6 +5,7 @@
 *.zip
 *.log
 /VTFEdit/
+/VPKEdit-Windows-Standalone-GUI-msvc-Release/
 *__pycache__*
 html/
 latex/
