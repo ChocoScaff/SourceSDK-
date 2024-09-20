@@ -27,7 +27,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Build executable with PyInstaller
-        run: pyinstaller --onefile assetsBrowser.py --icon .\lambda.ico --add-data icons/*;icons
+        run: pyinstaller --onefile assetsBrowser.py --icon .\lambda.ico --add-data .\icons/*;icons
 
       - name: Archive the build artifact
         uses: actions/upload-artifact@v3
