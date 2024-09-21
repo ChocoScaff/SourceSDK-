@@ -484,7 +484,7 @@ repo_owner = "ChocoScaff"
 repo_name = "SourceSDK-"
 
 # Replace this with the version of your local software
-local_version = "1.0.0"
+local_version = "1.1.0"
 
 setting = Setting(test.sdk)
 
