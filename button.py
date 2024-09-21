@@ -99,56 +99,56 @@ class Button:
         """
         
         file = File(self.sdk)
-        self.btn_file_explorer = tk.Button(self.sdk.root, text="Files", command=file.display_files_tree,image=self.iconExplorer,compound=tk.LEFT, background="#4c5844",fg="white")
+        self.btn_file_explorer = tk.Button(self.sdk.root, text="Files", command=file.display_files_tree,image=self.iconExplorer,compound=tk.LEFT, background=self.sdk.background_color,fg=self.sdk.foreground_color)
         self.btn_file_explorer.pack(side="left")
 
         if os.path.isfile(self.sdk.bin_folder + "/hammer.exe"):
-            self.btn_hammer = tk.Button(self.sdk.root, text="hammer", command=self.open_hammer,image=self.iconHammer,compound=tk.LEFT, background="#4c5844",fg="white")
+            self.btn_hammer = tk.Button(self.sdk.root, text="hammer", command=self.open_hammer,image=self.iconHammer,compound=tk.LEFT, background=self.sdk.background_color,fg=self.sdk.foreground_color)
             self.btn_hammer.pack(side="left")
         
         if os.path.isfile(self.sdk.bin_folder + "/hammerplusplus.exe"):
-            self.btn_hammer_plus_plus = tk.Button(self.sdk.root, text="hammer++", command=self.open_hammer_plus_plus, image=self.iconHpp, compound=tk.LEFT, background="#4c5844",fg="white")    
+            self.btn_hammer_plus_plus = tk.Button(self.sdk.root, text="hammer++", command=self.open_hammer_plus_plus, image=self.iconHpp, compound=tk.LEFT, background=self.sdk.background_color,fg=self.sdk.foreground_color)    
             self.btn_hammer_plus_plus.pack(side="left")
 
         if os.path.isfile(self.sdk.bin_folder + "/hlmv.exe"):
-            self.btn_hlmv = tk.Button(self.sdk.root, text="hlmv", command=self.model.open_hlmv, image=self.iconHLMV, compound=tk.LEFT, background="#4c5844",fg="white")
+            self.btn_hlmv = tk.Button(self.sdk.root, text="hlmv", command=self.model.open_hlmv, image=self.iconHLMV, compound=tk.LEFT, background=self.sdk.background_color,fg=self.sdk.foreground_color)
             self.btn_hlmv.pack(side="left")
 
         if os.path.isfile(self.sdk.bin_folder + "/qc_eyes.exe"):
-            self.btn_qc_eyes= tk.Button(self.sdk.root, text="qc_eyes", command=self.open_qc_eyes, image=self.iconQc_eyes, compound=tk.LEFT, background="#4c5844",fg="white")
+            self.btn_qc_eyes= tk.Button(self.sdk.root, text="qc_eyes", command=self.open_qc_eyes, image=self.iconQc_eyes, compound=tk.LEFT, background=self.sdk.background_color,fg=self.sdk.foreground_color)
             self.btn_qc_eyes.pack(side="left")
 
         if os.path.isfile(self.sdk.bin_folder + "/hlfaceposer.exe"):
-            self.btn_hlfaceposer = tk.Button(self.sdk.root, text="hlfaceposer", command=self.open_hlfaceposer, image=self.iconHlposer, compound=tk.LEFT, background="#4c5844",fg="white")
+            self.btn_hlfaceposer = tk.Button(self.sdk.root, text="hlfaceposer", command=self.open_hlfaceposer, image=self.iconHlposer, compound=tk.LEFT, background=self.sdk.background_color,fg=self.sdk.foreground_color)
             self.btn_hlfaceposer.pack(side="left")
 
         if os.path.isfile(os.getcwd() + "/VTfEdit/x64/VTFEdit.exe") or os.path.exists(r"C:\Program Files\Nem's Tools\VTFEdit\VTFEdit.exe"):
-            self.btn_vtf_edit = tk.Button(self.sdk.root, text="vtfEdit", command=self.texture.open_VTF, image=self.iconVTFEdit, compound=tk.LEFT, background="#4c5844",fg="white")
+            self.btn_vtf_edit = tk.Button(self.sdk.root, text="vtfEdit", command=self.texture.open_VTF, image=self.iconVTFEdit, compound=tk.LEFT, background=self.sdk.background_color,fg=self.sdk.foreground_color)
             self.btn_vtf_edit.pack(side="left")
         else:
             Download.download_VTF_Edit()
-            self.btn_vtf_edit = tk.Button(self.sdk.root, text="vtfEdit", command=self.texture.open_VTF, image=self.iconVTFEdit, compound=tk.LEFT, background="#4c5844",fg="white")
+            self.btn_vtf_edit = tk.Button(self.sdk.root, text="vtfEdit", command=self.texture.open_VTF, image=self.iconVTFEdit, compound=tk.LEFT, background=self.sdk.background_color,fg=self.sdk.foreground_color)
             self.btn_vtf_edit.pack(side="left")
         
         if os.path.isfile(os.getcwd() +"/VPKEdit-Windows-Standalone-GUI-msvc-Release/vpkedit.exe"):
-            self.btn_vpk_edit = tk.Button(self.sdk.root, text="vtfEdit", command=self.LaunchVPKEdit, image=self.iconVPKEdit, compound=tk.LEFT, background="#4c5844",fg="white")
+            self.btn_vpk_edit = tk.Button(self.sdk.root, text="vtfEdit", command=self.LaunchVPKEdit, image=self.iconVPKEdit, compound=tk.LEFT, background=self.sdk.background_color,fg=self.sdk.foreground_color)
             self.btn_vpk_edit.pack(side="left")
         
         if os.path.exists(self.sdk.selected_folder + "/src/games.sln"):
-            self.btn_games = tk.Button(self.sdk.root, text="games", command=self.open.open_games, image=self.iconVisualStudio, compound=tk.LEFT, background="#4c5844",fg="white")
+            self.btn_games = tk.Button(self.sdk.root, text="games", command=self.open.open_games, image=self.iconVisualStudio, compound=tk.LEFT, background=self.sdk.background_color,fg=self.sdk.foreground_color)
             self.btn_games.pack(side="left")
 
         if os.path.exists(self.sdk.selected_folder + "/src/everything.sln"):
-            self.btn_everything = tk.Button(self.sdk.root, text="everything", command=self.open.open_everything, image=self.iconVisualStudio, compound=tk.LEFT, background="#4c5844",fg="white")
+            self.btn_everything = tk.Button(self.sdk.root, text="everything", command=self.open.open_everything, image=self.iconVisualStudio, compound=tk.LEFT, background=self.sdk.background_color,fg=self.sdk.foreground_color)
             self.btn_everything.pack(side="left")
 
-        self.btn_particle = tk.Button(self.sdk.root, text="Particle", command=self.particle, image=self.iconSource, compound=tk.LEFT, background="#4c5844",fg="white")
+        self.btn_particle = tk.Button(self.sdk.root, text="Particle", command=self.particle, image=self.iconSource, compound=tk.LEFT, background=self.sdk.background_color,fg=self.sdk.foreground_color)
         self.btn_particle.pack(side="left")
 
-        self.btn_Launch_dev = tk.Button(self.sdk.root, text="Launch Dev", command=self.Launch_dev, image=self.iconSource, compound=tk.LEFT, background="#4c5844",fg="white")
+        self.btn_Launch_dev = tk.Button(self.sdk.root, text="Launch Dev", command=self.Launch_dev, image=self.iconSource, compound=tk.LEFT, background=self.sdk.background_color,fg=self.sdk.foreground_color)
         self.btn_Launch_dev.pack(side="left")
 
-        self.btn_Launch = tk.Button(self.sdk.root, text="Launch", command=self.Launch, image=self.iconSource, compound=tk.LEFT, background="#4c5844",fg="white")
+        self.btn_Launch = tk.Button(self.sdk.root, text="Launch", command=self.Launch, image=self.iconSource, compound=tk.LEFT, background=self.sdk.background_color,fg=self.sdk.foreground_color)
         self.btn_Launch.pack(side="left")
     
     def open_hammer(self):

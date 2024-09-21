@@ -203,13 +203,13 @@ class AssetsBrowser():
         self.button.display()
 
         if self.sdk.first_init == 0:
-            self.sdk.texture_menu = tk.Menu(self.sdk.menu_bar, tearoff=0,background="#4c5844",fg="white")
+            self.sdk.texture_menu = tk.Menu(self.sdk.menu_bar, tearoff=0,background=self.sdk.background_color,fg=self.sdk.foreground_color)
             self.sdk.menu_bar.add_cascade(label="Texture", menu=self.sdk.texture_menu)
-            self.sdk.map_menu = tk.Menu(self.sdk.menu_bar, tearoff=0,background="#4c5844",fg="white")
+            self.sdk.map_menu = tk.Menu(self.sdk.menu_bar, tearoff=0,background=self.sdk.background_color,fg=self.sdk.foreground_color)
             self.sdk.menu_bar.add_cascade(label="Map", menu=self.sdk.map_menu)
-            self.sdk.model_menu = tk.Menu(self.sdk.menu_bar, tearoff=0,background="#4c5844",fg="white")
+            self.sdk.model_menu = tk.Menu(self.sdk.menu_bar, tearoff=0,background=self.sdk.background_color,fg=self.sdk.foreground_color)
             self.sdk.menu_bar.add_cascade(label="Model", menu=self.sdk.model_menu)
-            self.sdk.other_menu = tk.Menu(self.sdk.menu_bar, tearoff=0,background="#4c5844",fg="white")
+            self.sdk.other_menu = tk.Menu(self.sdk.menu_bar, tearoff=0,background=self.sdk.background_color,fg=self.sdk.foreground_color)
             self.sdk.menu_bar.add_cascade(label="Other", menu=self.sdk.other_menu)
 
             self.sdk.map_menu.add_command(label="Build Map", command=self.map.build_map)
@@ -522,13 +522,11 @@ file_menu.add_command(label="Open", command=test.Init, accelerator="Ctrl+O")
 #file_menu.add_cascade(label="Previous Projects", menu=previous_projects_menu)
 file_menu.add_command(label="Exit", command=test.launch_exit)
 
-help_menu = tk.Menu(test.sdk.menu_bar, tearoff=0,background="#4c5844",fg="white")
+help_menu = tk.Menu(test.sdk.menu_bar, tearoff=0,background=test.sdk.background_color,fg=test.sdk.foreground_color)
 test.sdk.menu_bar.add_cascade(label="Help", menu=help_menu)
 help_menu.add_command(label="sdk Doc", command=test.sdk_Doc)
 help_menu.add_command(label="About", command=test.open_about_window)
-
-
-#help_menu.add_command(label="Settings", command=setting)
+help_menu.add_command(label="Settings", command=setting.create_gui)
 
 # Create a Text widget to display terminal output
 test.terminal = Terminal(test.sdk.root, wrap=tk.WORD, height=30, width=120)
