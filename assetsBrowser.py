@@ -22,6 +22,7 @@ from button import Button
 from caption import Caption
 from download import Download
 from decompiler import Decompiler
+from setting import Setting
 
 class AssetsBrowser():
     """
@@ -485,6 +486,8 @@ repo_name = "SourceSDK-"
 # Replace this with the version of your local software
 local_version = "1.0.0"
 
+setting = Setting(test.sdk)
+
 github_version = test.get_latest_release_version(repo_owner, repo_name)
 
 if github_version:
@@ -501,15 +504,15 @@ else:
 test.sdk.root = tk.Tk()
 test.sdk.root.title("Source SDK : assetsBrowser " + local_version)
 
-test.sdk.root.tk_setPalette(background="#4c5844", foreground="white")
+test.sdk.root.tk_setPalette(background=test.sdk.background_color, foreground=test.sdk.foreground_color)
 
-test.sdk.root.configure(background="#3e4637")
+test.sdk.root.configure(background=test.sdk.secondary_background_color)
 
 test.sdk.menu_bar = tk.Menu(test.sdk.root)
-test.sdk.root.config(menu=test.sdk.menu_bar,background="#3e4637")
+test.sdk.root.config(menu=test.sdk.menu_bar,background=test.sdk.secondary_background_color)
 
 # Create a "File" menu
-file_menu = tk.Menu(test.sdk.menu_bar, tearoff=0,background="#4c5844",fg="white")
+file_menu = tk.Menu(test.sdk.menu_bar, tearoff=0,background=test.sdk.background_color,fg=test.sdk.foreground_color)
 test.sdk.menu_bar.add_cascade(label="File", menu=file_menu)
 
 # Add "Open" option to the "File" menu
@@ -524,6 +527,9 @@ test.sdk.menu_bar.add_cascade(label="Help", menu=help_menu)
 help_menu.add_command(label="sdk Doc", command=test.sdk_Doc)
 help_menu.add_command(label="About", command=test.open_about_window)
 
+
+#help_menu.add_command(label="Settings", command=setting)
+
 # Create a Text widget to display terminal output
 test.terminal = Terminal(test.sdk.root, wrap=tk.WORD, height=30, width=120)
 test.terminal.pack()
@@ -536,7 +542,7 @@ sys.stderr = test.terminal
 test.sdk.root.bind("<Control-n>", test.handle_shortcut)
 test.sdk.root.bind("<Control-o>", test.handle_shortcut)
 
-lbl_result = tk.Label(test.sdk.root, text="Tools", wraplength=400, background="#3e4637",fg='white')
+lbl_result = tk.Label(test.sdk.root, text="Tools", wraplength=400, background=test.sdk.secondary_background_color,fg=test.sdk.foreground_color)
 lbl_result.pack()
 
 # Start the GUI event loop
