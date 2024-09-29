@@ -67,7 +67,7 @@ class Download:
     def download_VPKEdit():
         """
         """
-        url = "https://github.com/craftablescience/VPKEdit/releases/download/v4.2.3/VPKEdit-Windows-Standalone-GUI-msvc-Release.zip"
+        url = "https://github.com/craftablescience/VPKEdit/releases/download/v4.3.0/VPKEdit-Windows-Standalone-GUI-msvc-Release.zip"
         response = requests.get(url)
 
         if response.status_code == 200:
