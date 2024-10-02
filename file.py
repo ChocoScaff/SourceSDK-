@@ -14,9 +14,8 @@ class File:
     """
 
     root: tk.Tk
-    enableTree : bool
 
-    def __init__(self, sourceSDK, enableTree=True) -> None:
+    def __init__(self, sourceSDK) -> None:
         """
         Initialize the File class with a given sourceSDK instance.
         """
@@ -24,8 +23,35 @@ class File:
         self.tree = None
         self.thumbnails = {}            
         self.init_grid = False
-        self.enableTree = enableTree
         self.files = []
+
+    
+    def __del__(self):
+        """
+        """
+        if self.canvas:
+            self.canvas.destroy()
+        
+        # Destroy the scrollbar if it exists
+        if self.scroll_y:
+            self.scroll_y.destroy()
+        
+        if self.up_button:
+            self.up_button.destroy()
+        
+        if self.open_dir_button:
+            self.open_dir_button.destroy()
+        
+        self.scroll_frame.destroy()
+
+        self.main_root.destroy()
+
+        self.tree = None
+        self.thumbnails = {}            
+        self.init_grid = False
+        self.files = []
+        self.root.destroy()
+
 
     def list_files(self):
         """
@@ -66,6 +92,8 @@ class File:
         self.main_root.title("File Explorer")
         self.main_root.geometry("1400x600")
 
+        self.main_root.protocol("WM_DELETE_WINDOW", self.__del__)
+
         self.root = tk.Frame(self.main_root, width=200, height=600)
         self.root.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
 
@@ -95,21 +123,20 @@ class File:
         # Insert folders and files into the Treeview
         for folder, file_list in files.items():
             parent = ""
-            if self.enableTree == True:
-                for subfolder in folder.split(os.sep):
-                    
-                        if not parent:
-                            nodes = self.tree.get_children("")
-                            if subfolder in [self.tree.item(node, "text") for node in nodes]:
-                                parent = [node for node in nodes if self.tree.item(node, "text") == subfolder][0]
-                            else:
-                                parent = self.tree.insert("", "end", text=subfolder, open=False)
+            for subfolder in folder.split(os.sep):
+                
+                    if not parent:
+                        nodes = self.tree.get_children("")
+                        if subfolder in [self.tree.item(node, "text") for node in nodes]:
+                            parent = [node for node in nodes if self.tree.item(node, "text") == subfolder][0]
                         else:
-                            nodes = self.tree.get_children(parent)
-                            if subfolder in [self.tree.item(node, "text") for node in nodes]:
-                                parent = [node for node in nodes if self.tree.item(node, "text") == subfolder][0]
-                            else:
-                                parent = self.tree.insert(parent, "end", text=subfolder, open=False)
+                            parent = self.tree.insert("", "end", text=subfolder, open=False)
+                    else:
+                        nodes = self.tree.get_children(parent)
+                        if subfolder in [self.tree.item(node, "text") for node in nodes]:
+                            parent = [node for node in nodes if self.tree.item(node, "text") == subfolder][0]
+                        else:
+                            parent = self.tree.insert(parent, "end", text=subfolder, open=False)
 
             for file_name in file_list:
                 parent_folder_path = os.path.join(self.sdk.parent_folder, folder)  # Define parentFolder
@@ -317,18 +344,9 @@ class File:
         for widget in self.scroll_frame.winfo_children():
             widget.destroy()
 
-        if self.enableTree == True:
-            self.current_folder = folder
-            self.files = [f for f in os.listdir(self.current_folder) if os.path.isdir(os.path.join(self.current_folder, f)) or f.endswith(
-                (".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", "dir.vpk", ".tga", ".wav", ".mp3", ".sln", ".bik", ".bat"))]
-        else:
-            extensions = (".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", "dir.vpk", ".tga", ".wav", ".mp3", ".sln", ".bik", ".bat")
-            for game in self.sdk.game_path:
-                for root, dirs, filenames in os.walk(self.sdk.parent_folder + "/" + game):
-                    for filename in filenames:
-                        if filename.endswith(extensions):
-                            self.files.append(os.path.join(root, filename))
-
+        self.current_folder = folder
+        self.files = [f for f in os.listdir(self.current_folder) if os.path.isdir(os.path.join(self.current_folder, f)) or f.endswith(
+            (".vmf", ".txt", ".cfg", ".vtf", ".vmt", ".qc", ".mdl", ".vcd", ".res", ".bsp", "dir.vpk", ".tga", ".wav", ".mp3", ".sln", ".bik", ".bat"))]
 
         columns = max(1, int(self.root.winfo_width() / 150))
         row = col = 0
@@ -345,11 +363,7 @@ class File:
             frame.grid_propagate(False)
             frame.grid(row=row, column=col, padx=5, pady=5)
 
-            if self.enableTree == True:
-                label = ttk.Label(frame, text=file, wraplength=130, anchor="center")
-            else:
-                label_text = os.path.basename(file_path)
-                label = ttk.Label(frame, text=label_text, wraplength=130, anchor="center")
+            label = ttk.Label(frame, text=file, wraplength=130, anchor="center")
             label.place(relx=0.5, rely=0.1, anchor='center')
 
             thumbnail = self.load_thumbnail(file_path)
@@ -395,9 +409,6 @@ class File:
         self.up_button.pack(side="top", pady=5)
 
         self.open_dir_button = ttk.Button(self.root, text="Open Directory", command=self.open_directory)
-        self.open_dir_button.pack(side="top", pady=5)
-
-        self.open_dir_button = ttk.Button(self.root, text="Change View", command=self.change_view)
         self.open_dir_button.pack(side="top", pady=5)
 
         self.canvas = tk.Canvas(self.root, bg='white')
@@ -462,23 +473,4 @@ class File:
         """
         open_instance = Open(self.sdk)
         open_instance.open_directory(self.current_folder)
-
-    def change_view(self):
-        """
-        """
-
-        self.enableTree = not self.enableTree
-
-        self.clean()
-        
-        self.display_files_tree()
-    
-    def clean(self):
-        """
-        """
-        self.tree = None
-        self.thumbnails = {}            
-        self.init_grid = False
-        self.files = []
-        self.root.destroy()
-        self.main_root.destroy()
+            
