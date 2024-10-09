@@ -47,6 +47,12 @@ class Open:
             command = f'"{self.sdk.bin_folder}/hlmv.exe" "{localpath}"'
             subprocess.Popen(command)
         elif file_extension == ".vmf":
+            """
+            if os.path.isfile(self.sdk.bin_folder + "/hammerplusplus.exe"):
+                command = f'"{self.sdk.bin_folder}/hammerplusplus.exe" "{localpath}"'
+                print(command)
+            else:
+            """
             command = f'"{self.sdk.bin_folder}/hammer.exe" "{localpath}"'
             subprocess.Popen(command)
         elif file_extension == ".vcd":

@@ -236,7 +236,8 @@ class File:
                 ".wav": "audio.png",
                 ".mp3": "audio.png",
                 ".bik": "video.png",
-                ".bat": "terminal.png"
+                ".bat": "terminal.png",
+                ".vpk": "VPKEdit.png"
             }
 
             file_name, file_extension = os.path.splitext(file_path)
