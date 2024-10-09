@@ -7,6 +7,7 @@ from model import Model
 from texture import Texture
 from map import Map
 from decompiler import Decompiler
+import subprocess
 
 class File:
     """
@@ -141,7 +142,7 @@ class File:
             for file_name in file_list:
                 parent_folder_path = os.path.join(self.sdk.parent_folder, folder)  # Define parentFolder
                 
-                self.tree.insert(parent, "end", text=file_name, tags=(folder,))
+                #self.tree.insert(parent, "end", text=file_name, tags=(folder,))
                 """
                 thumbnail = self.load_thumbnail(file_name, parent_folder_path)
                 if thumbnail:
@@ -149,6 +150,7 @@ class File:
                 else:
                     self.tree.insert(parent, "end", text=file_name, tags=(folder,))
                 """
+                
             
         # Bind double-click event to open the selected file
         self.tree.bind("<Double-Button-1>", self.open_file)
@@ -261,6 +263,28 @@ class File:
             print("Error loading thumbnail:", e)
         return None
 
+    '''
+    def load_thumbnail_folder(self):
+        """
+        """
+        try :
+            image = None
+            base_path = os.path.dirname(os.path.abspath(__file__))
+
+            image = Image.open(os.path.join(base_path, "icons", "fileexplorer.png"))
+            
+            if image:
+                image.thumbnail((16, 16))
+                thumbnail = ImageTk.PhotoImage(image)
+                #self.thumbnails[file_path] = thumbnail
+                return thumbnail
+            else:
+                print('error load thumbnail')
+        except Exception as e:
+            print("Error loading thumbnail:", e)
+        return None
+    '''
+
     def show_context_menu(self, event, file_path=None):
         """
         Show the context menu on right-click.
@@ -290,7 +314,9 @@ class File:
             file_name, file_extension = os.path.splitext(file_path)
 
         self.context_menu = tk.Menu(self.root, tearoff=0)
-
+        open = Open(self.sdk)
+        self.context_menu.add_command(label="open", command=lambda: open.open_file(file_path))
+        
         if file_extension == ".qc":
             model = Model(self.sdk)
             self.context_menu.add_command(label="Compile Model", command=lambda: model.build_model(file_path))
@@ -474,4 +500,3 @@ class File:
         """
         open_instance = Open(self.sdk)
         open_instance.open_directory(self.current_folder)
-            

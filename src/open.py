@@ -80,8 +80,6 @@ class Open:
                 print("Error: Failed to open file:", e)
 
 
-
-
     def open_file_with_tree(self, tree):
         """
         Open the selected file from the Treeview.
