@@ -131,7 +131,7 @@ class Button:
             self.btn_vtf_edit.pack(side="left")
         
         if os.path.isfile(os.getcwd() +"/VPKEdit-Windows-Standalone-GUI-msvc-Release/vpkedit.exe"):
-            self.btn_vpk_edit = tk.Button(self.sdk.root, text="vtfEdit", command=self.LaunchVPKEdit, image=self.iconVPKEdit, compound=tk.LEFT, background=self.sdk.background_color,fg=self.sdk.foreground_color)
+            self.btn_vpk_edit = tk.Button(self.sdk.root, text="vpkEdit", command=self.LaunchVPKEdit, image=self.iconVPKEdit, compound=tk.LEFT, background=self.sdk.background_color,fg=self.sdk.foreground_color)
             self.btn_vpk_edit.pack(side="left")
         
         if os.path.exists(self.sdk.selected_folder + "/src/games.sln"):

@@ -7,7 +7,6 @@ from model import Model
 from texture import Texture
 from map import Map
 from decompiler import Decompiler
-import subprocess
 
 class File:
     """
@@ -316,7 +315,7 @@ class File:
         self.context_menu = tk.Menu(self.root, tearoff=0)
         open = Open(self.sdk)
         self.context_menu.add_command(label="open", command=lambda: open.open_file(file_path))
-        
+
         if file_extension == ".qc":
             model = Model(self.sdk)
             self.context_menu.add_command(label="Compile Model", command=lambda: model.build_model(file_path))
