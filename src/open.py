@@ -44,10 +44,16 @@ class Open:
             texture = Texture(self.sdk)
             texture.open_VTF(localpath)
         elif file_extension == ".mdl":
-            command = f'"{self.sdk.bin_folder}/hlmv.exe" "{localpath}"'
+            if os.path.isfile(self.sdk.bin_folder + "/hlmvplusplus.exe"):
+                command = f'"{self.sdk.bin_folder}/hlmvplusplus.exe" "{localpath}"'
+            else:
+                command = f'"{self.sdk.bin_folder}/hlmv.exe" "{localpath}"'
             subprocess.Popen(command)
         elif file_extension == ".vmf":
-            command = f'"{self.sdk.bin_folder}/hammer.exe" "{localpath}"'
+            if os.path.isfile(self.sdk.bin_folder + "/hammerplusplus.exe"):
+                command = f'"{self.sdk.bin_folder}/hammerplusplus.exe" "{localpath}"'
+            else:
+                command = f'"{self.sdk.bin_folder}/hammerplusplus.exe" "{localpath}"'
             subprocess.Popen(command)
         elif file_extension == ".vcd":
             command = f'"{self.sdk.bin_folder}/hlfaceposer.exe" "{localpath}"'
@@ -116,10 +122,16 @@ class Open:
             texture = Texture(self.sdk)
             texture.open_VTF(filepath)
         elif file_extension == ".mdl":
-            command = f'"{self.sdk.bin_folder}/hlmv.exe" "{filepath}"'
+            if os.path.isfile(self.sdk.bin_folder + "/hlmvplusplus.exe"):
+                command = f'"{self.sdk.bin_folder}/hlmvplusplus.exe" "{filepath}"'
+            else:
+                command = f'"{self.sdk.bin_folder}/hlmv.exe" "{filepath}"'
             subprocess.Popen(command)
         elif file_extension == ".vmf":
-            command = f'"{self.sdk.bin_folder}/hammer.exe" "{filepath}"'
+            if os.path.isfile(self.sdk.bin_folder + "/hammerplusplus.exe"):
+                command = f'"{self.sdk.bin_folder}/hammerplusplus.exe" "{filepath}"'
+            else:
+                command = f'"{self.sdk.bin_folder}/hammerplusplus.exe" "{filepath}"'
             subprocess.Popen(command)
         elif file_extension == ".vcd":
             command = f'"{self.sdk.bin_folder}/hlfaceposer.exe" "{filepath}"'

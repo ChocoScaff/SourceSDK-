@@ -24,6 +24,12 @@ class Model:
 
         subprocess.Popen([self.sdk.bin_folder + "/hlmv.exe"])
 
+    def open_hlmvplusplus(self):
+        """
+        """
+
+        subprocess.Popen([self.sdk.bin_folder + "/hlmvplusplus.exe"])
+
     def build_model(self, file=None):
         """
         """

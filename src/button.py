@@ -19,6 +19,7 @@ class Button:
     iconHammer : tk.PhotoImage
     iconSource : tk.PhotoImage
     iconHLMV : tk.PhotoImage
+    iconHLMVplusplus : tk.PhotoImage
     iconQc_eyes : tk.PhotoImage
     iconHlposer : tk.PhotoImage
     iconVisualStudio : tk.PhotoImage
@@ -28,6 +29,7 @@ class Button:
     btn_hammer : tk.Button
     btn_hammer_plus_plus : tk.Button
     btn_hlmv : tk.Button
+    btn_hlmv_plus_plus : tk.Button
     btn_qc_eyes : tk.Button
     btn_hlfaceposer : tk.Button
     btn_vtf_edit : tk.Button
@@ -58,6 +60,7 @@ class Button:
         self.iconHammer = tk.PhotoImage(file=os.path.join(base_path, "icons", "hammer.png"))
         self.iconSource = tk.PhotoImage(file=os.path.join(base_path, "icons", "source.png"))
         self.iconHLMV = tk.PhotoImage(file=os.path.join(base_path, "icons", "hlmv.png"))
+        self.iconHLMVplusplus = tk.PhotoImage(file=os.path.join(base_path, "icons", "hlmvpp.png"))
         self.iconQc_eyes = tk.PhotoImage(file=os.path.join(base_path, "icons", "qc_eyes.png"))
         self.iconHlposer = tk.PhotoImage(file=os.path.join(base_path, "icons", "hlposer.png"))
         self.iconVisualStudio = tk.PhotoImage(file=os.path.join(base_path, "icons", "Visual_Studio.png"))
@@ -84,6 +87,8 @@ class Button:
             self.btn_games.destroy()
         if os.path.isfile(self.sdk.bin_folder + "/hlmv.exe"):
             self.btn_hlmv.destroy()
+        if os.path.isfile(self.sdk.bin_folder + "/hlmvplusplus.exe"):
+            self.btn_hlmv_plus_plus.destroy()
         if os.path.isfile(self.sdk.bin_folder + "/hlfaceposer.exe"):
             self.btn_hlfaceposer.destroy()
         if os.path.isfile(os.getcwd() + "/VTfEdit/x64/VTFEdit.exe") or os.path.exists(r"C:\Program Files\Nem's Tools\VTFEdit\VTFEdit.exe"):
@@ -113,6 +118,10 @@ class Button:
         if os.path.isfile(self.sdk.bin_folder + "/hlmv.exe"):
             self.btn_hlmv = tk.Button(self.sdk.root, text="hlmv", command=self.model.open_hlmv, image=self.iconHLMV, compound=tk.LEFT, background=self.sdk.background_color,fg=self.sdk.foreground_color)
             self.btn_hlmv.pack(side="left")
+
+        if os.path.isfile(self.sdk.bin_folder + "/hlmvplusplus.exe"):
+            self.btn_hlmv_plus_plus= tk.Button(self.sdk.root, text="hlmv++", command=self.model.open_hlmvplusplus, image=self.iconHLMVplusplus, compound=tk.LEFT, background=self.sdk.background_color,fg=self.sdk.foreground_color)
+            self.btn_hlmv_plus_plus.pack(side="left")
 
         if os.path.isfile(self.sdk.bin_folder + "/qc_eyes.exe"):
             self.btn_qc_eyes= tk.Button(self.sdk.root, text="qc_eyes", command=self.open_qc_eyes, image=self.iconQc_eyes, compound=tk.LEFT, background=self.sdk.background_color,fg=self.sdk.foreground_color)
